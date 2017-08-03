@@ -20,8 +20,9 @@ import time
 
 def get_env():
     """Get environment variables
-    return dictionary with environment variables
+    :returns dictionary with environment variables
     """
+
     ev = dict()
     ev['out_dir'] = os.environ['OUT_DIR']
     return ev
