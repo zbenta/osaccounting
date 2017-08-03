@@ -30,6 +30,8 @@ def get_env():
 if __name__ == '__main__':
     evr = get_env()
     json_proj = evr['out_dir'] + os.sep + 'projects.json'
-    print json_proj
+    with open(json_proj, 'r') as f:
+        projects = json.load(f)
+    pprint.pprint(projects)
 
 
