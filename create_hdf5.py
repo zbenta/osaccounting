@@ -14,14 +14,21 @@ import pprint
 import datetime
 import os
 import h5py
+import json
 import time
 
 
 def get_env():
-    envvars = dict()
-    envvars['out_dir'] = os.environ['OUT_DIR']
+    """Get environment variables
+    return dictionary with environment variables
+    """
+    ev = dict()
+    ev['out_dir'] = os.environ['OUT_DIR']
+    return ev
 
 if __name__ == '__main__':
-    all_records = {}
+    evr = get_env()
+    json_proj = evr['out_dir'] + os.sep + 'projects.json'
+    print json_proj
 
 

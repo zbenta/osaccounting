@@ -6,7 +6,7 @@ Accounting for Openstack, uses hdf5 to store time series of number of VCPUs, amo
 
 The scripts rely on environment variables:
 
-* OUT_DIR - output directory for projects.json, also for the accounting files the default value is """/tmp""" 
+* OUT_DIR - output directory for projects.json, also for the accounting files the default value is '/tmp' 
 * All Openstack admin credentials - OS_ variables
 
 ## Usage
