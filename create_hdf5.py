@@ -21,7 +21,7 @@ import numpy
 
 # Set the initial date to start the accounting
 DATEINI = datetime.datetime(2014, 10, 1, 0, 0, 0)
-SECEPOC = int(time.mktime(DATEINI.timetuple()))
+SECEPOC = time.mktime(DATEINI.timetuple())
 
 
 def get_env():
@@ -37,19 +37,20 @@ def get_env():
 def to_secepoc(date=DATEINI):
     """Converts datetime to seconds from epoc
     :param date: Date in datetime format
-    :returns (int) seconds from epoc
+    :returns (float) seconds from epoch
     """
-    return int(time.mktime(date.timetuple()))
+    return time.mktime(date.timetuple())
 
 
 def time_series():
-    tf = datetime.datetime.now()
-    ti = DATEINI
-    delta_t = tf - ti
-    time_array = numpy.array()
-    while (td <= tf):
-        time_array
-
+    """Create a time array (of ints) in epoch format with interval of one hour
+    :returns (numpy) time_array
+    """
+    tf = to_secepoc(datetime.datetime.now())
+    ti = SECEPOC
+    nhours = (tf - ti)/3600.0
+    time_array = numpy.arange(int(ti), int(tf), int(nhours))
+    return time_array
 
 if __name__ == '__main__':
     evr = get_env()
