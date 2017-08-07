@@ -187,7 +187,8 @@ if __name__ == '__main__':
         nova = get_nova_client(proj['Name'])
 
         for i in range(4000):
-            usg = nova.usage.get(proj, to_isodate(ts[i]), to_isodate(ts[i+1]))
+            aux = nova.usage.get(proj, to_isodate(ts[i]), to_isodate(ts[i+1]))
+            usg = getattr(aux, "server_usages", [])
             a_vcpus[i] = usg["vcpus"]
             a_mem_mb[i] = usg["memory_mb"]
             a_disk_gb[i] = usg["local_gb"]
