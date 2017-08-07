@@ -7,6 +7,14 @@
 
 
 """Create initial hdf5 files to store accounting data
+
+    The projects.json data structure is
+    projects = { "Description": None,
+                 "Domain ID": None,
+                 "Enabled": None,
+                 "ID": None,
+                 "Name": None
+                }
 """
 
 
@@ -53,9 +61,7 @@ def time_series(year=2016):
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     n = (df - di)/DELTA
-    print 'SIZE ARRAY in function. ', n
     time_array = numpy.arange(int(di), int(df), DELTA)
-    print 'time array size. ', time_array.size
     return time_array
 
 
@@ -102,4 +108,6 @@ if __name__ == '__main__':
     sa = size_array()
     print 'Array size: ', sa
 
-    #pprint.pprint(projects)
+    for p in projects:
+        print 80*'-'
+        print p
