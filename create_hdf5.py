@@ -19,9 +19,11 @@ import time
 import numpy
 
 
-# Set the initial date to start the accounting -> !st April 2016
+# Set the initial date to start the accounting -> 1st April 2016
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
+# Interval of data points in seconds
+DELTA = 3600
 
 
 def get_env():
@@ -42,18 +44,28 @@ def to_secepoc(date=DATEINI):
     return time.mktime(date.timetuple())
 
 
-def time_series():
-    """Create a time array (of ints) in epoch format with interval of one hour
+def time_series(year=2016):
+    """Create a time array (of ints) in epoch format with interval
+    of one hour for a given year
+    :param year: Year
     :returns (numpy) time_array
     """
-    tf = to_secepoc(datetime.datetime.now())
-    ti = SECEPOC
-    nhours = (tf - ti)/3600.0
-    time_array = numpy.arange(int(ti), int(tf), int(nhours))
+    di = datetime.datetime(year, 1, 1, 0, 0, 0)
+    df = datetime.datetime(year+1, 1, 1, 0, 0, 0)
+    n = (df - di)/DELTA
+    time_array = numpy.arange(int(di), int(df), int(n))
     return time_array
 
 
-def get_hdf_fnames():
+def size_array(year=2016):
+    """Number of data points is the size of the arrays for 1 year
+    :param year: Year
+    :return (int) size of arrays"""
+    sa = time_series(year)
+    return sa.size
+
+
+def set_hdf_fnames():
     """List of HDF5 filenames, are the <YEAR>.hdf
     :returns (list) of filename
     """
@@ -75,10 +87,17 @@ def set_hdf_grp(proj, user, metric):
     grp = proj + '/' + user + '/' + metric
     return grp
 
-
 if __name__ == '__main__':
     evr = get_env()
     json_proj = evr['out_dir'] + os.sep + 'projects.json'
     with open(json_proj, 'r') as f:
         projects = json.load(f)
-    pprint.pprint(projects)
+
+    fn = set_hdf_fnames()
+    print 'FILENAME: ', fn
+    ts = time_series()
+    print 'TIME SERIES: ', ts
+    sa = size_array()
+    print 'Array size: ', sa
+
+    #pprint.pprint(projects)
