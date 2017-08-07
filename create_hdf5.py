@@ -179,10 +179,9 @@ if __name__ == '__main__':
         a_disk_gb = create_metric_array()
         a_volume_gb = create_metric_array()
         print proj['Name']
-
-        #nova = get_nova_client(proj[proj])
-        #cinder = get_cinder_client(proj[proj])
-        #volumes = cinder.volumes.list()
+        nova = get_nova_client(proj['Name'])
+        cinder = get_cinder_client(proj['Name'])
+        volumes = cinder.volumes.list()
 
         #usg = nova.usage.get(proj, datei, datef)
 
