@@ -69,6 +69,10 @@ def to_secepoc(date=DATEINI):
     return time.mktime(date.timetuple())
 
 
+def to_isodate(date):
+    return datetime.datetime.fromtimestamp(date)
+
+
 def time_series(year=2016):
     """Create a time array (of ints) in epoch format with interval
     of one hour for a given year
@@ -183,7 +187,7 @@ if __name__ == '__main__':
         nova = get_nova_client(proj['Name'])
 
         for i in range(4000):
-            usg = nova.usage.get(proj, ts[i], ts[i+1])
+            usg = nova.usage.get(proj, to_isodate(ts[i]), to_isodate(ts[i+1]))
             a_vcpus[i] = usg["vcpus"]
             a_mem_mb[i] = usg["memory_mb"]
             a_disk_gb[i] = usg["local_gb"]
