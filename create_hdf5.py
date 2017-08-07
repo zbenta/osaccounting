@@ -53,6 +53,7 @@ def time_series(year=2016):
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     n = (df - di)/DELTA
+    print 'SIZE ARRAY in function. ', n
     time_array = numpy.arange(int(di), int(df), int(n))
     return time_array
 
