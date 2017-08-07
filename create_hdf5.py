@@ -190,6 +190,7 @@ if __name__ == '__main__':
             aux = nova.usage.get(proj, to_isodate(ts[i]), to_isodate(ts[i+1]))
             usg = getattr(aux, "server_usages", [])
             for u in usg:
+                print i, to_isodate(ts[i]), to_isodate(ts[i+1]), u["vcpus"], u["memory_mb"]
                 a_vcpus[i] += u["vcpus"]
                 a_mem_mb[i] += u["memory_mb"]
                 a_disk_gb[i] += u["local_gb"]
