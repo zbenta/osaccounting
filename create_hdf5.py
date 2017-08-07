@@ -187,7 +187,7 @@ if __name__ == '__main__':
         nova = get_nova_client(proj['Name'])
 
         for i in range(6000, 6300):
-            print i, to_isodate(ts[i]), to_isodate(ts[i+1]),
+            print i, to_isodate(ts[i]), to_isodate(ts[i+1])
             aux = nova.usage.get(proj['Name'], to_isodate(ts[i]), to_isodate(ts[i+1]))
             usg = getattr(aux, "server_usages", [])
             for u in usg:
