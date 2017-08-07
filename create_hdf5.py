@@ -54,7 +54,7 @@ def time_series(year=2016):
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     n = (df - di)/DELTA
     print 'SIZE ARRAY in function. ', n
-    time_array = numpy.arange(int(di), int(df), int(n))
+    time_array = numpy.arange(int(di), int(df), DELTA)
     print 'time array size. ', time_array.size
     return time_array
 
