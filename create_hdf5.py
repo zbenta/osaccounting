@@ -106,14 +106,13 @@ def set_hdf_fnames():
     return fname
 
 
-def set_hdf_grp(proj, user, metric):
+def set_hdf_grp(project, metric):
     """Creates the HDF5 group structure
-    :param proj: project name
-    :param user: user name
+    :param project: project name
     :param metric: metric name
     :return hdf5 group
     """
-    grp = proj + '/' + user + '/' + metric
+    grp = project + '/' + '/' + metric
     return grp
 
 
@@ -175,28 +174,36 @@ if __name__ == '__main__':
     fn = set_hdf_fnames()
     ts = time_series()
     sa = size_array()
+    metrics = ['vcpus', 'mem_mb', 'disk_gb']
 
-    for proj in projects:
-        # Create the arrays for metrics
-        a_vcpus = create_metric_array()
-        a_mem_mb = create_metric_array()
-        a_disk_gb = create_metric_array()
-        a_volume_gb = create_metric_array()
-        print 80*'-'
-        print proj['Name']
-        nova = get_nova_client(proj['Name'])
+    with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
+        for proj in projects:
+            grp_vcpus = set_hdf_grp(proj, 'vcpus')
+            grp1 = f.create_group(grp_vcpus)
+            grp_mem_mb = set_hdf_grp(proj, 'mem_mb')
+            grp2 = f.create_group(grp_mem_mb)
+            grp_disk_gb = set_hdf_grp(proj, 'disk_gb')
+            grp3 = f.create_group(grp_disk_gb)
+            # Create the arrays for metrics
+            a_vcpus = create_metric_array()
+            a_mem_mb = create_metric_array()
+            a_disk_gb = create_metric_array()
+            a_volume_gb = create_metric_array()
+            print 80*'-'
+            print proj['Name']
+            nova = get_nova_client(proj['Name'])
 
-        for i in range(6000, 6200):
-            print i, to_isodate(ts[i]), to_isodate(ts[i+1])
-            aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
-            usg = getattr(aux, "server_usages", [])
-            print 5*'>'
-            for u in usg:
-                a_vcpus[i] = a_vcpus[i] + u["vcpus"]
-                a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
-                a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                print 'AVCPU= ', a_vcpus[i], ' VCPU= ', u["vcpus"]
-            print 5 * '<'
-        print 'VPUS: ', a_vcpus[6000, 6200]
-        print 'MEM: ', a_mem_mb[6000, 6200]
-        print 'Disk: ', a_disk_gb[6000, 6200]
+            for i in range(6000, 6200):
+                aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
+                usg = getattr(aux, "server_usages", [])
+                for u in usg:
+                    a_vcpus[i] = a_vcpus[i] + u["vcpus"]
+                    a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
+                    a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
+
+            res = grp1.create_dataset('vcpus', data=a_vcpus)
+            res = grp2.create_dataset('mem_mb', data=a_mem_mb)
+            res = grp3.create_dataset('disk_gb', data=a_disk_gb)
+            print 'VPUS: ', a_vcpus
+            print 'MEM: ', a_mem_mb
+            print 'Disk: ', a_disk_gb
