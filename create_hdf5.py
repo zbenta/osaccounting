@@ -180,12 +180,8 @@ if __name__ == '__main__':
         a_volume_gb = create_metric_array()
         print proj['Name']
         nova = get_nova_client(proj['Name'])
-        cinder = get_cinder_client(proj['Name'])
-        volumes = cinder.volumes.list()
 
         print 'Nova OBJ: ', nova
-        print 'Cinder OBJ: ', cinder
-        print 'Volume list: ', volumes
 
         #usg = nova.usage.get(proj, datei, datef)
 
