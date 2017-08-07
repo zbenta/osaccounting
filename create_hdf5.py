@@ -55,6 +55,7 @@ def time_series(year=2016):
     n = (df - di)/DELTA
     print 'SIZE ARRAY in function. ', n
     time_array = numpy.arange(int(di), int(df), int(n))
+    print 'time array size. ', time_array.size
     return time_array
 
 
