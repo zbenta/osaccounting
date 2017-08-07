@@ -178,12 +178,19 @@ if __name__ == '__main__':
         a_mem_mb = create_metric_array()
         a_disk_gb = create_metric_array()
         a_volume_gb = create_metric_array()
+        print 80*'-'
         print proj['Name']
         nova = get_nova_client(proj['Name'])
 
-        print 'Nova OBJ: ', nova
+        for i in range(4000):
+            usg = nova.usage.get(proj, ts[i], ts[i+1])
+            a_vcpus[i] = usg["vcpus"]
+            a_mem_mb[i] = usg["memory_mb"]
+            a_disk_gb[i] = usg["local_gb"]
+        print 'VPUS: ', a_vcpus
+        print 'MEM: ', a_mem_mb
+        print 'Disk: ', a_disk_gb
 
-        #usg = nova.usage.get(proj, datei, datef)
 
 
         # prints vars
