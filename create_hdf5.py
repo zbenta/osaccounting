@@ -8,13 +8,13 @@
 
 """Create initial hdf5 files to store accounting data
 
-    The projects.json data structure is
-    projects = { "Description": None,
-                 "Domain ID": None,
-                 "Enabled": None,
-                 "ID": None,
-                 "Name": None
-                }
+    The project data structure is
+    project = { "Description": None,
+                "Domain ID": None,
+                "Enabled": None,
+                "ID": None,
+                "Name": None
+               }
 """
 
 
@@ -26,12 +26,29 @@ import json
 import time
 import numpy
 
+from keystoneauth1.identity import v3
+from keystoneauth1 import session
+from keystoneclient.v3 import client
+import novaclient.client
+import cinderclient.client
+
 
 # Set the initial date to start the accounting -> 1st April 2016
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
 # Interval of data points in seconds
 DELTA = 3600
+
+ksauth = dict()
+ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
+ksauth['user_domain_name'] = os.environ['OS_USER_DOMAIN_NAME']
+ksauth['project_name'] = os.environ['OS_PROJECT_NAME']
+ksauth['username'] = os.environ['OS_USERNAME']
+ksauth['password'] = os.environ['OS_PASSWORD']
+ksauth['auth_url'] = os.environ['OS_AUTH_URL']
+ksauth['identity_api_version'] = os.environ['OS_IDENTITY_API_VERSION']
+ksauth['image_api_version'] = os.environ['OS_IMAGE_API_VERSION']
+ksauth['cacert'] = os.environ['OS_CACERT']
 
 
 def get_env():
@@ -56,7 +73,7 @@ def time_series(year=2016):
     """Create a time array (of ints) in epoch format with interval
     of one hour for a given year
     :param year: Year
-    :returns (numpy) time_array
+    :returns (numpy array) time_array
     """
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
@@ -95,6 +112,56 @@ def set_hdf_grp(proj, user, metric):
     grp = proj + '/' + user + '/' + metric
     return grp
 
+
+def create_metric_array(year=2016):
+    """Create array for a given metric
+    :param year: Year to calculate the size of the array
+    :return (numpy array) Array to hold the values of the metric"""
+    sizea = size_array(year)
+    return numpy.zeros([sizea, ], dtype=int)
+
+
+def get_keystone_session(project_name=ksauth['project_name']):
+    """Get keystone client session
+
+    :param project_name: Project name
+    """
+    auth = v3.Password(auth_url=ksauth['auth_url'],
+                       username=ksauth['username'],
+                       password=ksauth['password'],
+                       project_domain_name=ksauth['project_domain_name'],
+                       project_name=project_name,
+                       user_domain_name=ksauth['user_domain_name'])
+    return session.Session(auth=auth)
+
+
+def get_keystone_client():
+    sess = get_keystone_session()
+    return client.Client(session=sess)
+
+
+def get_users():
+    dusers = dict()
+    ks = get_keystone_client()
+    for usr in ks.users.list():
+        dusers[usr.id] = usr.name
+    return dusers
+
+
+def get_nova_client(project_name):
+    sess = get_keystone_session(project_name)
+    return novaclient.client.Client(2, session=sess)
+
+
+def get_cinder_client(project_name):
+    sess = get_keystone_session(project_name)
+    return cinderclient.client.Client(2, session=sess)
+
+
+def get_last_run():
+    last_run = datetime.datetime(2010, 1, 1, 0, 0, 0)
+    return last_run
+
 if __name__ == '__main__':
     evr = get_env()
     json_proj = evr['out_dir'] + os.sep + 'projects.json'
@@ -102,12 +169,28 @@ if __name__ == '__main__':
         projects = json.load(f)
 
     fn = set_hdf_fnames()
-    print 'FILENAME: ', fn
     ts = time_series()
-    print 'TIME SERIES: ', ts
     sa = size_array()
-    print 'Array size: ', sa
 
-    for p in projects:
-        print 80*'-'
-        print p
+    for proj in projects:
+        # Create the arrays for metrics
+        a_vcpus = create_metric_array()
+        a_mem_mb = create_metric_array()
+        a_disk_gb = create_metric_array()
+        a_volume_gb = create_metric_array()
+        print proj['Name']
+
+        #nova = get_nova_client(proj[proj])
+        #cinder = get_cinder_client(proj[proj])
+        #volumes = cinder.volumes.list()
+
+        #usg = nova.usage.get(proj, datei, datef)
+
+
+        # prints vars
+    #print 'FILENAME: ', fn
+    #print 'TIME SERIES: ', ts
+    #print 'Array size: ', sa
+    #for p in projects:
+    #    print 80*'-'
+    #    print p
