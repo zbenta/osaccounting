@@ -190,20 +190,13 @@ if __name__ == '__main__':
             print i, to_isodate(ts[i]), to_isodate(ts[i+1])
             aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
             usg = getattr(aux, "server_usages", [])
+            print 5*'>'
             for u in usg:
                 a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                 a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                 a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
+                print 'AVCPU= ', a_vcpus[i], ' VCPU= ', u["vcpus"]
+            print 5 * '<'
         print 'VPUS: ', a_vcpus
         print 'MEM: ', a_mem_mb
         print 'Disk: ', a_disk_gb
-
-
-
-        # prints vars
-    #print 'FILENAME: ', fn
-    #print 'TIME SERIES: ', ts
-    #print 'Array size: ', sa
-    #for p in projects:
-    #    print 80*'-'
-    #    print p
