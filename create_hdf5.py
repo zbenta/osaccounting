@@ -112,7 +112,7 @@ def set_hdf_grp(project, metric):
     :param metric: metric name
     :return hdf5 group
     """
-    grp = project + '/' + '/' + metric
+    grp = project + "/" + metric
     return grp
 
 
@@ -178,11 +178,11 @@ if __name__ == '__main__':
 
     with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
         for proj in projects:
-            grp_vcpus = set_hdf_grp(proj, 'vcpus')
+            grp_vcpus = set_hdf_grp(proj['Name'], 'vcpus')
             grp1 = f.create_group(grp_vcpus)
-            grp_mem_mb = set_hdf_grp(proj, 'mem_mb')
+            grp_mem_mb = set_hdf_grp(proj['Name'], 'mem_mb')
             grp2 = f.create_group(grp_mem_mb)
-            grp_disk_gb = set_hdf_grp(proj, 'disk_gb')
+            grp_disk_gb = set_hdf_grp(proj['Name'], 'disk_gb')
             grp3 = f.create_group(grp_disk_gb)
             # Create the arrays for metrics
             a_vcpus = create_metric_array()
