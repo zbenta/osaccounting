@@ -186,10 +186,13 @@ if __name__ == '__main__':
         print proj['Name']
         nova = get_nova_client(proj['Name'])
 
-        for i in range(6000, 6300):
+        for i in range(6000, 6200):
             print i, to_isodate(ts[i]), to_isodate(ts[i+1])
             aux = nova.usage.get(proj['Name'], to_isodate(ts[i]), to_isodate(ts[i+1]))
             usg = getattr(aux, "server_usages", [])
+            print 10*'>'
+            pprint.pprint(usg)
+            print 10*'<'
             for u in usg:
                 a_vcpus[i] += u["vcpus"]
                 a_mem_mb[i] += u["memory_mb"]
