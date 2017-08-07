@@ -52,6 +52,30 @@ def time_series():
     time_array = numpy.arange(int(ti), int(tf), int(nhours))
     return time_array
 
+
+def get_hdf_fnames():
+    """List of HDF5 filenames, are the <YEAR>.hdf
+    :returns (list) of filename
+    """
+    tf = datetime.datetime.now()
+    l = range(DATEINI.year, tf.year + 1)
+    fname = []
+    for i in l:
+        fname.append(str(i) + '.hdf')
+    return fname
+
+
+def set_hdf_grp(proj, user, metric):
+    """Creates the HDF5 group structure
+    :param proj: project name
+    :param user: user name
+    :param metric: metric name
+    :return hdf5 group
+    """
+    grp = proj + '/' + user + '/' + metric
+    return grp
+
+
 if __name__ == '__main__':
     evr = get_env()
     json_proj = evr['out_dir'] + os.sep + 'projects.json'
