@@ -19,8 +19,8 @@ import time
 import numpy
 
 
-# Set the initial date to start the accounting
-DATEINI = datetime.datetime(2014, 10, 1, 0, 0, 0)
+# Set the initial date to start the accounting -> !st April 2016
+DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
 
 
