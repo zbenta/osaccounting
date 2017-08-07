@@ -50,8 +50,8 @@ def time_series(year=2016):
     :param year: Year
     :returns (numpy) time_array
     """
-    di = datetime.datetime(year, 1, 1, 0, 0, 0)
-    df = datetime.datetime(year+1, 1, 1, 0, 0, 0)
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     n = (df - di)/DELTA
     time_array = numpy.arange(int(di), int(df), int(n))
     return time_array
@@ -61,8 +61,8 @@ def size_array(year=2016):
     """Number of data points is the size of the arrays for 1 year
     :param year: Year
     :return (int) size of arrays"""
-    sa = time_series(year)
-    return sa.size
+    sizea = time_series(year)
+    return sizea.size
 
 
 def set_hdf_fnames():
