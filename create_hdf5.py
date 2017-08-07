@@ -197,6 +197,6 @@ if __name__ == '__main__':
                 a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
                 print 'AVCPU= ', a_vcpus[i], ' VCPU= ', u["vcpus"]
             print 5 * '<'
-        print 'VPUS: ', a_vcpus
-        print 'MEM: ', a_mem_mb
-        print 'Disk: ', a_disk_gb
+        print 'VPUS: ', a_vcpus[6000, 6200]
+        print 'MEM: ', a_mem_mb[6000, 6200]
+        print 'Disk: ', a_disk_gb[6000, 6200]
