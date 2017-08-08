@@ -199,7 +199,7 @@ if __name__ == '__main__':
             res = grp.create_dataset('vcpus', data=a_vcpus)
             res = grp.create_dataset('mem_mb', data=a_mem_mb)
             res = grp.create_dataset('disk_gb', data=a_disk_gb)
-            print 'Date: ', ts
-            print 'VPUS: ', a_vcpus
-            print 'MEM: ', a_mem_mb
-            print 'Disk: ', a_disk_gb
+            print 'Date: ', ts[720:840]
+            print 'VPUS: ', a_vcpus[720:840]
+            print 'MEM: ', a_mem_mb[720:840]
+            print 'Disk: ', a_disk_gb[720:840]
