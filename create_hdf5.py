@@ -37,7 +37,7 @@ import cinderclient.client
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
 # Interval of data points in seconds
-DELTA = 3600
+DELTA = 3600*24
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
@@ -170,8 +170,9 @@ if __name__ == '__main__':
     metrics = ['vcpus', 'mem_mb', 'disk_gb']
 
     # indexes to check date intervals
-    idx_i = 720
-    idx_f = 1440
+    idx_i = sa-48
+    idx_f = sa
+
 
     with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
         for proj in projects:
@@ -184,29 +185,30 @@ if __name__ == '__main__':
             a_volume_gb = create_metric_array(year)
             print 80*'-'
             print proj['Name']
-            print 'Date= ', to_isodate(ts[idx_i])
+            print 'Date= ', to_isodate(ts[0])
             nova = get_nova_client(proj['Name'])
 
-            for i in range(idx_i, idx_f):
+            for i in range(sa-1):
                 aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
                 usg = getattr(aux, "server_usages", [])
-                #print 5*'>'
+                print 5*'>'
+                print 'index= ', i, ' DATE= ', to_isodate(ts[i])
                 #pprint.pprint(usg)
-                #print 5*'<'
+                print 5*'<'
                 for u in usg:
                     if u["state"] == "error":
                         continue
                     a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                     a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                    print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
-                    print 2*'_'
+                    #print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
+                    #print 2*'_'
 
             res = grp.create_dataset('date', data=ts, compression="gzip")
             res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
             res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
             res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
-            print 'Date: ', to_isodate(ts[idx_i])
+            print 'Date: ', to_isodate(ts[sa])
             print 'VPUS: ', a_vcpus[idx_i:idx_f]
             print 'MEM: ', a_mem_mb[idx_i:idx_f]
             print 'Disk: ', a_disk_gb[idx_i:idx_f]
