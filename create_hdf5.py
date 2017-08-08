@@ -37,8 +37,7 @@ import cinderclient.client
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
 # Interval of data points in seconds
-#DELTA = 3600*24
-DELTA = 3600.0*24.0
+DELTA = 3600.0
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
@@ -174,7 +173,6 @@ if __name__ == '__main__':
     # indexes to check date intervals
     idx_i = sa-15
     idx_f = sa
-
 
     with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
         for proj in projects:
