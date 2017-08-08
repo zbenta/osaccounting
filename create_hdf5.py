@@ -190,10 +190,10 @@ if __name__ == '__main__':
                 for i in range(sa):
                     aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i]+DELTA))
                     usg = getattr(aux, "server_usages", [])
-                    print 5*'>'
-                    print 'index= ', i, ' DATE= ', to_isodate(ts[i]), 'EPOCH= ', ts[i]
+                    #print 5*'>'
+                    #print 'index= ', i, ' DATE= ', to_isodate(ts[i]), 'EPOCH= ', ts[i]
                     #pprint.pprint(usg)
-                    print 5*'<'
+                    #print 5*'<'
                     for u in usg:
                         if u["state"] == "error":
                             continue
@@ -207,6 +207,7 @@ if __name__ == '__main__':
                 res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
                 res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
                 res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
+                res = grp.create_dataset('volume_gb', data=a_volume_gb, compression="gzip")
                 print 'Date: ', to_isodate(ts[sa-1])
                 print 'VPUS: ', a_vcpus[idx_i:idx_f]
                 print 'MEM: ', a_mem_mb[idx_i:idx_f]
