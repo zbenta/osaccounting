@@ -35,7 +35,7 @@ import cinderclient.client
 
 # Set the initial date to start the accounting -> 1st April 2016
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
-SECEPOC = time.gmtime(DATEINI.timetuple())
+SECEPOC = time.mktime(DATEINI.utctimetuple())
 # Interval of data points in seconds
 DELTA = 3600.0*24.0
 
