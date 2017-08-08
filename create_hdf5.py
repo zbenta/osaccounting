@@ -169,6 +169,10 @@ if __name__ == '__main__':
     sa = size_array(year)
     metrics = ['vcpus', 'mem_mb', 'disk_gb']
 
+    # indexes to check date intervals
+    idx_i = 720
+    idx_f = 1440
+
     with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
         for proj in projects:
             grp_name = proj['Name']
@@ -182,7 +186,7 @@ if __name__ == '__main__':
             print proj['Name']
             nova = get_nova_client(proj['Name'])
 
-            for i in range(720, 840):
+            for i in range(idx_i, idx_f):
                 aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
                 usg = getattr(aux, "server_usages", [])
                 print 5*'>'
@@ -199,7 +203,7 @@ if __name__ == '__main__':
             res = grp.create_dataset('vcpus', data=a_vcpus)
             res = grp.create_dataset('mem_mb', data=a_mem_mb)
             res = grp.create_dataset('disk_gb', data=a_disk_gb)
-            print 'Date: ', ts[720:840]
-            print 'VPUS: ', a_vcpus[720:840]
-            print 'MEM: ', a_mem_mb[720:840]
-            print 'Disk: ', a_disk_gb[720:840]
+            print 'Date: ', to_isodate(ts[idx_i:idx_f])
+            print 'VPUS: ', a_vcpus[idx_i:idx_f]
+            print 'MEM: ', a_mem_mb[idx_i:idx_f]
+            print 'Disk: ', a_disk_gb[idx_i:idx_f]
