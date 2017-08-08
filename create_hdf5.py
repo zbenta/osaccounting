@@ -184,18 +184,17 @@ if __name__ == '__main__':
             a_volume_gb = create_metric_array(year)
             print 80*'-'
             print proj['Name']
+            print 'Date= ', to_isodate(ts[idx_i])
             nova = get_nova_client(proj['Name'])
 
             for i in range(idx_i, idx_f):
                 aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
                 usg = getattr(aux, "server_usages", [])
-                print 5*'>'
-                pprint.pprint(usg)
-                print 5*'<'
-                print 'Date= ', to_isodate(ts[i])
+                #print 5*'>'
+                #pprint.pprint(usg)
+                #print 5*'<'
                 for u in usg:
                     if u["state"] == "error":
-                        print 'ooo THIS is the IF in state error: ', u["state"]
                         continue
                     a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
@@ -203,11 +202,11 @@ if __name__ == '__main__':
                     print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
                     print 2*'_'
 
-            res = grp.create_dataset('date', data=ts)
-            res = grp.create_dataset('vcpus', data=a_vcpus)
-            res = grp.create_dataset('mem_mb', data=a_mem_mb)
-            res = grp.create_dataset('disk_gb', data=a_disk_gb)
-            print 'Date: ', ts[idx_i:idx_f]
+            res = grp.create_dataset('date', data=ts, compression="gzip")
+            res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
+            res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
+            res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
+            print 'Date: ', to_isodate(ts[idx_i])
             print 'VPUS: ', a_vcpus[idx_i:idx_f]
             print 'MEM: ', a_mem_mb[idx_i:idx_f]
             print 'Disk: ', a_disk_gb[idx_i:idx_f]
