@@ -79,9 +79,11 @@ def time_series(year=2016):
     :param year: Year
     :returns (numpy array) time_array
     """
-    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    month = 1
+    if year == 2016:
+        month = 4
+    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
-    n = (df - di)/DELTA
     time_array = numpy.arange(int(di), int(df), DELTA)
     return time_array
 
@@ -178,12 +180,15 @@ if __name__ == '__main__':
 
     with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
         for proj in projects:
-            grp_vcpus = set_hdf_grp(proj['Name'], 'vcpus')
-            grp1 = f.create_group(grp_vcpus)
-            grp_mem_mb = set_hdf_grp(proj['Name'], 'mem_mb')
-            grp2 = f.create_group(grp_mem_mb)
-            grp_disk_gb = set_hdf_grp(proj['Name'], 'disk_gb')
-            grp3 = f.create_group(grp_disk_gb)
+            #grp_vcpus = set_hdf_grp(proj['Name'], 'vcpus')
+            #grp1 = f.create_group(grp_vcpus)
+            #grp_mem_mb = set_hdf_grp(proj['Name'], 'mem_mb')
+            #grp2 = f.create_group(grp_mem_mb)
+            #grp_disk_gb = set_hdf_grp(proj['Name'], 'disk_gb')
+            #grp3 = f.create_group(grp_disk_gb)
+
+            grp_name = proj['Name']
+            grp = f.create_group(grp_name)
             # Create the arrays for metrics
             a_vcpus = create_metric_array()
             a_mem_mb = create_metric_array()
@@ -193,7 +198,7 @@ if __name__ == '__main__':
             print proj['Name']
             nova = get_nova_client(proj['Name'])
 
-            for i in range(6000, 6200):
+            for i in range(720, 1440):
                 aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
                 usg = getattr(aux, "server_usages", [])
                 for u in usg:
@@ -201,9 +206,9 @@ if __name__ == '__main__':
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                     a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
 
-            res = grp1.create_dataset('vcpus', data=a_vcpus)
-            res = grp2.create_dataset('mem_mb', data=a_mem_mb)
-            res = grp3.create_dataset('disk_gb', data=a_disk_gb)
+            res = grp.create_dataset('vcpus', data=a_vcpus)
+            res = grp.create_dataset('mem_mb', data=a_mem_mb)
+            res = grp.create_dataset('disk_gb', data=a_disk_gb)
             print 'VPUS: ', a_vcpus
             print 'MEM: ', a_mem_mb
             print 'Disk: ', a_disk_gb
