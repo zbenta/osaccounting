@@ -65,7 +65,7 @@ def to_secepoc(date=DATEINI):
     :param date: Date in datetime format
     :returns (float) seconds from epoch
     """
-    return time.gmtime(date.utctimetuple())
+    return time.mktime(date.utctimetuple())
 
 
 def to_isodate(date):
