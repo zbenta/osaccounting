@@ -35,7 +35,7 @@ import cinderclient.client
 
 # Set the initial date to start the accounting -> 1st April 2016
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
-SECEPOC = time.mktime(DATEINI.timetuple())
+SECEPOC = time.gmtime(DATEINI.timetuple())
 # Interval of data points in seconds
 DELTA = 3600.0
 
@@ -55,7 +55,6 @@ def get_env():
     """Get environment variables
     :returns dictionary with environment variables
     """
-
     ev = dict()
     ev['out_dir'] = os.environ['OUT_DIR']
     return ev
@@ -66,11 +65,11 @@ def to_secepoc(date=DATEINI):
     :param date: Date in datetime format
     :returns (float) seconds from epoch
     """
-    return time.mktime(date.timetuple())
+    return time.gmtime(date.utctimetuple())
 
 
 def to_isodate(date):
-    return datetime.datetime.fromtimestamp(date)
+    return datetime.datetime.utcfromtimestamp(date)
 
 
 def time_series(year_l=2016):
@@ -84,7 +83,6 @@ def time_series(year_l=2016):
         month = 4
     di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
-    #time_array = numpy.arange(int(di), int(df), DELTA)
     time_array = numpy.arange(di, df, DELTA)
     return time_array
 
@@ -97,16 +95,12 @@ def size_array(year_l=2016):
     return sizea.size
 
 
-def set_hdf_fnames():
-    """List of HDF5 filenames, are the <YEAR>.hdf
-    :returns (list) of filename
+def get_years():
+    """List of years
+    :returns (list) of years
     """
-    tf = datetime.datetime.now()
-    l = range(DATEINI.year, tf.year + 1)
-    fname = []
-    for i in l:
-        fname.append(str(i) + '.hdf')
-    return fname
+    tf = datetime.datetime.utcnow()
+    return range(DATEINI.year, tf.year + 1)
 
 
 def create_metric_array(year_l=2016):
@@ -160,55 +154,60 @@ def get_last_run():
 
 if __name__ == '__main__':
     evr = get_env()
-    year = 2016
+    metrics = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
     json_proj = evr['out_dir'] + os.sep + 'projects.json'
     with open(json_proj, 'r') as f:
         projects = json.load(f)
 
-    fn = set_hdf_fnames()
-    ts = time_series(year)
-    sa = size_array(year)
-    metrics = ['vcpus', 'mem_mb', 'disk_gb']
+    # Set the list of years for testing purposes
+    years = [2016]
 
-    # indexes to check date intervals
-    idx_i = sa-15
-    idx_f = sa
+    # Get the list of years
+    #years = get_years()
 
-    with h5py.File(evr['out_dir'] + os.sep + fn[0], 'w') as f:
-        for proj in projects:
-            grp_name = proj['Name']
-            grp = f.create_group(grp_name)
-            # Create the arrays for metrics
-            a_vcpus = create_metric_array(year)
-            a_mem_mb = create_metric_array(year)
-            a_disk_gb = create_metric_array(year)
-            a_volume_gb = create_metric_array(year)
-            print 80*'-'
-            print proj['Name']
-            print 'Date= ', to_isodate(ts[0])
-            nova = get_nova_client(proj['Name'])
+    for year in years:
+        ts = time_series(year)
+        sa = size_array(year)
 
-            for i in range(sa):
-                aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i]+DELTA))
-                usg = getattr(aux, "server_usages", [])
-                print 5*'>'
-                print 'index= ', i, ' DATE= ', to_isodate(ts[i]), 'EPOCH= ', ts[i]
-                #pprint.pprint(usg)
-                print 5*'<'
-                for u in usg:
-                    if u["state"] == "error":
-                        continue
-                    a_vcpus[i] = a_vcpus[i] + u["vcpus"]
-                    a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
-                    a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                    #print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
-                    #print 2*'_'
+        # For testing purposes: indexes to check date intervals
+        idx_i = sa-15
+        idx_f = sa
 
-            res = grp.create_dataset('date', data=ts, compression="gzip")
-            res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
-            res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
-            res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
-            print 'Date: ', to_isodate(ts[sa-1])
-            print 'VPUS: ', a_vcpus[idx_i:idx_f]
-            print 'MEM: ', a_mem_mb[idx_i:idx_f]
-            print 'Disk: ', a_disk_gb[idx_i:idx_f]
+        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'w') as f:
+            for proj in projects:
+                grp_name = proj['Name']
+                grp = f.create_group(grp_name)
+                # Create the arrays for metrics
+                a_vcpus = create_metric_array(year)
+                a_mem_mb = create_metric_array(year)
+                a_disk_gb = create_metric_array(year)
+                a_volume_gb = create_metric_array(year)
+                print 80*'-'
+                print proj['Name']
+                print 'Date= ', to_isodate(ts[0])
+                nova = get_nova_client(proj['Name'])
+
+                for i in range(sa):
+                    aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i]+DELTA))
+                    usg = getattr(aux, "server_usages", [])
+                    print 5*'>'
+                    print 'index= ', i, ' DATE= ', to_isodate(ts[i]), 'EPOCH= ', ts[i]
+                    #pprint.pprint(usg)
+                    print 5*'<'
+                    for u in usg:
+                        if u["state"] == "error":
+                            continue
+                        a_vcpus[i] = a_vcpus[i] + u["vcpus"]
+                        a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
+                        a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
+                        #print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
+                        #print 2*'_'
+
+                res = grp.create_dataset('date', data=ts, compression="gzip")
+                res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
+                res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
+                res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
+                print 'Date: ', to_isodate(ts[sa-1])
+                print 'VPUS: ', a_vcpus[idx_i:idx_f]
+                print 'MEM: ', a_mem_mb[idx_i:idx_f]
+                print 'Disk: ', a_disk_gb[idx_i:idx_f]
