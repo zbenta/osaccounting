@@ -192,11 +192,11 @@ if __name__ == '__main__':
                 print 5*'>'
                 pprint.pprint(usg)
                 print 5*'<'
+                print 'Date= ', to_isodate(ts[i])
                 for u in usg:
                     a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                     a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                    print 'Date= ', to_isodate(ts[i])
                     print 'uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
                     print 2*'_'
 
