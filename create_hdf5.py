@@ -37,7 +37,7 @@ import cinderclient.client
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.utctimetuple())
 # Interval of data points in seconds
-DELTA = 3600.0*24.0
+DELTA = 3600.0
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
@@ -160,10 +160,10 @@ if __name__ == '__main__':
         projects = json.load(f)
 
     # Set the list of years for testing purposes
-    years = [2016]
+    #years = [2016]
 
     # Get the list of years
-    #years = get_years()
+    years = get_years()
 
     for year in years:
         ts = time_series(year)
