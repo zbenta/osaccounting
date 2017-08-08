@@ -112,7 +112,7 @@ def create_metric_array(year_l=2016):
     """Create array for a given metric
     :param year_l: Year to calculate the size of the array
     :return (numpy array) Array to hold the values of the metric"""
-    sizea = size_array(yeyear_lar)
+    sizea = size_array(year_l)
     return numpy.zeros([sizea, ], dtype=int)
 
 
