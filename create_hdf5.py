@@ -194,13 +194,12 @@ if __name__ == '__main__':
                 print 5*'<'
                 print 'Date= ', to_isodate(ts[i])
                 for u in usg:
-                    if u["state"] == "error":
-                        continue
-                    a_vcpus[i] = a_vcpus[i] + u["vcpus"]
-                    a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
-                    a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                    print 'uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
-                    print 2*'_'
+                    if u["state"] != "error":
+                        a_vcpus[i] = a_vcpus[i] + u["vcpus"]
+                        a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
+                        a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
+                        print 'uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
+                        print 2*'_'
 
             res = grp.create_dataset('date', data=ts)
             res = grp.create_dataset('vcpus', data=a_vcpus)
