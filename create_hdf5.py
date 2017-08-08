@@ -37,7 +37,7 @@ import cinderclient.client
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.gmtime(DATEINI.timetuple())
 # Interval of data points in seconds
-DELTA = 3600.0
+DELTA = 3600.0*24.0
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
