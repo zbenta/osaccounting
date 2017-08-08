@@ -208,7 +208,7 @@ if __name__ == '__main__':
             res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
             res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
             res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
-            print 'Date: ', to_isodate(ts[sa])
+            print 'Date: ', to_isodate(ts[sa-1])
             print 'VPUS: ', a_vcpus[idx_i:idx_f]
             print 'MEM: ', a_mem_mb[idx_i:idx_f]
             print 'Disk: ', a_disk_gb[idx_i:idx_f]
