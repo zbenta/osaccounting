@@ -73,26 +73,26 @@ def to_isodate(date):
     return datetime.datetime.fromtimestamp(date)
 
 
-def time_series(year=2016):
+def time_series(year_l=2016):
     """Create a time array (of ints) in epoch format with interval
     of one hour for a given year
-    :param year: Year
+    :param year_l: Year
     :returns (numpy array) time_array
     """
     month = 1
-    if year == 2016:
+    if year_l == 2016:
         month = 4
-    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
+    di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(int(di), int(df), DELTA)
     return time_array
 
 
-def size_array(year=2016):
+def size_array(year_l=2016):
     """Number of data points is the size of the arrays for 1 year
-    :param year: Year
+    :param year_l: Year
     :return (int) size of arrays"""
-    sizea = time_series(year)
+    sizea = time_series(year_l)
     return sizea.size
 
 
@@ -108,11 +108,11 @@ def set_hdf_fnames():
     return fname
 
 
-def create_metric_array(year=2016):
+def create_metric_array(year_l=2016):
     """Create array for a given metric
-    :param year: Year to calculate the size of the array
+    :param year_l: Year to calculate the size of the array
     :return (numpy array) Array to hold the values of the metric"""
-    sizea = size_array(year)
+    sizea = size_array(yeyear_lar)
     return numpy.zeros([sizea, ], dtype=int)
 
 
@@ -174,15 +174,15 @@ if __name__ == '__main__':
             grp_name = proj['Name']
             grp = f.create_group(grp_name)
             # Create the arrays for metrics
-            a_vcpus = create_metric_array()
-            a_mem_mb = create_metric_array()
-            a_disk_gb = create_metric_array()
-            a_volume_gb = create_metric_array()
+            a_vcpus = create_metric_array(year)
+            a_mem_mb = create_metric_array(year)
+            a_disk_gb = create_metric_array(year)
+            a_volume_gb = create_metric_array(year)
             print 80*'-'
             print proj['Name']
             nova = get_nova_client(proj['Name'])
 
-            for i in range(720, 1440):
+            for i in range(720, 840):
                 aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
                 usg = getattr(aux, "server_usages", [])
                 print 5*'>'
@@ -192,11 +192,14 @@ if __name__ == '__main__':
                     a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                     a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
+                    print 'uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
+                    print 2*'_'
 
             res = grp.create_dataset('date', data=ts)
             res = grp.create_dataset('vcpus', data=a_vcpus)
             res = grp.create_dataset('mem_mb', data=a_mem_mb)
             res = grp.create_dataset('disk_gb', data=a_disk_gb)
+            print 'Date: ', ts
             print 'VPUS: ', a_vcpus
             print 'MEM: ', a_mem_mb
             print 'Disk: ', a_disk_gb
