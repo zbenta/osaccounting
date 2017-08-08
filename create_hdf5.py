@@ -196,14 +196,14 @@ if __name__ == '__main__':
                     a_vcpus[i] = a_vcpus[i] + u["vcpus"]
                     a_mem_mb[i] = a_mem_mb[i] + u["memory_mb"]
                     a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
-                    print 'uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
+                    print 'Date= ', to_isodate(ts[i]), ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
                     print 2*'_'
 
             res = grp.create_dataset('date', data=ts)
             res = grp.create_dataset('vcpus', data=a_vcpus)
             res = grp.create_dataset('mem_mb', data=a_mem_mb)
             res = grp.create_dataset('disk_gb', data=a_disk_gb)
-            print 'Date: ', to_isodate(ts[idx_i:idx_f])
+            print 'Date: ', ts[idx_i:idx_f]
             print 'VPUS: ', a_vcpus[idx_i:idx_f]
             print 'MEM: ', a_mem_mb[idx_i:idx_f]
             print 'Disk: ', a_disk_gb[idx_i:idx_f]
