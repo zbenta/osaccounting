@@ -37,7 +37,8 @@ import cinderclient.client
 DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.timetuple())
 # Interval of data points in seconds
-DELTA = 3600*24
+#DELTA = 3600*24
+DELTA = 3600.0*24.0
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
@@ -84,7 +85,8 @@ def time_series(year_l=2016):
         month = 4
     di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
-    time_array = numpy.arange(int(di), int(df), DELTA)
+    #time_array = numpy.arange(int(di), int(df), DELTA)
+    time_array = numpy.arange(di, df, DELTA)
     return time_array
 
 
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     metrics = ['vcpus', 'mem_mb', 'disk_gb']
 
     # indexes to check date intervals
-    idx_i = sa-48
+    idx_i = sa-15
     idx_f = sa
 
 
@@ -188,11 +190,11 @@ if __name__ == '__main__':
             print 'Date= ', to_isodate(ts[0])
             nova = get_nova_client(proj['Name'])
 
-            for i in range(sa-1):
-                aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i+1]))
+            for i in range(sa):
+                aux = nova.usage.get(proj['ID'], to_isodate(ts[i]), to_isodate(ts[i]+DELTA))
                 usg = getattr(aux, "server_usages", [])
                 print 5*'>'
-                print 'index= ', i, ' DATE= ', to_isodate(ts[i])
+                print 'index= ', i, ' DATE= ', to_isodate(ts[i]), 'EPOCH= ', ts[i]
                 #pprint.pprint(usg)
                 print 5*'<'
                 for u in usg:
