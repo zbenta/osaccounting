@@ -16,23 +16,23 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     evr = get_env()
-    volumes = get_volumes()
     #pprint.pprint(volumes)
     years = get_years()
     projects = get_projects()
+
     for year in years:
         size_a = size_array(year)
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
             ts = f['date'][:]
             print to_isodate(ts[0])
-            print 80*'='
+            volumes = get_volumes(year)
             for vol in volumes:
                 t_create = to_secepoc(vol["created_at"])
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
                 print "Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
-
+            print 80*'='
             for proj in projects:
                 print 20*'-'
                 print proj

@@ -75,15 +75,19 @@ def get_projects():
     return projects
 
 
-def get_volumes():
+def get_volumes(year=2016):
     conn = db_conn()
     cursor = conn.cursor()
+    ti = datetime.date(year, 1, 1)
+    tf = datetime.date(year, 12, 31)
     dbtable = "volumes"
     sep = ","
     table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
     s = len(table_coll)
-    qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable +";"
-    cursor.execute(qry)
+    qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable + ";"
+    cond_qry = "WHERE created_at BETWEEN %s AND %s"
+    query = (qry + cond_qry)
+    cursor.execute(query, (ti, tf))
     vols = cursor.fetchall()
     vols_list = []
     for v in vols:
