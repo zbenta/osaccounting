@@ -159,7 +159,7 @@ def dT_to_indexes(ti, tf, year):
     :return (list int) list of indexes in time series corresponding to given time interval
     """
     ts = time_series(year)
-    idxs = (ts>=ti)*(ts<tf)
+    idxs = numpy.argwhere((ts>=ti)&(ts<tf))
     return idxs
 
 
