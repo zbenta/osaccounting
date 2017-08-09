@@ -150,7 +150,7 @@ def create_metric_array(year_l=2016):
     return numpy.zeros([sizea, ], dtype=int)
 
 
-def dT_to_indexes(ti, tf, year):
+def dt_to_indexes(ti, tf, year):
     """For a given date in seconds to epoch return the
     corresponding index in the time_series
     :param ti: initial date in seconds to epoch in UTC
@@ -159,7 +159,11 @@ def dT_to_indexes(ti, tf, year):
     :return (list int) list of indexes in time series corresponding to given time interval
     """
     ts = time_series(year)
-    idxs = numpy.argwhere((ts>=ti) & (ts<tf))
+    print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
+    print 'ti= ', ti, ' tf= ', tf, ' year= ', year
+    idxs = numpy.argwhere((ts >= ti) & (ts < tf))
+    print 'idxs= ', idxs
+    print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
     return idxs
 
 
