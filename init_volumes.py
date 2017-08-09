@@ -24,7 +24,7 @@ if __name__ == '__main__':
         size_a = size_array(year)
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
             ts = f['date'][:]
-            print to_secepoc(ts[0])
+            print to_isodate(ts[0])
             for proj in projects:
                 print 20*'-'
                 print proj
