@@ -17,7 +17,7 @@ import h5py
 import json
 import time
 import numpy
-import MySQLdb
+import mysql.connector
 
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
@@ -58,10 +58,10 @@ def get_env():
 
 def db_conn():
     ev = get_env()
-    return MySQLdb.connect(host=ev['mysql_host'],
-                           user=ev['mysql_user'],
-                           passwd=ev['mysql_pass'],
-                           db="cinder")
+    return mysql.connector.connect(host=ev['mysql_host'],
+                                   user=ev['mysql_user'],
+                                   passwd=ev['mysql_pass'],
+                                   db="cinder")
 
 
 def get_projects():
