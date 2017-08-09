@@ -36,6 +36,7 @@ if __name__ == '__main__':
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 # print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
                 idx_list = dT_to_indexes(t_create, t_final, year)
+                print "INDEXES= ", idx_list
                 idx_start = idx_list[0][0]
                 idx_end = idx_list[-1][0]
                 print 80*'-'
