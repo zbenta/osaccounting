@@ -17,7 +17,7 @@ from osacc_functions import *
 if __name__ == '__main__':
     evr = get_env()
     volumes = get_volumes()
-    pprint.pprint(volumes)
+    #pprint.pprint(volumes)
     years = get_years()
     projects = get_projects()
     for year in years:
@@ -25,6 +25,14 @@ if __name__ == '__main__':
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
             ts = f['date'][:]
             print to_isodate(ts[0])
+            print 80*'='
+            for vol in volumes:
+                t_create = to_secepoc(vol["created_at"])
+                t_final = ts[size_a-1]
+                if vol["deleted"]:
+                    t_final = to_secepoc(vol["deleted_at"])
+                print "Date Ini= ", t_create, "Date Final= ", t_final
+
             for proj in projects:
                 print 20*'-'
                 print proj
