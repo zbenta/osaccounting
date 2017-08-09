@@ -29,7 +29,6 @@ if __name__ == '__main__':
                 print 20*'-'
                 print proj
                 grp_name = proj['Name']
-                vol_array = f[grp_name]['volume_gb'][:]
-                vcpus = f[grp_name]['vcpus'][:]
+                vol_array = f[grp_name]['volume_gb']
                 for i in range(size_a):
-                    f[grp_name]['volume_gb'][i] = i*2
+                    vol_array[i] = i*2
