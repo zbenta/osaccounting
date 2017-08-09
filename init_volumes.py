@@ -30,9 +30,6 @@ if __name__ == '__main__':
                 print proj
                 grp_name = proj['Name']
                 vol_array = f[grp_name]['volume_gb'][:]
-                vcpus = f[grp_name + '/vcpus'][:]
-                print 'READ volume array= ', vol_array[0:5]
-                print 'READ vcpus array= ', vcpus[0:5]
+                vcpus = f[grp_name]['vcpus'][:]
                 for i in range(size_a):
-                    vol_array[i] = i*2
-                print 'UPDATED volume array= ',vol_array[0:5]
+                    f[grp_name]['volume_gb'][i] = i*2
