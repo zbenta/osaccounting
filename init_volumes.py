@@ -21,7 +21,7 @@ if __name__ == '__main__':
     years = get_years()
     projects = get_projects()
     for year in years:
-        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', '+r') as f:
+        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
             ts = f['date']
             print ts
             for proj in projects:
