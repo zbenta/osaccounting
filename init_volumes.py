@@ -31,9 +31,9 @@ if __name__ == '__main__':
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
-                if t_final > SECEPOC:
+                if t_final > to_secepoc(datetime.datetime.utcnow()):
                     print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
-                    t_final = SECEPOC
+                    t_final = to_secepoc(datetime.datetime.utcnow())
                 print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
 
             print 80*'='
