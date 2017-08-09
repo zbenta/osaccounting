@@ -81,12 +81,17 @@ def get_volumes():
     dbtable = "volumes"
     sep = ","
     table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
+    s = len(table_coll)
     qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable +";"
     cursor.execute(qry)
     vols = cursor.fetchall()
     vols_list = []
-
-    return vols
+    for v in vols:
+        vd = dict()
+        for i in range(s):
+            vd[table_coll[i]] = v[i]
+        vols_list.append(vd)
+    return vols_list
 
 
 def to_secepoc(date=DATEINI):
