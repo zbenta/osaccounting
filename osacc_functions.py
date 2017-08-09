@@ -135,7 +135,7 @@ def size_array(year_l=2016):
 
 def get_years():
     """List of years
-    :returns (list) of years
+    :return (list) of years
     """
     tf = datetime.datetime.utcnow()
     return range(DATEINI.year, tf.year + 1)
@@ -144,9 +144,23 @@ def get_years():
 def create_metric_array(year_l=2016):
     """Create array for a given metric
     :param year_l: Year to calculate the size of the array
-    :return (numpy array) Array to hold the values of the metric"""
+    :return (numpy array) Array to hold the values of the metric
+    """
     sizea = size_array(year_l)
     return numpy.zeros([sizea, ], dtype=int)
+
+
+def dT_to_indexes(ti, tf, year):
+    """For a given date in seconds to epoch return the
+    corresponding index in the time_series
+    :param ti: initial date in seconds to epoch in UTC
+    :param tf: final date in seconds to epoch in UTC
+    :param year: year
+    :return (list int) list of indexes in time series corresponding to given time interval
+    """
+    ts = time_series(year)
+    idxs = (ts>=ti)*(ts<tf)
+    return idxs
 
 
 def get_keystone_session(project_name=ksauth['project_name']):

@@ -26,17 +26,22 @@ if __name__ == '__main__':
             print to_isodate(ts[0])
             volumes = get_volumes(year)
             for vol in volumes:
-                pprint.pprint(vol)
+                # pprint.pprint(vol)
                 t_create = to_secepoc(vol["created_at"])
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
                 if t_final > to_secepoc(datetime.datetime.utcnow()):
-                    print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
+                    # print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
                     t_final = to_secepoc(datetime.datetime.utcnow())
-                print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
-
-            print 80*'='
+                # print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
+                idx_list = dT_to_indexes(t_create, t_final, year)
+                idx_start = idx_list[0][0]
+                idx_end = idx_list[-1][0]
+                print 80*'='
+                print 'IDX_Start= ', idx_start, ' IDX_End= ', idx_end
+                print 'Vol_Start= ', to_isodate(t_create), ' Vol_End= ', to_isodate(t_final)
+                print 'TS_Start= ', ts[idx_start], ' TS_End= ', ts[idx_end]
             for proj in projects:
                 print 20*'-'
                 print proj
