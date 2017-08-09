@@ -21,9 +21,12 @@ if __name__ == '__main__':
     years = get_years()
     projects = get_projects()
     for year in years:
+        size_a = size_array(year)
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
-            ts = f['date']
+            ts = f['date'][:]
             print ts
             for proj in projects:
                 grp_name = proj['Name']
-                vol_array = f[grp_name]['volume_gb']
+                vol_array = f[grp_name]['volume_gb'][:]
+                for i in range(size_a):
+                    vol_array[i] = i*2
