@@ -17,6 +17,7 @@ import h5py
 import json
 import time
 import numpy
+import MySQLdb
 
 from keystoneauth1.identity import v3
 from keystoneauth1 import session
@@ -49,7 +50,41 @@ def get_env():
     """
     ev = dict()
     ev['out_dir'] = os.environ['OUT_DIR']
+    ev['mysql_user'] = os.environ['MYSQL_USER']
+    ev['mysql_pass'] = os.environ['MYSQL_PASS']
+    ev['mysql_host'] = os.environ['MYSQL_HOST']
     return ev
+
+
+def db_conn():
+    ev = get_env()
+    return MySQLdb.connect(host=ev['mysql_host'],
+                           user=ev['mysql_user'],
+                           passwd=ev['mysql_pass'],
+                           db="cinder")
+
+
+def get_projects():
+    """Get json with all projects
+    :return (json dict) all projects
+    """
+    evr = get_env()
+    json_proj = evr['out_dir'] + os.sep + 'projects.json'
+    with open(json_proj, 'r') as f:
+        projects = json.load(f)
+    return projects
+
+
+def get_volumes():
+    conn = db_conn()
+    cursor = conn.cursor()
+    dbtable = "volumes"
+    sep = ","
+    table_coll = ["created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status"]
+    qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable +";"
+    cursor.execute(qry)
+    vols = cursor.fetchall()
+    return vols
 
 
 def to_secepoc(date=DATEINI):
