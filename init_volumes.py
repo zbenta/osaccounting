@@ -16,7 +16,6 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     evr = get_env()
-    #pprint.pprint(volumes)
     years = get_years()
     projects = get_projects()
 
@@ -27,13 +26,15 @@ if __name__ == '__main__':
             print to_isodate(ts[0])
             volumes = get_volumes(year)
             for vol in volumes:
+                pprint.pprint(vol)
                 t_create = to_secepoc(vol["created_at"])
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
                 if t_final > SECEPOC:
+                    print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
                     t_final = SECEPOC
-                print "Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
+                print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
 
             print 80*'='
             for proj in projects:
