@@ -80,10 +80,12 @@ def get_volumes():
     cursor = conn.cursor()
     dbtable = "volumes"
     sep = ","
-    table_coll = ["created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status"]
+    table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
     qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable +";"
     cursor.execute(qry)
     vols = cursor.fetchall()
+    vols_list = []
+
     return vols
 
 
