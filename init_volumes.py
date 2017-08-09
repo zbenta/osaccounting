@@ -17,7 +17,7 @@ from osacc_functions import *
 if __name__ == '__main__':
     evr = get_env()
     volumes = get_volumes()
-    #pprint.pprint(volumes)
+    pprint.pprint(volumes)
     years = get_years()
     projects = get_projects()
     for year in years:
