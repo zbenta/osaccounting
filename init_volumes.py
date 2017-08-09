@@ -39,6 +39,7 @@ if __name__ == '__main__':
                 idx_start = idx_list[0][0]
                 idx_end = idx_list[-1][0]
                 print 80*'='
+                print "ProjID= ", vol['project_id'], " SizeGB= ", vol['size']
                 print 'IDX_Start= ', idx_start, ' IDX_End= ', idx_end
                 print 'Vol_Start= ', to_isodate(t_create), ' Vol_End= ', to_isodate(t_final)
                 print 'TS_Start= ', ts[idx_start], ' TS_End= ', ts[idx_end]
