@@ -31,7 +31,7 @@ if __name__ == '__main__':
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
-                print "Date Ini= ", t_create, "Date Final= ", t_final
+                print "Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
 
             for proj in projects:
                 print 20*'-'
