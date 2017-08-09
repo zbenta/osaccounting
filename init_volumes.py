@@ -18,3 +18,11 @@ if __name__ == '__main__':
     evr = get_env()
     volumes = get_volumes()
     pprint.pprint(volumes)
+    years = get_years()
+    projects = get_projects()
+    for year in years:
+        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', '+r') as f:
+            ts = f['date']
+            print ts
+            for proj in projects:
+                grp_name = proj['Name']

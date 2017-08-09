@@ -17,6 +17,8 @@
                }
 """
 
+from osacc_functions import *
+
 if __name__ == '__main__':
     evr = get_env()
     metrics = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
@@ -37,6 +39,7 @@ if __name__ == '__main__':
         idx_f = sa
 
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'w') as f:
+            res = f.create_dataset('date', data=ts, compression="gzip")
             for proj in projects:
                 grp_name = proj['Name']
                 grp = f.create_group(grp_name)
@@ -69,7 +72,6 @@ if __name__ == '__main__':
                         #print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
                         #print 2*'_'
 
-                res = grp.create_dataset('date', data=ts, compression="gzip")
                 res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
                 res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
                 res = grp.create_dataset('disk_gb', data=a_disk_gb, compression="gzip")
