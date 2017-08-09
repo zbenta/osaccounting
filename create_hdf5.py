@@ -181,6 +181,9 @@ if __name__ == '__main__':
             for proj in projects:
                 grp_name = proj['Name']
                 grp = f.create_group(grp_name)
+                grp.attrs['ProjID'] = proj['ID']
+                grp.attrs['ProjDesc'] = proj['Description']
+
                 # Create the arrays for metrics
                 a_vcpus = create_metric_array(year)
                 a_mem_mb = create_metric_array(year)
@@ -188,7 +191,7 @@ if __name__ == '__main__':
                 a_volume_gb = create_metric_array(year)
                 print 80*'-'
                 print proj['Name']
-                print 'Date= ', to_isodate(ts[0])
+                print 'Date= ', to_isodate(ts[0]), ' SizeArray= ', sa
                 nova = get_nova_client(proj['Name'])
 
                 for i in range(sa):
