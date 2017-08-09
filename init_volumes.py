@@ -31,6 +31,7 @@ if __name__ == '__main__':
                 grp_name = proj['Name']
                 vol_array = f[grp_name]['volume_gb']
                 for vol_tup in volumes:
+                    pass
 
                 for i in range(size_a):
                     vol_array[i] = i*2
