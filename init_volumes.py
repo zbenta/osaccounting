@@ -26,3 +26,4 @@ if __name__ == '__main__':
             print ts
             for proj in projects:
                 grp_name = proj['Name']
+                vol_array = f[grp_name]['volume_gb']
