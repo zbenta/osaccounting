@@ -35,6 +35,7 @@ if __name__ == '__main__':
             for inst in instances:
                 t_create = to_secepoc(inst["created_at"])
                 t_final = ts[size_a-1]
+                print "Deleted_at = <", inst["deleted_at"], ">"
                 if inst["deleted_at"]:
                     t_final = to_secepoc(inst["deleted_at"])
                 if t_final > to_secepoc(datetime.datetime.utcnow()):
