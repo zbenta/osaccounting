@@ -161,8 +161,10 @@ def dt_to_indexes(ti, tf, year):
     ts = time_series(year)
     print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
     print 'ti= ', ti, ' tf= ', tf, ' year= ', year
+    idxs_f = size_array(year) - 1
     idxs_i = numpy.argwhere((ts > ti))
-    idxs_f = numpy.argwhere((ts < tf))
+    if tf <= ts[-1]:
+        idxs_f = numpy.argwhere((ts < tf))
     idx_ini = idxs_i[0][0] - 1
     idx_fin = idxs_f[-1][0] + 1
 
