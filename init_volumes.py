@@ -27,28 +27,24 @@ if __name__ == '__main__':
             volumes = get_volumes(year)
             for vol in volumes:
                 print 80*'|'
-                # pprint.pprint(vol)
                 t_create = to_secepoc(vol["created_at"])
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
                     t_final = to_secepoc(vol["deleted_at"])
                 if t_final > to_secepoc(datetime.datetime.utcnow()):
-                    # print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
                     t_final = to_secepoc(datetime.datetime.utcnow())
-                # print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
                 idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
+                proj = filter(lambda pr: pr['ID'] == vol['project_id'], projects)
                 print 80*'-'
-                print 80*'-'
-                print "ProjID= ", vol['project_id'], " SizeGB= ", vol['size']
+                print "ProjID= ", vol['project_id'], " SizeGB= ", vol['size'], "  --ProjID from filter= ", proj
                 print 'IDX_Start= ', idx_start, ' IDX_End= ', idx_end
                 print 'Vol_Start= ', to_isodate(t_create), ' Vol_End= ', to_isodate(t_final)
                 print 'TS_Start= ', ts[idx_start], ' TS_End= ', ts[idx_end]
-                print 80 * '-'
-                print 80 * '-'
-            for proj in projects:
+
+            #for proj in projects:
                 # print 20*'-'
                 # print proj
-                grp_name = proj['Name']
-                vol_array = f[grp_name]['volume_gb']
-                for i in range(size_a):
-                    vol_array[i] = i*2
+            #    grp_name = proj['Name']
+            #    vol_array = f[grp_name]['volume_gb']
+            #    for i in range(size_a):
+            #        vol_array[i] = i*2
