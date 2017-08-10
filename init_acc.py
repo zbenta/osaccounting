@@ -35,6 +35,7 @@ if __name__ == '__main__':
             instances = get_instances(year)
             pprint.pprint(instances)
             for inst in instances:
+                print 120*'O'
                 t_create = to_secepoc(inst["created_at"])
                 t_final = ts[size_a-1]
                 print "Deleted_at = <", inst["deleted_at"], ">"
@@ -44,7 +45,7 @@ if __name__ == '__main__':
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
                 p = filter(lambda pr: pr['ID'] == inst['project_id'], projects)
-                print 'Project from filter = ', p
+                print 'Project from filter = ', p, 'Proj Instance = ', inst['project_id'
                 proj = p[0]
                 grp_name = proj['Name']
                 vcpu_array = f[grp_name]['vcpus']
