@@ -118,7 +118,7 @@ def get_instances(year=2016):
         vd = dict()
         for i in range(s):
             vd[table_coll[i]] = v[i]
-            insts_list.append(vd)
+        insts_list.append(vd)
     return insts_list
 
 
