@@ -156,18 +156,20 @@ def dt_to_indexes(ti, tf, year):
     :param ti: initial date in seconds to epoch in UTC
     :param tf: final date in seconds to epoch in UTC
     :param year: year
-    :return (list int) list of indexes in time series corresponding to given time interval
+    :return (int, int) index start of interval and end of interval in time series
     """
     ts = time_series(year)
     print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
     print 'ti= ', ti, ' tf= ', tf, ' year= ', year
-    # print 'ts= ', ts[:]
-    idxs = numpy.argwhere((ts >= ti))
-    idxs2 = numpy.argwhere((ts <= tf))
-    print 'idxs >= ti -> ', idxs[0][0], 'ts_idxs = ', ts[idxs[0][0]], ' ti= ', ti
-    print 'idxs <= tf -> ', idxs2[-1][0], 'ts_idxs2 = ', ts[idxs2[-1][0]], ' tf= ', tf
+    idxs_i = numpy.argwhere((ts > ti))
+    idxs_f = numpy.argwhere((ts < tf))
+    idx_ini = idxs_i[0][0] - 1
+    idx_fin = idxs_f[-1][0] + 1
+
+    print 'idxs >= ti -> ', idx_ini, 'ts_ini = ', ts[idx_ini], ' ti= ', ti
+    print 'idxs <= tf -> ', idx_fin, 'ts_fin = ', ts[idx_fin], ' tf= ', tf
     print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
-    return idxs
+    return idx_ini, idx_fin
 
 
 def get_keystone_session(project_name=ksauth['project_name']):
