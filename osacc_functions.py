@@ -25,11 +25,15 @@ from keystoneclient.v3 import client
 import novaclient.client
 
 
-# Set the initial date to start the accounting -> 1st April 2016
-DATEINI = datetime.datetime(2016, 4, 1, 0, 0, 0)
+# Set the initial date to start the accounting -> 1st March 2016
+MONTH_INI = 3
+YEAR_INI = 2016
+DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.utctimetuple())
 # Interval of data points in seconds
 DELTA = 3600.0*24.0
+# List of metrics
+METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
 
 ksauth = dict()
 ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
@@ -55,12 +59,12 @@ def get_env():
     return ev
 
 
-def db_conn():
+def db_conn(database="nova"):
     ev = get_env()
     return mysql.connector.connect(host=ev['mysql_host'],
                                    user=ev['mysql_user'],
                                    passwd=ev['mysql_pass'],
-                                   db="cinder")
+                                   db=database)
 
 
 def get_projects():
@@ -74,10 +78,50 @@ def get_projects():
     return projects
 
 
-def get_volumes(year=2016):
-    conn = db_conn()
+def get_projects2():
+    """Query keystone to get projects
+    :return (json dict) all projects
+    """
+    conn = db_conn("keystone")
     cursor = conn.cursor()
-    ti = datetime.date(year, 1, 1)
+    dbtable = "projects"
+    sep = ","
+
+
+def get_instances(year=2016):
+    conn = db_conn("nova")
+    cursor = conn.cursor()
+    month = 1
+    if year == 2016:
+        month = 3
+    ti = datetime.date(year, month, 1)
+    tf = datetime.date(year, 12, 31)
+    dbtable = "instances"
+    sep = ","
+    table_str = "created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+    table_coll = table_str.strip(sep).split(sep)
+    s = len(table_coll)
+    qry = "SELECT " + table_str + " FROM " + dbtable + " "
+    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)"
+    query = (qry + cond_qry)
+    cursor.execute(query, (ti, tf))
+    insts = cursor.fetchall()
+    insts_list = []
+    for v in insts:
+        vd = dict()
+        for i in range(s):
+            vd[table_coll[i]] = v[i]
+            insts_list.append(vd)
+    return insts_list
+
+
+def get_volumes(year=2016):
+    conn = db_conn("cinder")
+    cursor = conn.cursor()
+    month = 1
+    if year == 2016:
+        month = 3
+    ti = datetime.date(year, month, 1)
     tf = datetime.date(year, 12, 31)
     dbtable = "volumes"
     sep = ","
@@ -197,11 +241,6 @@ def get_users():
 def get_nova_client(project_name):
     sess = get_keystone_session(project_name)
     return novaclient.client.Client(2, session=sess)
-
-
-def get_cinder_client(project_name):
-    sess = get_keystone_session(project_name)
-    return cinderclient.client.Client(2, session=sess)
 
 
 def get_last_run():

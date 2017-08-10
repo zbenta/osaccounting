@@ -21,12 +21,7 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     evr = get_env()
-    metrics = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
     projects = get_projects()
-
-    # Set the list of years for testing purposes
-    #years = [2016]
-
     # Get the list of years
     years = get_years()
 
@@ -54,6 +49,8 @@ if __name__ == '__main__':
                 print 80*'-'
                 print proj['Name']
                 print 'Date= ', to_isodate(ts[0]), ' SizeArray= ', sa
+
+ """ This block uses the nova API bindings
                 nova = get_nova_client(proj['Name'])
 
                 for i in range(sa):
@@ -71,6 +68,8 @@ if __name__ == '__main__':
                         a_disk_gb[i] = a_disk_gb[i] + u["local_gb"]
                         #print 'u[state]= ', u["state"], ' uvcpus= ',  u["vcpus"], ' a_vcpus[i]= ', a_vcpus[i]
                         #print 2*'_'
+"""
+
 
                 res = grp.create_dataset('vcpus', data=a_vcpus, compression="gzip")
                 res = grp.create_dataset('mem_mb', data=a_mem_mb, compression="gzip")
