@@ -44,6 +44,7 @@ if __name__ == '__main__':
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
                 p = filter(lambda pr: pr['ID'] == inst['project_id'], projects)
+                print 'Project from filter = ', p
                 proj = p[0]
                 grp_name = proj['Name']
                 vcpu_array = f[grp_name]['vcpus']
