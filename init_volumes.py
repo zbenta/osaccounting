@@ -36,10 +36,7 @@ if __name__ == '__main__':
                     # print "---> tfinal= ", t_final, " SECEPOC= ", SECEPOC
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 # print "Status= ", vol["status"], " Date Ini= ", to_isodate(t_create), "Date Final= ", to_isodate(t_final)
-                idx_list = dt_to_indexes(t_create, t_final, year)
-                # print "INDEXES= ", idx_list
-                idx_start = idx_list[0][0]
-                idx_end = idx_list[-1][0]
+                idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
                 print 80*'-'
                 print 80*'-'
                 print "ProjID= ", vol['project_id'], " SizeGB= ", vol['size']
