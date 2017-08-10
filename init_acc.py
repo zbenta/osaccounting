@@ -29,9 +29,11 @@ if __name__ == '__main__':
         size_a = size_array(year)
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'r+') as f:
             ts = f['date'][:]
+            print 80*"O"
             print to_isodate(ts[0])
             # This block is to insert the values from Nova Instances
             instances = get_instances(year)
+            pprint.pprint(instances)
             for inst in instances:
                 t_create = to_secepoc(inst["created_at"])
                 t_final = ts[size_a-1]
@@ -52,10 +54,13 @@ if __name__ == '__main__':
                 disk_array[idx_start:idx_end] = disk_array[idx_start:idx_end] + inst['root_gb']
                 print 80 * '-'
                 print 'xxxxxxxxxxx   INSTANCES   xxxxxxxxxxxxxxxxxxxxxxxx'
-                print "ProjID= ", inst['project_id'], " VCPUs= ", inst['vcpus'], "  --ProjID from filter= ", proj
+                print "Instance ID = ", inst['uuid']
+                print "ProjID= ", inst['project_id'], " VCPUs= ", inst['vcpus'], " Mem_MB= ", inst['memory_mb']
+                print "  --ProjID from filter= ", proj
                 print 'IDX_Start= ', idx_start, ' IDX_End= ', idx_end
                 print 'Inst Start= ', to_isodate(t_create), ' Inst End= ', to_isodate(t_final)
                 print 'VCPU Array Start= ', vcpu_array[idx_start], ' VCPU Array End= ', vcpu_array[idx_end - 1]
+                print 'MEM Array Start= ', mem_array[idx_start], ' MEM Array End= ', mem_array[idx_end - 1]
                 print 'TS_Start= ', ts[idx_start], ' TS_End= ', ts[idx_end]
 
             # This block is to insert the values from Cinder volumes
