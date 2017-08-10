@@ -118,7 +118,7 @@ def time_series(year_l=2016):
     """
     month = 1
     if year_l == 2016:
-        month = 4
+        month = 3
     di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(di, df, DELTA)
