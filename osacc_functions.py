@@ -166,6 +166,7 @@ def dt_to_indexes(ti, tf, year):
     idx_fin = size_array(year) - 1
     if tf <= ts[-1]:
         idxs_f = numpy.argwhere((ts < tf))
+        print 'INSIDE IF idxs_f= ', idxs_f
         idx_fin = idxs_f[-1][0] + 1
 
     print 'idxs >= ti -> ', idx_ini, 'ts_ini = ', ts[idx_ini], ' ti= ', ti
