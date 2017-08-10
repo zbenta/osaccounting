@@ -165,7 +165,7 @@ def dt_to_indexes(ti, tf, year):
     idxs = numpy.argwhere((ts >= ti))
     idxs2 = numpy.argwhere((ts <= tf))
     print 'idxs >= ti -> ', idxs[0][0], 'ts_idxs = ', ts[idxs[0][0]], ' ti= ', ti
-    print 'idxs <= tf -> ', idxs2[-1][0], 'ts_idxs2 = ', ts[idxs[-1][0]], ' tf= ', tf
+    print 'idxs <= tf -> ', idxs2[-1][0], 'ts_idxs2 = ', ts[idxs2[-1][0]], ' tf= ', tf
     print '$$$$$$$$$$$$$$$$$$$ INSIDE FUNCTION $$$$$$$$$$$$$$$$$$$$$'
     return idxs
 
