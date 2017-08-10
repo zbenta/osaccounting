@@ -19,12 +19,6 @@ import time
 import numpy
 import mysql.connector
 
-from keystoneauth1.identity import v3
-from keystoneauth1 import session
-from keystoneclient.v3 import client
-import novaclient.client
-
-
 # Set the initial date to start the accounting -> 1st March 2016
 MONTH_INI = 3
 YEAR_INI = 2016
@@ -34,17 +28,6 @@ SECEPOC = time.mktime(DATEINI.utctimetuple())
 DELTA = 3600.0*24.0
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
-
-ksauth = dict()
-ksauth['project_domain_name'] = os.environ['OS_PROJECT_DOMAIN_NAME']
-ksauth['user_domain_name'] = os.environ['OS_USER_DOMAIN_NAME']
-ksauth['project_name'] = os.environ['OS_PROJECT_NAME']
-ksauth['username'] = os.environ['OS_USERNAME']
-ksauth['password'] = os.environ['OS_PASSWORD']
-ksauth['auth_url'] = os.environ['OS_AUTH_URL']
-ksauth['identity_api_version'] = os.environ['OS_IDENTITY_API_VERSION']
-ksauth['image_api_version'] = os.environ['OS_IMAGE_API_VERSION']
-ksauth['cacert'] = os.environ['OS_CACERT']
 
 
 def get_env():
@@ -57,6 +40,30 @@ def get_env():
     ev['mysql_pass'] = os.environ['MYSQL_PASS']
     ev['mysql_host'] = os.environ['MYSQL_HOST']
     return ev
+
+
+def create_hdf():
+    """Initial creation of hdf5 files containing 1 group per project and datasets
+    for each metric and for each project/group.
+    The size of the datasets depend on the year.
+    Attributes are set for each hdf5 group (project) with project ID and Description
+    """
+    evr = get_env()
+    projects = get_projects()
+    # Get the list of years
+    years = get_years()
+    for year in years:
+        ts = time_series(year)
+        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'w') as f:
+            f.create_dataset('date', data=ts, compression="gzip")
+            for proj in projects:
+                grp_name = proj['Name']
+                grp = f.create_group(grp_name)
+                grp.attrs['ProjID'] = proj['ID']
+                grp.attrs['ProjDesc'] = proj['Description']
+                a = create_metric_array(year)
+                for m in METRICS:
+                    grp.create_dataset(m, data=a, compression="gzip")
 
 
 def db_conn(database="nova"):
@@ -209,38 +216,6 @@ def dt_to_indexes(ti, tf, year):
         idxs_f = numpy.argwhere((ts < tf))
         idx_fin = idxs_f[-1][0] + 1
     return idx_ini, idx_fin
-
-
-def get_keystone_session(project_name=ksauth['project_name']):
-    """Get keystone client session
-
-    :param project_name: Project name
-    """
-    auth = v3.Password(auth_url=ksauth['auth_url'],
-                       username=ksauth['username'],
-                       password=ksauth['password'],
-                       project_domain_name=ksauth['project_domain_name'],
-                       project_name=project_name,
-                       user_domain_name=ksauth['user_domain_name'])
-    return session.Session(auth=auth)
-
-
-def get_keystone_client():
-    sess = get_keystone_session()
-    return client.Client(session=sess)
-
-
-def get_users():
-    dusers = dict()
-    ks = get_keystone_client()
-    for usr in ks.users.list():
-        dusers[usr.id] = usr.name
-    return dusers
-
-
-def get_nova_client(project_name):
-    sess = get_keystone_session(project_name)
-    return novaclient.client.Client(2, session=sess)
 
 
 def get_last_run():
