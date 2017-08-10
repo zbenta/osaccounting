@@ -26,7 +26,6 @@ if __name__ == '__main__':
             print to_isodate(ts[0])
             volumes = get_volumes(year)
             for vol in volumes:
-                print 80*'|'
                 t_create = to_secepoc(vol["created_at"])
                 t_final = ts[size_a-1]
                 if vol["deleted"]:
