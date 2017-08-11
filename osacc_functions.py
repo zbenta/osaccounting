@@ -49,7 +49,7 @@ def create_hdf():
     Attributes are set for each hdf5 group (project) with project ID and Description
     """
     evr = get_env()
-    projects = get_projects()
+    projects = get_list_db(2016, "keystone", "projects")
     # Get the list of years
     years = get_years()
     for year in years:
@@ -57,10 +57,10 @@ def create_hdf():
         with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'w') as f:
             f.create_dataset('date', data=ts, compression="gzip")
             for proj in projects:
-                grp_name = proj['Name']
+                grp_name = proj['name']
                 grp = f.create_group(grp_name)
-                grp.attrs['ProjID'] = proj['ID']
-                grp.attrs['ProjDesc'] = proj['Description']
+                grp.attrs['ProjID'] = proj['id']
+                grp.attrs['ProjDescription'] = proj['description']
                 a = create_metric_array(year)
                 for m in METRICS:
                     grp.create_dataset(m, data=a, compression="gzip")
@@ -85,14 +85,51 @@ def get_projects():
     return projects
 
 
-def get_projects2():
+def get_list_db(year=2016, database="keystone", dbtable="projects"):
     """Query keystone to get projects
+    :param year: Year
+    :param database: database to query
+    :param dbtable: database table to query
     :return (json dict) all projects
     """
-    conn = db_conn("keystone")
+
+    # Query -- SELECT id,name,description,enabled
+    #          FROM project
+    #          WHERE (domain_id='default' and name!='admin' and name!='service');
+    # do not take into account admin and service projects
+
+    # TODO: variables that will come as arguments to the function
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+
+    conn = db_conn(database)
     cursor = conn.cursor()
-    dbtable = "projects"
+
+    # Date intervals are need for volumes and instances, not needed for projects
+    month = 1
+    if year == 2016:
+        month = 3
+    ti = datetime.date(year, month, 1)
+    tf = datetime.date(year, 12, 31)
+
     sep = ","
+    table_coll = table_str.strip(sep).split(sep)
+    s = len(table_coll)
+    qry = "SELECT " + table_str + " FROM " + dbtable + " "
+    cond_qry = "WHERE (" + condition + ")"
+    query = (qry + cond_qry)
+
+    # cursor.execute(query, (ti, tf))
+    cursor.execute(query)
+
+    rows = cursor.fetchall()
+    rows_list = []
+    for r in rows:
+        rd = dict()
+        for i in range(s):
+            rd[table_coll[i]] = r[i]
+        rows_list.append(rd)
+    return rows_list
 
 
 def get_instances(year=2016):
@@ -109,9 +146,9 @@ def get_instances(year=2016):
     table_coll = table_str.strip(sep).split(sep)
     s = len(table_coll)
     qry = "SELECT " + table_str + " FROM " + dbtable + " "
-    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)"
+    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)" % (ti, tf)
     query = (qry + cond_qry)
-    cursor.execute(query, (ti, tf))
+    cursor.execute(query)
     insts = cursor.fetchall()
     insts_list = []
     for v in insts:
@@ -135,9 +172,9 @@ def get_volumes(year=2016):
     table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
     s = len(table_coll)
     qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable + " "
-    cond_qry = "WHERE created_at BETWEEN %s AND %s"
+    cond_qry = "WHERE created_at BETWEEN %s AND %s" % (ti, tf)
     query = (qry + cond_qry)
-    cursor.execute(query, (ti, tf))
+    cursor.execute(query)
     vols = cursor.fetchall()
     vols_list = []
     for v in vols:

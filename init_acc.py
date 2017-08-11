@@ -8,13 +8,19 @@
 
 """Create initial hdf5 files to store accounting data
 
-    The project data structure is
-    project = { "Description": None,
-                "Domain ID": None,
-                "Enabled": None,
-                "ID": None,
-                "Name": None
+    Dictionaries (data structures) returned from the query to database tables
+    - projects  (DB=keystone, TABLE=project)
+    - instances (DB=nova,     TABLE=instances)
+    - volumes   (DB=cinder,   TABLE=volumes)
+    project = { "description": None,
+                "enabled": None,
+                "id": None,
+                "name": None
                }
+    instances = {
+                }
+    volumes = {
+              }
 """
 
 from osacc_functions import *
@@ -23,7 +29,8 @@ if __name__ == '__main__':
     create_hdf()
     evr = get_env()
     years = get_years()
-    projects = get_projects()
+    # projects = get_projects()
+    projects = get_list_db(2016, "keystone", "projects")
 
     for year in years:
         size_a = size_array(year)
@@ -44,10 +51,12 @@ if __name__ == '__main__':
                 if t_final > to_secepoc(datetime.datetime.utcnow()):
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
-                p = filter(lambda pr: pr['ID'] == inst['project_id'], projects)
+                p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
+                if not p:
+                    continue
                 print 'Project from filter = ', p, 'Proj Instance = ', inst['project_id']
                 proj = p[0]
-                grp_name = proj['Name']
+                grp_name = proj['name']
                 vcpu_array = f[grp_name]['vcpus']
                 vcpu_array[idx_start:idx_end] = vcpu_array[idx_start:idx_end] + inst['vcpus']
                 mem_array = f[grp_name]['mem_mb']
@@ -75,9 +84,11 @@ if __name__ == '__main__':
                 if t_final > to_secepoc(datetime.datetime.utcnow()):
                     t_final = to_secepoc(datetime.datetime.utcnow())
                 idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
-                p = filter(lambda pr: pr['ID'] == vol['project_id'], projects)
+                p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
+                if not p:
+                    continue
                 proj = p[0]
-                grp_name = proj['Name']
+                grp_name = proj['name']
                 vol_array = f[grp_name]['volume_gb']
                 vol_array[idx_start:idx_end] = vol_array[idx_start:idx_end] + vol['size']
                 print 80*'-'
