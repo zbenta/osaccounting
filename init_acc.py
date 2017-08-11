@@ -98,7 +98,7 @@ if __name__ == '__main__':
             vol_array[idx_start:idx_end] = vol_array[idx_start:idx_end] + vol['size']
 
             print 80*'-'
-            print 10*"x", " Volume ID = ", vol['uuid']
+            print 10*"x", " Volume ID = ", vol['id']
             print "ProjID Vol = ", vol['project_id'], " SizeGB= ", vol['size']
             print "ProjID fil = ", proj
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
