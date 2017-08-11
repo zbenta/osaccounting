@@ -49,7 +49,7 @@ def create_hdf():
     Attributes are set for each hdf5 group (project) with project ID and Description
     """
     evr = get_env()
-    projects = get_list_db(2016, "keystone", "projects")
+    projects = get_list_db(2016, "keystone", "project")
     # Get the list of years
     years = get_years()
     for year in years:
