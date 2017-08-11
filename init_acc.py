@@ -76,7 +76,7 @@ if __name__ == '__main__':
             print "ProjID Inst = ", inst['project_id'], " VCPUs= ", inst['vcpus'], " Mem_MB= ", inst['memory_mb']
             print "ProjID filt = ", proj["id"], proj["name"]
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
-            print 'Inst Start = ', to_isodate(t_create), '      Inst End = ', to_isodate(t_final)
+            print 'Inst Start = ', to_isodate(t_create),      ' Inst End = ', to_isodate(t_final)
             print 'TS_Start   = ', to_isodate(ts[idx_start]), ' TS_End   = ', to_isodate(ts[idx_end])
             print 'VCPU Array Start = ', vcpu_array[idx_start], ' MEM Array Start = ', mem_array[idx_start]
 
@@ -104,6 +104,6 @@ if __name__ == '__main__':
             print "ProjID Vol  = ", vol['project_id'], " SizeGB= ", vol['size']
             print "ProjID filt = ", proj["id"], proj["name"]
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
-            print 'Vol Start = ', to_isodate(t_create), '      Vol End = ', to_isodate(t_final)
+            print 'Vol Start = ', to_isodate(t_create),      ' Vol End = ', to_isodate(t_final)
             print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
             print 'Vol Array Start = ', vol_array[idx_start]
