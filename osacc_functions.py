@@ -146,9 +146,9 @@ def get_instances(year=2016):
     table_coll = table_str.strip(sep).split(sep)
     s = len(table_coll)
     qry = "SELECT " + table_str + " FROM " + dbtable + " "
-    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)" % (ti, tf)
+    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)"
     query = (qry + cond_qry)
-    cursor.execute(query)
+    cursor.execute(query, (ti, tf))
     insts = cursor.fetchall()
     insts_list = []
     for v in insts:
@@ -157,6 +157,7 @@ def get_instances(year=2016):
             vd[table_coll[i]] = v[i]
         insts_list.append(vd)
 
+    """
     print 80*"x"
     print "Function get_instances ", year, ti, tf
     print "insts="
@@ -165,6 +166,7 @@ def get_instances(year=2016):
     print "insts_list="
     pprint.pprint(insts_list)
     print 80*"x"
+    """
 
     return insts_list
 
@@ -182,9 +184,9 @@ def get_volumes(year=2016):
     table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
     s = len(table_coll)
     qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable + " "
-    cond_qry = "WHERE created_at BETWEEN %s AND %s" % (ti, tf)
+    cond_qry = "WHERE created_at BETWEEN %s AND %s"
     query = (qry + cond_qry)
-    cursor.execute(query)
+    cursor.execute(query, (ti, tf))
     vols = cursor.fetchall()
     vols_list = []
     for v in vols:
