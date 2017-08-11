@@ -9,12 +9,10 @@
 """Functions and utils for the Openstack accounting
 """
 
-
 import pprint
 import datetime
 import os
 import h5py
-import json
 import time
 import numpy
 import mysql.connector
@@ -42,28 +40,28 @@ def get_env():
     return ev
 
 
-def create_hdf():
+def create_hdf(year=YEAR_INI):
     """Initial creation of hdf5 files containing 1 group per project and datasets
     for each metric and for each project/group.
     The size of the datasets depend on the year.
     Attributes are set for each hdf5 group (project) with project ID and Description
+    One file is created per year
+    :param year: Year
     """
     evr = get_env()
-    projects = get_list_db(2016, "keystone", "project")
-    # Get the list of years
-    years = get_years()
-    for year in years:
-        ts = time_series(year)
-        with h5py.File(evr['out_dir'] + os.sep + str(year) + '.hdf', 'w') as f:
-            f.create_dataset('date', data=ts, compression="gzip")
-            for proj in projects:
-                grp_name = proj['name']
-                grp = f.create_group(grp_name)
-                grp.attrs['ProjID'] = proj['id']
-                grp.attrs['ProjDescription'] = proj['description']
-                a = create_metric_array(year)
-                for m in METRICS:
-                    grp.create_dataset(m, data=a, compression="gzip")
+    projects = get_list_db("keystone", "project")
+    ts = time_series(year)
+    file_name = evr['out_dir'] + os.sep + str(year) + '.hdf'
+    with h5py.File(file_name, 'w') as f:
+        f.create_dataset('date', data=ts, compression="gzip")
+        for proj in projects:
+            grp_name = proj['name']
+            grp = f.create_group(grp_name)
+            grp.attrs['ProjID'] = proj['id']
+            grp.attrs['ProjDescription'] = proj['description']
+            a = create_metric_array(year)
+            for m in METRICS:
+                grp.create_dataset(m, data=a, compression="gzip")
 
 
 def db_conn(database="nova"):
@@ -74,53 +72,53 @@ def db_conn(database="nova"):
                                    db=database)
 
 
-def get_projects():
-    """Get json with all projects
-    :return (json dict) all projects
-    """
-    evr = get_env()
-    json_proj = evr['out_dir'] + os.sep + 'projects.json'
-    with open(json_proj, 'r') as f:
-        projects = json.load(f)
-    return projects
+def get_list_db(database="keystone", dbtable="project"):
+    """Query keystone or nova or cinder to get projects or instances or volumes
 
+    For projects (do not take into account admin and service projects)
+    SELECT id,name,description,enabled
+    FROM project
+    WHERE (domain_id='default' and name!='admin' and name!='service')
 
-def get_list_db(year=2016, database="keystone", dbtable="project"):
-    """Query keystone to get projects
-    :param year: Year
+    For instances
+    SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
+    FROM instances
+    WHERE (vm_state != 'error')
+
+    For volumes
+    SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
+    FROM volumes
+
     :param database: database to query
     :param dbtable: database table to query
     :return (json dict) all projects
     """
-
-    # Query -- SELECT id,name,description,enabled
-    #          FROM project
-    #          WHERE (domain_id='default' and name!='admin' and name!='service');
-    # do not take into account admin and service projects
-
-    # TODO: variables that will come as arguments to the function
-    table_str = "id,name,description,enabled"
-    condition = "domain_id='default' AND name!='admin' AND name!='service'"
-
-    conn = db_conn(database)
-    cursor = conn.cursor()
-
-    # Date intervals are need for volumes and instances, not needed for projects
-    month = 1
-    if year == 2016:
-        month = 3
+    year = YEAR_INI
+    month = MONTH_INI
     ti = datetime.date(year, month, 1)
     tf = datetime.date(year, 12, 31)
 
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if dbtable == "instances":
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
+    if dbtable == "volumes":
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = "created_at BETWEEN %s AND %s"
+
+    conn = db_conn(database)
+    cursor = conn.cursor()
     sep = ","
     table_coll = table_str.strip(sep).split(sep)
     s = len(table_coll)
     qry = "SELECT " + table_str + " FROM " + dbtable + " "
     cond_qry = "WHERE (" + condition + ")"
     query = (qry + cond_qry)
-
-    # cursor.execute(query, (ti, tf))
-    cursor.execute(query)
+    if dbtable == "project":
+        cursor.execute(query)
+    else:
+        cursor.execute(query, (ti, tf))
 
     rows = cursor.fetchall()
     rows_list = []
@@ -129,72 +127,8 @@ def get_list_db(year=2016, database="keystone", dbtable="project"):
         for i in range(s):
             rd[table_coll[i]] = r[i]
         rows_list.append(rd)
+
     return rows_list
-
-
-def get_instances(year=2016):
-    conn = db_conn("nova")
-    cursor = conn.cursor()
-    month = 1
-    if year == 2016:
-        month = 3
-    ti = datetime.date(year, month, 1)
-    tf = datetime.date(year, 12, 31)
-    dbtable = "instances"
-    sep = ","
-    table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
-    table_coll = table_str.strip(sep).split(sep)
-    s = len(table_coll)
-    qry = "SELECT " + table_str + " FROM " + dbtable + " "
-    cond_qry = "WHERE (vm_state != 'error' AND created_at BETWEEN %s AND %s)"
-    query = (qry + cond_qry)
-    cursor.execute(query, (ti, tf))
-    insts = cursor.fetchall()
-    insts_list = []
-    for v in insts:
-        vd = dict()
-        for i in range(s):
-            vd[table_coll[i]] = v[i]
-        insts_list.append(vd)
-
-    """
-    print 80*"x"
-    print "Function get_instances ", year, ti, tf
-    print "insts="
-    pprint.pprint(insts)
-    print "---"
-    print "insts_list="
-    pprint.pprint(insts_list)
-    print 80*"x"
-    """
-
-    return insts_list
-
-
-def get_volumes(year=2016):
-    conn = db_conn("cinder")
-    cursor = conn.cursor()
-    month = 1
-    if year == 2016:
-        month = 3
-    ti = datetime.date(year, month, 1)
-    tf = datetime.date(year, 12, 31)
-    dbtable = "volumes"
-    sep = ","
-    table_coll = ("created_at", "deleted_at", "deleted", "id", "user_id", "project_id", "size", "status")
-    s = len(table_coll)
-    qry = "SELECT " + sep.join(table_coll) + " FROM " + dbtable + " "
-    cond_qry = "WHERE created_at BETWEEN %s AND %s"
-    query = (qry + cond_qry)
-    cursor.execute(query, (ti, tf))
-    vols = cursor.fetchall()
-    vols_list = []
-    for v in vols:
-        vd = dict()
-        for i in range(s):
-            vd[table_coll[i]] = v[i]
-        vols_list.append(vd)
-    return vols_list
 
 
 def to_secepoc(date=DATEINI):
@@ -209,22 +143,22 @@ def to_isodate(date):
     return datetime.datetime.utcfromtimestamp(date)
 
 
-def time_series(year_l=2016):
+def time_series(year_l=YEAR_INI):
     """Create a time array (of ints) in epoch format with interval
     of one hour for a given year
     :param year_l: Year
     :returns (numpy array) time_array
     """
     month = 1
-    if year_l == 2016:
-        month = 3
+    if year_l == YEAR_INI:
+        month = MONTH_INI
     di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(di, df, DELTA)
     return time_array
 
 
-def size_array(year_l=2016):
+def size_array(year_l=YEAR_INI):
     """Number of data points is the size of the arrays for 1 year
     :param year_l: Year
     :return (int) size of arrays"""
@@ -240,7 +174,7 @@ def get_years():
     return range(DATEINI.year, tf.year + 1)
 
 
-def create_metric_array(year_l=2016):
+def create_metric_array(year_l=YEAR_INI):
     """Create array for a given metric
     :param year_l: Year to calculate the size of the array
     :return (numpy array) Array to hold the values of the metric
@@ -268,6 +202,6 @@ def dt_to_indexes(ti, tf, year):
 
 
 def get_last_run():
-    last_run = datetime.datetime(2010, 1, 1, 0, 0, 0)
+    last_run = datetime.datetime(YEAR_INI, 1, 1, 0, 0, 0)
     return last_run
 
