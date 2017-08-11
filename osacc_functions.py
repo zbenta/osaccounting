@@ -129,12 +129,6 @@ def get_list_db(year=2016, database="keystone", dbtable="project"):
         for i in range(s):
             rd[table_coll[i]] = r[i]
         rows_list.append(rd)
-
-    print 80*"+"
-    print "--- Function get_list_db"
-    print rows_list
-    print 80*"+"
-
     return rows_list
 
 

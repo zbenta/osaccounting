@@ -31,6 +31,10 @@ if __name__ == '__main__':
     years = get_years()
     # projects = get_projects()
     projects = get_list_db(2016, "keystone", "project")
+    print 80 * "+"
+    print "Projects"
+    pprint.pprint(projects)
+    print 80 * "+"
 
     for year in years:
         size_a = size_array(year)
