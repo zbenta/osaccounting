@@ -35,6 +35,7 @@ if __name__ == '__main__':
     size_a = size_array(year)
     print 80 * "="
     print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
+    """
     print "--> Projects"
     pprint.pprint(projects)
     print
@@ -43,6 +44,7 @@ if __name__ == '__main__':
     print
     print "--> Volumes"
     pprint.pprint(volumes)
+    """
     print 20 * "-"
 
     with h5py.File(filename, 'r+') as f:
@@ -70,6 +72,8 @@ if __name__ == '__main__':
             mem_array[idx_start:idx_end] = mem_array[idx_start:idx_end] + inst['memory_mb']
             disk_array = f[grp_name]['disk_gb']
             disk_array[idx_start:idx_end] = disk_array[idx_start:idx_end] + inst['root_gb']
+            ninst_array = f[grp_name]['ninstances']
+            ninst_array[idx_start:idx_end] = ninst_array[idx_start:idx_end] + 1
 
             print 80*'-'
             print 10*"x", " Instance ID = ", inst['uuid']
@@ -79,6 +83,7 @@ if __name__ == '__main__':
             print 'Inst Start = ', to_isodate(t_create),      ' Inst End = ', to_isodate(t_final)
             print 'TS_Start   = ', to_isodate(ts[idx_start]), ' TS_End   = ', to_isodate(ts[idx_end])
             print 'VCPU Array Start = ', vcpu_array[idx_start], ' MEM Array Start = ', mem_array[idx_start]
+            print "Number of instances = ", ninst_array[idx_start]
 
         # This block is to insert the values from Cinder volumes
         for vol in volumes:
@@ -98,6 +103,8 @@ if __name__ == '__main__':
             grp_name = proj['name']
             vol_array = f[grp_name]['volume_gb']
             vol_array[idx_start:idx_end] = vol_array[idx_start:idx_end] + vol['size']
+            nvol_array = f[grp_name]['nvolumes']
+            nvol_array[idx_start:idx_end] = nvol_array[idx_start:idx_end] + 1
 
             print 80*'-'
             print 10*"x", " Volume ID = ", vol['id']
@@ -106,4 +113,4 @@ if __name__ == '__main__':
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
             print 'Vol Start = ', to_isodate(t_create),      ' Vol End = ', to_isodate(t_final)
             print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
-            print 'Vol Array Start = ', vol_array[idx_start]
+            print 'Vol Array Start = ', vol_array[idx_start], " Number of volumes = ", nvol_array[idx_start]

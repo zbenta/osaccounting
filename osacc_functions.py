@@ -23,9 +23,9 @@ YEAR_INI = 2016
 DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.utctimetuple())
 # Interval of data points in seconds
-DELTA = 3600.0*24.0
+DELTA = 3600.0
 # List of metrics
-METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb']
+METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes']
 
 
 def get_env():
