@@ -37,9 +37,11 @@ if __name__ == '__main__':
     print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
     print "--> Projects"
     pprint.pprint(projects)
-    print "/n--> Instances"
+    print
+    print "--> Instances"
     pprint.pprint(instances)
-    print "/n--> Volumes"
+    print
+    print "--> Volumes"
     pprint.pprint(volumes)
     print 20 * "-"
 
@@ -72,7 +74,7 @@ if __name__ == '__main__':
             print 80*'-'
             print 10*"x", " Instance ID = ", inst['uuid']
             print "ProjID Inst = ", inst['project_id'], " VCPUs= ", inst['vcpus'], " Mem_MB= ", inst['memory_mb']
-            print "ProjID filt = ", proj
+            print "ProjID filt = ", proj["id"], proj["name"]
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
             print 'Inst Start = ', to_isodate(t_create), '      Inst End = ', to_isodate(t_final)
             print 'TS_Start   = ', to_isodate(ts[idx_start]), ' TS_End   = ', to_isodate(ts[idx_end])
@@ -99,8 +101,8 @@ if __name__ == '__main__':
 
             print 80*'-'
             print 10*"x", " Volume ID = ", vol['id']
-            print "ProjID Vol = ", vol['project_id'], " SizeGB= ", vol['size']
-            print "ProjID fil = ", proj
+            print "ProjID Vol  = ", vol['project_id'], " SizeGB= ", vol['size']
+            print "ProjID filt = ", proj["id"], proj["name"]
             print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
             print 'Vol Start = ', to_isodate(t_create), '      Vol End = ', to_isodate(t_final)
             print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
