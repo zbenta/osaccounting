@@ -156,6 +156,16 @@ def get_instances(year=2016):
         for i in range(s):
             vd[table_coll[i]] = v[i]
         insts_list.append(vd)
+
+    print 80*"x"
+    print "Function get_instances ", year, ti, tf
+    print "insts="
+    pprint.pprint(insts)
+    print "---"
+    print "insts_list="
+    pprint.pprint(insts_list)
+    print 80*"x"
+
     return insts_list
 
 
