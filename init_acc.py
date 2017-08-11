@@ -30,7 +30,7 @@ if __name__ == '__main__':
     evr = get_env()
     years = get_years()
     # projects = get_projects()
-    projects = get_list_db(2016, "keystone", "projects")
+    projects = get_list_db(2016, "keystone", "project")
 
     for year in years:
         size_a = size_array(year)

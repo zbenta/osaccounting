@@ -85,7 +85,7 @@ def get_projects():
     return projects
 
 
-def get_list_db(year=2016, database="keystone", dbtable="projects"):
+def get_list_db(year=2016, database="keystone", dbtable="project"):
     """Query keystone to get projects
     :param year: Year
     :param database: database to query
