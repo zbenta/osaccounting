@@ -47,6 +47,7 @@ def create_hdf(year=YEAR_INI):
     Attributes are set for each hdf5 group (project) with project ID and Description
     One file is created per year
     :param year: Year
+    :return (string) file_name
     """
     evr = get_env()
     projects = get_list_db("keystone", "project")
@@ -62,6 +63,7 @@ def create_hdf(year=YEAR_INI):
             a = create_metric_array(year)
             for m in METRICS:
                 grp.create_dataset(m, data=a, compression="gzip")
+    return file_name
 
 
 def db_conn(database="nova"):
