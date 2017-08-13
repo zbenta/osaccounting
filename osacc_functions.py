@@ -153,7 +153,7 @@ def get_list_db(database="keystone", dbtable="project"):
     return rows_list
 
 
-def update_list_db(ti, tf, database="keystone", dbtable="project"):
+def update_list_db(ti, database="keystone", dbtable="project"):
     """Query keystone or nova or cinder to get projects or instances or volumes
 
     For projects (do not take into account admin and service projects)
@@ -164,29 +164,28 @@ def update_list_db(ti, tf, database="keystone", dbtable="project"):
     For instances
     SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
     FROM instances
-    WHERE (vm_state != 'error')
+    WHERE (vm_state != 'error' AND (created_at >= ti OR vm_state = 'active' ))
 
     For volumes
     SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
     FROM volumes
+    WHERE created_at >= '2017-06-01' OR status != 'deleted'
 
     :param ti: date start
-    :param tf: date end
     :param database: database to query
     :param dbtable: database table to query
     :return (json dict) all projects
     """
     tiso_i = to_isodate(ti)
-    tiso_f = to_isodate(tf)
 
     table_str = "id,name,description,enabled"
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
     if dbtable == "instances":
         table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
-        condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
+        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )"
     if dbtable == "volumes":
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "created_at BETWEEN %s AND %s"
+        condition = "created_at >= %s OR status != 'deleted'"
 
     conn = db_conn(database)
     cursor = conn.cursor()
@@ -199,7 +198,7 @@ def update_list_db(ti, tf, database="keystone", dbtable="project"):
     if dbtable == "project":
         cursor.execute(query)
     else:
-        cursor.execute(query, (ti, tf))
+        cursor.execute(query, (tiso_i))
 
     rows = cursor.fetchall()
     rows_list = []

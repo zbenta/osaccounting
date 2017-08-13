@@ -22,9 +22,9 @@ if __name__ == '__main__':
     with h5py.File(filename, 'r+') as f:
         ti = f.attrs['LastRun']
         tf = today()
-        projects = get_list_db("keystone", "project")
-        instances = get_list_db("nova", "instances")
-        volumes = get_list_db("cinder", "volumes")
+        projects = update_list_db(ti, "keystone", "project")
+        instances = update_list_db(ti, "nova", "instances")
+        volumes = update_list_db(ti, "cinder", "volumes")
         size_a = size_array(year)
         print 80 * "="
         print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
@@ -49,8 +49,8 @@ if __name__ == '__main__':
             t_final = ts[size_a-1]
             if inst["deleted_at"]:
                 t_final = to_secepoc(inst["deleted_at"])
-            if t_final > to_secepoc(datetime.datetime.utcnow()):
-                t_final = to_secepoc(datetime.datetime.utcnow())
+            if t_final > tf:
+                t_final = tf
 
             idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
             p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
@@ -84,8 +84,8 @@ if __name__ == '__main__':
             t_final = ts[size_a-1]
             if vol["deleted"]:
                 t_final = to_secepoc(vol["deleted_at"])
-            if t_final > to_secepoc(datetime.datetime.utcnow()):
-                t_final = to_secepoc(datetime.datetime.utcnow())
+            if t_final > tf:
+                t_final = tf
 
             idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
             p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
