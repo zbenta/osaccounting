@@ -40,6 +40,15 @@ def get_env():
     return ev
 
 
+def get_hdf_filename(year=YEAR_INI):
+    """Get the HDF5 filename
+    :param year: Year
+    :return (string) file_name
+    """
+    evr = get_env()
+    return evr['out_dir'] + os.sep + str(year) + '.hdf'
+
+
 def create_hdf(year=YEAR_INI):
     """Initial creation of hdf5 files containing 1 group per project and datasets
     for each metric and for each project/group.
@@ -49,12 +58,16 @@ def create_hdf(year=YEAR_INI):
     :param year: Year
     :return (string) file_name
     """
-    evr = get_env()
+    month = 1
+    if year == YEAR_INI:
+        month = MONTH_INI
+    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     projects = get_list_db("keystone", "project")
     ts = time_series(year)
-    file_name = evr['out_dir'] + os.sep + str(year) + '.hdf'
+    file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
+        f.attrs['LastRun'] = di
         for proj in projects:
             grp_name = proj['name']
             grp = f.create_group(grp_name)
@@ -65,6 +78,13 @@ def create_hdf(year=YEAR_INI):
                 grp.create_dataset(m, data=a, compression="gzip")
     return file_name
 
+
+def exists_hdf(year=YEAR_INI):
+    """Checks if hdf5 file exists
+    :param year: Year
+    :return (boolean) true is file exists or false if it doesn't"""
+    return os.path.exists(get_hdf_filename(year))
+    
 
 def db_conn(database="nova"):
     ev = get_env()
@@ -131,6 +151,17 @@ def get_list_db(database="keystone", dbtable="project"):
         rows_list.append(rd)
 
     return rows_list
+
+
+def today():
+    """
+    :return: Today at midnight 00h:00min:00sec in seconds from epoch
+    """
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    day = datetime.datetime.now().day
+    to_day = datetime.datetime(year, month, day, 0, 0, 0)
+    return to_secepoc(to_day)
 
 
 def to_secepoc(date=DATEINI):
