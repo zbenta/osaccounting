@@ -153,6 +153,65 @@ def get_list_db(database="keystone", dbtable="project"):
     return rows_list
 
 
+def update_list_db(ti, tf, database="keystone", dbtable="project"):
+    """Query keystone or nova or cinder to get projects or instances or volumes
+
+    For projects (do not take into account admin and service projects)
+    SELECT id,name,description,enabled
+    FROM project
+    WHERE (domain_id='default' and name!='admin' and name!='service')
+
+    For instances
+    SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
+    FROM instances
+    WHERE (vm_state != 'error')
+
+    For volumes
+    SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
+    FROM volumes
+
+    :param ti: date start
+    :param tf: date end
+    :param database: database to query
+    :param dbtable: database table to query
+    :return (json dict) all projects
+    """
+    tiso_i = to_isodate(ti)
+    tiso_f = to_isodate(tf)
+
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if dbtable == "instances":
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
+    if dbtable == "volumes":
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = "created_at BETWEEN %s AND %s"
+
+    conn = db_conn(database)
+    cursor = conn.cursor()
+    sep = ","
+    table_coll = table_str.strip(sep).split(sep)
+    s = len(table_coll)
+    qry = "SELECT " + table_str + " FROM " + dbtable + " "
+    cond_qry = "WHERE (" + condition + ")"
+    query = (qry + cond_qry)
+    if dbtable == "project":
+        cursor.execute(query)
+    else:
+        cursor.execute(query, (ti, tf))
+
+    rows = cursor.fetchall()
+    rows_list = []
+    for r in rows:
+        rd = dict()
+        for i in range(s):
+            rd[table_coll[i]] = r[i]
+        rows_list.append(rd)
+
+    return rows_list
+
+
 def today():
     """
     :return: Today at midnight 00h:00min:00sec in seconds from epoch
