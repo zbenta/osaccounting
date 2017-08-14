@@ -118,3 +118,6 @@ if __name__ == '__main__':
             print 'Vol Start = ', to_isodate(t_create),      ' Vol End = ', to_isodate(t_final)
             print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
             print 'Vol Array Start = ', vol_array[idx_start], " Number of volumes = ", nvol_array[idx_start]
+
+        # After everything runs - Update the LastRun
+        f.attrs['LastRun'] = ts[size_a-1]
