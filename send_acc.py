@@ -10,13 +10,17 @@
 """
 
 import socket
+import pickle
+import struct
 from osacc_functions import *
 
 if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
-    carbon_port = 2003
-    years = get_years()
+    carbon_port = 2004
+    # years = get_years()
+    years = [2017]
+    delay = 10  # 10 seconds delay
     for year in years:
         print 80 * "="
         filename = get_hdf_filename(year)
@@ -24,6 +28,7 @@ if __name__ == '__main__':
         with h5py.File(filename, 'r') as f:
             ti = f.attrs['LastRun']
             ts = f['date'][:]
+            graph_list = []
             for group in f:
                 if group == "date":
                     continue
@@ -34,9 +39,18 @@ if __name__ == '__main__':
                     metric_str = GRAPH_NS + "." + group + "." + m
                     for i in range(20):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
-                        print graph_string
-                        sock = socket.socket()
-                        sock.connect((carbon_server, carbon_port))
-                        sock.sendall(graph_string)
-                        sock.close()
+                        graph_ds = (metric_str, (int(ts[i]), data[i]))
+                        graph_list.append(graph_ds)
+
+            print graph_list
+            package = pickle.dumps(graph_list, 2)
+            size = struct.pack('!L', len(package))
+            sock = socket.socket()
+            sock.sendall(size)
+            sock.sendall(package)
+            time.sleep(delay)
+
+            # sock.connect((carbon_server, carbon_port))
+            # sock.sendall(graph_string)
+            sock.close()
 
