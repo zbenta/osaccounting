@@ -26,6 +26,6 @@ if __name__ == '__main__':
                     print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = group + "." + m
-                    for i in range(4)
+                    for i in range(4):
                         print metric_str, data[i], ts[i]
 
