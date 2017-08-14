@@ -30,13 +30,13 @@ if __name__ == '__main__':
         print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
         print "Last Run = ", ti
 
-        print "--> Projects"
+        print "--> Projects Number = ", len(projects)
         pprint.pprint(projects)
         print
-        print "--> Instances"
+        print "--> Instances Number = ", len(instances)
         pprint.pprint(instances)
         print
-        print "--> Volumes"
+        print "--> Volumes Number = ", len(volumes)
         pprint.pprint(volumes)
 
         print 20 * "-"
@@ -47,6 +47,8 @@ if __name__ == '__main__':
         for inst in instances:
             t_create = to_secepoc(inst["created_at"])
             t_final = ts[size_a-1]
+            if t_create < ti:
+                t_create = ti
             if inst["deleted_at"]:
                 t_final = to_secepoc(inst["deleted_at"])
             if t_final > tf:
@@ -88,6 +90,8 @@ if __name__ == '__main__':
         for vol in volumes:
             t_create = to_secepoc(vol["created_at"])
             t_final = ts[size_a-1]
+            if t_create < ti:
+                t_create = ti
             if vol["deleted"]:
                 t_final = to_secepoc(vol["deleted_at"])
             if t_final > tf:
