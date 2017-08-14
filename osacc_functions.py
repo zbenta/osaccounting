@@ -43,7 +43,7 @@ def get_env():
 def get_hdf_filename(year=YEAR_INI):
     """Get the HDF5 filename
     :param year: Year
-    :return (string) file_name
+    :return (string) filename
     """
     evr = get_env()
     return evr['out_dir'] + os.sep + str(year) + '.hdf'

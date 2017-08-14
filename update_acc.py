@@ -42,7 +42,7 @@ if __name__ == '__main__':
         print 20 * "-"
 
         ts = f['date'][:]
-        print "Start date <ts>- ", to_isodate(ts[0])
+        print "Start date time series: ", to_isodate(ts[0])
         # This block is to insert the values from Nova Instances
         for inst in instances:
             t_create = to_secepoc(inst["created_at"])
