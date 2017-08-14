@@ -26,6 +26,7 @@ if __name__ == '__main__':
         instances = update_list_db(ti, "nova", "instances")
         volumes = update_list_db(ti, "cinder", "volumes")
         size_a = size_array(year)
+        """
         print 80 * "="
         print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
         print "Last Run = ", ti
@@ -38,7 +39,7 @@ if __name__ == '__main__':
         print
         print "--> Volumes Number = ", len(volumes)
         pprint.pprint(volumes)
-
+        """
         print 20 * "-"
 
         ts = f['date'][:]
