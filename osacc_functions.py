@@ -26,6 +26,8 @@ SECEPOC = time.mktime(DATEINI.utctimetuple())
 DELTA = 60.0
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes']
+# Graphite namespace
+GRAPH_NS = "os_accounting"
 
 
 def get_env():

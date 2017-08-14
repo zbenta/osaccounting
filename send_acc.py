@@ -9,6 +9,7 @@
 """Send accounting data to graphite
 """
 
+import socket
 from osacc_functions import *
 
 if __name__ == '__main__':
@@ -27,8 +28,8 @@ if __name__ == '__main__':
                 for m in METRICS:
                     print "--> Metric = ", m
                     data = f[group][m]
-                    metric_str = group + "." + m
+                    metric_str = GRAPH_NS + "." + group + "." + m
                     for i in range(20):
-                        graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i]))
+                        graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         print graph_string
 
