@@ -198,7 +198,7 @@ def update_list_db(ti, database="keystone", dbtable="project"):
     if dbtable == "project":
         cursor.execute(query)
     else:
-        cursor.execute(query, (tiso_i))
+        cursor.execute(query, (tiso_i,))
 
     rows = cursor.fetchall()
     rows_list = []
