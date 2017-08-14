@@ -28,6 +28,7 @@ if __name__ == '__main__':
                     print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = group + "." + m
-                    for i in range(4):
-                        print metric_str, data[i], ts[i]
+                    for i in range(20):
+                        graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i]))
+                        print graph_string
 
