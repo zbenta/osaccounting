@@ -10,7 +10,8 @@ The scripts rely on environment variables:
 * MYSQL_USER - database user to get the records from the cinder DB
 * MYSQL_PASS - database password for the cinder DB
 * MYSQL_HOST - database host
-* All Openstack admin credentials - OS_ variables
+* CARBON_SERVER - graphite/carbon server
+* CARBON_PORT - graphite/carbon (default 2003)
 
 ## Usage
 

@@ -13,6 +13,9 @@ import socket
 from osacc_functions import *
 
 if __name__ == '__main__':
+    env = get_env()
+    carbon_server = env['CARBON_SERVER']
+    carbon_port = env['CARBON_PORT']
     years = get_years()
     for year in years:
         print 80 * "="
@@ -32,4 +35,8 @@ if __name__ == '__main__':
                     for i in range(20):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         print graph_string
+                        sock = socket.socket()
+                        sock.connect((carbon_server, carbon_port))
+                        sock.sendall(graph_string)
+                        sock.close()
 
