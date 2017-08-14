@@ -43,13 +43,13 @@ if __name__ == '__main__':
                         graph_list.append(graph_ds)
 
             print graph_list
-            package = pickle.dumps(graph_list, 2)
+            package = pickle.dumps(graph_list, protocol=2)
             size = struct.pack('!L', len(package))
             message = size + package
             sock = socket.socket()
             sock.connect((carbon_server, carbon_port))
             sock.sendall(message)
-            time.sleep(delay)
+            # time.sleep(delay)
 
             # sock.sendall(graph_string)
             sock.close()
