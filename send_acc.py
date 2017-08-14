@@ -14,8 +14,8 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     env = get_env()
-    carbon_server = env['CARBON_SERVER']
-    carbon_port = env['CARBON_PORT']
+    carbon_server = env['carbon_server']
+    carbon_port = env['carbon_port']
     years = get_years()
     for year in years:
         print 80 * "="

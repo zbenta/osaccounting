@@ -39,6 +39,8 @@ def get_env():
     ev['mysql_user'] = os.environ['MYSQL_USER']
     ev['mysql_pass'] = os.environ['MYSQL_PASS']
     ev['mysql_host'] = os.environ['MYSQL_HOST']
+    ev['carbon_server'] = os.environ['CARBON_SERVER']
+    ev['carbon_port'] = os.environ['CARBON_PORT']
     return ev
 
 
