@@ -120,4 +120,4 @@ if __name__ == '__main__':
             print 'Vol Array Start = ', vol_array[idx_start], " Number of volumes = ", nvol_array[idx_start]
 
         # After everything runs - Update the LastRun
-        f.attrs['LastRun'] = ts[size_a-1]
+        f.attrs['LastRun'] = tf
