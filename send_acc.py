@@ -45,12 +45,12 @@ if __name__ == '__main__':
             print graph_list
             package = pickle.dumps(graph_list, 2)
             size = struct.pack('!L', len(package))
+            message = size + package
             sock = socket.socket()
-            sock.sendall(size)
-            sock.sendall(package)
+            sock.connect((carbon_server, carbon_port))
+            sock.sendall(message)
             time.sleep(delay)
 
-            # sock.connect((carbon_server, carbon_port))
             # sock.sendall(graph_string)
             sock.close()
 
