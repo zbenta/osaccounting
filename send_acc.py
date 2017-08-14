@@ -29,8 +29,6 @@ if __name__ == '__main__':
             ti = f.attrs['LastRun']
             ts = f['date'][:]
             # graph_list = []
-            sock = socket.socket()
-            sock.connect((carbon_server, carbon_port))
             for group in f:
                 if group == "date":
                     continue
@@ -41,8 +39,11 @@ if __name__ == '__main__':
                     metric_str = GRAPH_NS + "." + group + "." + m
                     # for i in range(323970, 323999):
                     for i in range(50):
+                        sock = socket.socket()
+                        sock.connect((carbon_server, carbon_port))
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         sock.sendall(graph_string)
+                        sock.close()
                         # graph_ds = (metric_str, (int(ts[i]), data[i]))
                         # graph_list.append(graph_ds)
 
@@ -53,5 +54,4 @@ if __name__ == '__main__':
             # sock.sendall(message)
             # time.sleep(delay)
 
-            sock.close()
 
