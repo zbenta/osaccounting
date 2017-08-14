@@ -37,7 +37,7 @@ if __name__ == '__main__':
                     print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + group + "." + m
-                    for i in range(20):
+                    for i in range(323970:323999):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         graph_ds = (metric_str, (int(ts[i]), data[i]))
                         graph_list.append(graph_ds)
