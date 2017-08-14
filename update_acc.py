@@ -29,7 +29,7 @@ if __name__ == '__main__':
         print 80 * "="
         print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
         print "Last Run = ", ti
-        """
+
         print "--> Projects"
         pprint.pprint(projects)
         print
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         print
         print "--> Volumes"
         pprint.pprint(volumes)
-        """
+
         print 20 * "-"
 
         ts = f['date'][:]
@@ -56,6 +56,12 @@ if __name__ == '__main__':
             p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
             if not p:
                 continue
+
+            print 80*'#'
+            print "t_create = ", t_create, " t_final = ", t_final,  " Instance project = ", p[0]
+            print "idx_start = ", idx_start, " idx_end = ", idx_end
+            print "Date Start = ", to_isodate(t_create), " Date End = ", to_isodate(t_final)
+            print 80*'#'
 
             proj = p[0]
             grp_name = proj['name']
