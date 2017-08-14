@@ -21,5 +21,11 @@ if __name__ == '__main__':
             ti = f.attrs['LastRun']
             ts = f['date'][:]
             for group in f:
-                print group
+                print "--> Group = ", group
+                for m in METRICS:
+                    print "--> Metric = ", m
+                    data = f[group][m]
+                    metric_str = group + "." + m
+                    for i in range(4)
+                        print metric_str, data[i], ts[i]
 
