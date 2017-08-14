@@ -17,7 +17,7 @@ from osacc_functions import *
 if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
-    carbon_port = 2004
+    carbon_port = 2003
     # years = get_years()
     years = [2017]
     delay = 10  # 10 seconds delay
@@ -28,30 +28,30 @@ if __name__ == '__main__':
         with h5py.File(filename, 'r') as f:
             ti = f.attrs['LastRun']
             ts = f['date'][:]
-            graph_list = []
+            # graph_list = []
+            sock = socket.socket()
+            sock.connect((carbon_server, carbon_port))
             for group in f:
                 if group == "date":
                     continue
-                print "--> Group = ", group
+                # print "--> Group = ", group
                 for m in METRICS:
-                    print "--> Metric = ", m
+                    # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + group + "." + m
                     # for i in range(323970, 323999):
                     for i in range(50):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
-                        graph_ds = (metric_str, (int(ts[i]), data[i]))
-                        graph_list.append(graph_ds)
+                        sock.sendall(graph_string)
+                        # graph_ds = (metric_str, (int(ts[i]), data[i]))
+                        # graph_list.append(graph_ds)
 
-            print graph_list
-            package = pickle.dumps(graph_list, protocol=2)
-            size = struct.pack('!L', len(package))
-            message = size + package
-            sock = socket.socket()
-            sock.connect((carbon_server, carbon_port))
-            sock.sendall(message)
+            # pprint.pprint(graph_list)
+            # package = pickle.dumps(graph_list, protocol=2)
+            # size = struct.pack('!L', len(package))
+            # message = size + package
+            # sock.sendall(message)
             # time.sleep(delay)
 
-            # sock.sendall(graph_string)
             sock.close()
 
