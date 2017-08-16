@@ -23,9 +23,9 @@ if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
     carbon_port = int(env['carbon_port'])
-    ini_list = 1000 # size of list to initialize
-    # years = get_years()
-    years = [2017]
+    ini_list = 10000 # size of list to initialize
+    years = get_years()
+    # years = [2017]
     delay = 10  # 10 seconds delay
     for year in years:
         print 80 * "="
@@ -34,6 +34,7 @@ if __name__ == '__main__':
         with h5py.File(filename, 'r') as f:
             ti = f.attrs['LastRun']
             ts = f['date'][:]
+            len_ds = len(ts)
             for group in f:
                 if group == "date":
                     continue
@@ -43,7 +44,7 @@ if __name__ == '__main__':
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
-                    for i in range(318879, 326879):
+                    for i in range(len_ds):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         value = int(data[i])
                         timestamp = int(ts[i])
