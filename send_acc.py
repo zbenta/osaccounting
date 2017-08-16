@@ -44,14 +44,22 @@ if __name__ == '__main__':
                     metric_str = GRAPH_NS + "." + group + "." + m
                     for i in range(326819, 326879):
                     # for i in range(50):
-                        # sock = socket.socket()
-                        # sock.connect((carbon_server, carbon_port))
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
-                        # sock.sendall(graph_string)
-                        # sock.close()
+                        sock = socket.socket()
+                        sock.connect((carbon_server, carbon_port))
+                        try:
+                            sock.connect((carbon_server, carbon_port))
+                        except:
+                            print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
+                                'server': carbon_server, 'port': carbon_port}
+                            sys.exit(1)
+                        sock.sendall(graph_string)
+                        sock.close()
+
                         graph_ds = (metric_str, (ts[i], data[i]))
                         graph_list.append(graph_ds)
 
+                    """
                     pprint.pprint(graph_list)
                     package = pickle.dumps(graph_list, protocol=2)
                     size = struct.pack('!L', len(package))
@@ -67,5 +75,5 @@ if __name__ == '__main__':
                     sock.sendall(message)
                     sock.close()
                     # time.sleep(delay)
-
+                    """
 
