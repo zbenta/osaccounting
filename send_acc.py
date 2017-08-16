@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         # sock.sendall(graph_string)
                         # sock.close()
-                        graph_ds = (metric_str, (int(ts[i]), data[i]))
+                        graph_ds = (metric_str, (ts[i], data[i]))
                         graph_list.append(graph_ds)
 
                     pprint.pprint(graph_list)
