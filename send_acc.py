@@ -36,44 +36,24 @@ if __name__ == '__main__':
             for group in f:
                 if group == "date":
                     continue
-
-                # Select just one group for testing
-                if group != "lip":
-                    continue
-
                 print "--> Group = ", group
                 for m in METRICS:
                     graph_list = list()
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
-                    for i in range(326759, 326879):
+                    for i in range(325879, 326879):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
-                        """
-                        print "Server = ", carbon_server, " Port = ", carbon_port
-                        sock = socket.socket()
-                        try:
-                            sock.connect((carbon_server, carbon_port))
-                        except:
-                            print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
-                                'server': carbon_server, 'port': carbon_port}
-                            sys.exit(1)
-                        sock.sendall(graph_string)
-                        sock.close()
-                        """
                         value = int(data[i])
                         timestamp = int(ts[i])
                         metric = str(metric_str)
                         graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
 
-                    pprint.pprint(graph_list)
+                    # pprint.pprint(graph_list)
                     package = pickle.dumps(graph_list, protocol=2)
                     size = struct.pack('!L', len(package))
-                    print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
-                    # print "-------- Unpickled"
-                    # up = pickle.loads(package)
-                    # pprint.pprint(up)
+                    print "Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                     message = size + package
                     sock = socket.socket()
                     try:
