@@ -36,14 +36,18 @@ if __name__ == '__main__':
             for group in f:
                 if group == "date":
                     continue
+
+                # Select just one group for testing
+                if group != "lip":
+                    continue
+
                 print "--> Group = ", group
                 for m in METRICS:
-                    graph_list = []
+                    graph_list = [()]
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
                     for i in range(326759, 326879):
-                    # for i in range(50):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         """
                         print "Server = ", carbon_server, " Port = ", carbon_port
@@ -57,8 +61,10 @@ if __name__ == '__main__':
                         sock.sendall(graph_string)
                         sock.close()
                         """
-
-                        graph_ds = (metric_str, (ts[i], int(data[i])))
+                        value = int(data[i])
+                        timestamp = int(ts[i])
+                        metric = str(metric_str)
+                        graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
 
                     pprint.pprint(graph_list)
