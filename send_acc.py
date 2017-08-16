@@ -42,9 +42,10 @@ if __name__ == '__main__':
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + group + "." + m
-                    for i in range(326819, 326879):
+                    for i in range(326759, 326879):
                     # for i in range(50):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
+                        """
                         print "Server = ", carbon_server, " Port = ", carbon_port
                         sock = socket.socket()
                         try:
@@ -55,15 +56,18 @@ if __name__ == '__main__':
                             sys.exit(1)
                         sock.sendall(graph_string)
                         sock.close()
+                        """
 
                         graph_ds = (metric_str, (ts[i], data[i]))
                         graph_list.append(graph_ds)
 
-                    """
                     pprint.pprint(graph_list)
                     package = pickle.dumps(graph_list, protocol=2)
                     size = struct.pack('!L', len(package))
                     print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
+                    print "-------- Unpickled"
+                    up = pickle.loads(package)
+                    pprint.pprint(up)
                     message = size + package
                     sock = socket.socket()
                     try:
@@ -75,5 +79,4 @@ if __name__ == '__main__':
                     sock.sendall(message)
                     sock.close()
                     # time.sleep(delay)
-                    """
 
