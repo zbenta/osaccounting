@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         graph_list.append(graph_ds)
 
                 pprint.pprint(graph_list)
-                package = pickle.dumps(graph_list, protocol=1)
+                package = pickle.dumps(graph_list, protocol=2)
                 size = struct.pack('!L', len(package))
                 print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
                 message = size + package
