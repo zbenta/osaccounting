@@ -12,6 +12,7 @@
 import socket
 import pickle
 import struct
+import sys
 from osacc_functions import *
 
 if __name__ == '__main__':
@@ -37,7 +38,7 @@ if __name__ == '__main__':
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + group + "." + m
-                    for i in range(326819, 326979):
+                    for i in range(326819, 326879):
                     # for i in range(50):
                         # sock = socket.socket()
                         # sock.connect((carbon_server, carbon_port))
@@ -50,10 +51,15 @@ if __name__ == '__main__':
                 pprint.pprint(graph_list)
                 package = pickle.dumps(graph_list, protocol=1)
                 size = struct.pack('!L', len(package))
-                print "Size of pickle = ", len(package)
+                print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
                 message = size + package
                 sock = socket.socket()
-                sock.connect((carbon_server, carbon_port))
+                try:
+                    sock.connect((carbon_server, carbon_port))
+                except:
+                    print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
+                        'server': carbon_server, 'port': carbon_port}
+                    sys.exit(1)
                 sock.sendall(message)
                 sock.close()
                 # time.sleep(delay)
