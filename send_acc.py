@@ -47,10 +47,10 @@ if __name__ == '__main__':
                         graph_ds = (metric_str, (int(ts[i]), data[i]))
                         graph_list.append(graph_ds)
 
-                # pprint.pprint(graph_list)
-                package = pickle.dumps(graph_list, protocol=2)
+                pprint.pprint(graph_list)
+                package = pickle.dumps(graph_list, protocol=1)
                 size = struct.pack('!L', len(package))
-                print "Size of pickle = ", size
+                print "Size of pickle = ", len(package)
                 message = size + package
                 sock = socket.socket()
                 sock.connect((carbon_server, carbon_port))
