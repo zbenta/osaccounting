@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
                 print "--> Group = ", group
                 for m in METRICS:
-                    graph_list = [()]
+                    graph_list = list()
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
