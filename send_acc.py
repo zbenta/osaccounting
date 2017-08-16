@@ -10,9 +10,13 @@
 """
 
 import socket
-import pickle
 import struct
 import sys
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from osacc_functions import *
 
 if __name__ == '__main__':
