@@ -41,7 +41,7 @@ if __name__ == '__main__':
                     graph_list = []
                     # print "--> Metric = ", m
                     data = f[group][m]
-                    metric_str = GRAPH_NS + "." + group + "." + m
+                    metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
                     for i in range(326759, 326879):
                     # for i in range(50):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
@@ -58,16 +58,16 @@ if __name__ == '__main__':
                         sock.close()
                         """
 
-                        graph_ds = (metric_str, (ts[i], data[i]))
+                        graph_ds = (metric_str, (ts[i], int(data[i])))
                         graph_list.append(graph_ds)
 
                     pprint.pprint(graph_list)
                     package = pickle.dumps(graph_list, protocol=2)
                     size = struct.pack('!L', len(package))
                     print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
-                    print "-------- Unpickled"
-                    up = pickle.loads(package)
-                    pprint.pprint(up)
+                    # print "-------- Unpickled"
+                    # up = pickle.loads(package)
+                    # pprint.pprint(up)
                     message = size + package
                     sock = socket.socket()
                     try:
