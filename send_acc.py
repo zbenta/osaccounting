@@ -45,8 +45,8 @@ if __name__ == '__main__':
                     for i in range(326819, 326879):
                     # for i in range(50):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
+                        print "Server = ", carbon_server, " Port = ", carbon_port
                         sock = socket.socket()
-                        sock.connect((carbon_server, carbon_port))
                         try:
                             sock.connect((carbon_server, carbon_port))
                         except:
