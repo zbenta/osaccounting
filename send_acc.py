@@ -33,8 +33,8 @@ if __name__ == '__main__':
                 if group == "date":
                     continue
                 print "--> Group = ", group
-                graph_list = []
                 for m in METRICS:
+                    graph_list = []
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + group + "." + m
@@ -48,20 +48,20 @@ if __name__ == '__main__':
                         graph_ds = (metric_str, (int(ts[i]), data[i]))
                         graph_list.append(graph_ds)
 
-                pprint.pprint(graph_list)
-                package = pickle.dumps(graph_list, protocol=2)
-                size = struct.pack('!L', len(package))
-                print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
-                message = size + package
-                sock = socket.socket()
-                try:
-                    sock.connect((carbon_server, carbon_port))
-                except:
-                    print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
-                        'server': carbon_server, 'port': carbon_port}
-                    sys.exit(1)
-                sock.sendall(message)
-                sock.close()
-                # time.sleep(delay)
+                    pprint.pprint(graph_list)
+                    package = pickle.dumps(graph_list, protocol=2)
+                    size = struct.pack('!L', len(package))
+                    print "Size of pickle = ", len(package), " Server = ", carbon_server, " Port = ", carbon_port
+                    message = size + package
+                    sock = socket.socket()
+                    try:
+                        sock.connect((carbon_server, carbon_port))
+                    except:
+                        print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
+                            'server': carbon_server, 'port': carbon_port}
+                        sys.exit(1)
+                    sock.sendall(message)
+                    sock.close()
+                    # time.sleep(delay)
 
 
