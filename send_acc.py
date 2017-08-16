@@ -31,7 +31,7 @@ if __name__ == '__main__':
             for group in f:
                 if group == "date":
                     continue
-                # print "--> Group = ", group
+                print "--> Group = ", group
                 graph_list = []
                 for m in METRICS:
                     # print "--> Metric = ", m
@@ -50,6 +50,7 @@ if __name__ == '__main__':
                 # pprint.pprint(graph_list)
                 package = pickle.dumps(graph_list, protocol=2)
                 size = struct.pack('!L', len(package))
+                print "Size of pickle = ", size
                 message = size + package
                 sock = socket.socket()
                 sock.connect((carbon_server, carbon_port))
