@@ -23,6 +23,7 @@ if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
     carbon_port = int(env['carbon_port'])
+    ini_list = 1000 # size of list to initialize
     # years = get_years()
     years = [2017]
     delay = 10  # 10 seconds delay
@@ -42,27 +43,29 @@ if __name__ == '__main__':
                     # print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
-                    for i in range(325879, 326879):
+                    for i in range(318879, 326879):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         value = int(data[i])
                         timestamp = int(ts[i])
                         metric = str(metric_str)
                         graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
-
-                    # pprint.pprint(graph_list)
-                    package = pickle.dumps(graph_list, protocol=2)
-                    size = struct.pack('!L', len(package))
-                    print "Size of pickle = ", len(package), " ListSize = ", len(graph_list)
-                    message = size + package
-                    sock = socket.socket()
-                    try:
-                        sock.connect((carbon_server, carbon_port))
-                    except:
-                        print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
-                            'server': carbon_server, 'port': carbon_port}
-                        sys.exit(1)
-                    sock.sendall(message)
-                    sock.close()
-                    # time.sleep(delay)
+                        if i % ini_list:
+                            print "IIII will restart graphlist i = ", i
+                            # pprint.pprint(graph_list)
+                            package = pickle.dumps(graph_list, protocol=2)
+                            size = struct.pack('!L', len(package))
+                            print "Size of pickle = ", len(package), " ListSize = ", len(graph_list)
+                            message = size + package
+                            sock = socket.socket()
+                            try:
+                                sock.connect((carbon_server, carbon_port))
+                            except:
+                                print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
+                                    'server': carbon_server, 'port': carbon_port}
+                                sys.exit(1)
+                            sock.sendall(message)
+                            sock.close()
+                            graph_list = list()
+                            # time.sleep(delay)
 
