@@ -26,7 +26,7 @@ if __name__ == '__main__':
     ini_list = 30000 # size of list to initialize
     years = get_years()
     # years = [2017]
-    delay = 10  # 10 seconds delay
+    delay = 4  # seconds delay to close connection
     for year in years:
         print 80 * "="
         filename = get_hdf_filename(year)
