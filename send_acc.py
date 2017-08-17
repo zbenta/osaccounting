@@ -23,10 +23,10 @@ if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
     carbon_port = int(env['carbon_port'])
-    ini_list = 10000 # size of list to initialize
+    ini_list = 1000 # size of list to initialize
     years = get_years()
     # years = [2017]
-    delay = 3  # seconds delay to close connection
+    delay = 0  # seconds delay to close connection
     for year in years:
         print 80 * "="
         filename = get_hdf_filename(year)
