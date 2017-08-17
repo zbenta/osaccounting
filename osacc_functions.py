@@ -25,7 +25,7 @@ SECEPOC = time.mktime(DATEINI.utctimetuple())
 # Interval of data points in seconds
 DELTA = 60.0
 # List of metrics
-METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes']
+METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
 # Graphite namespace
 GRAPH_NS = "os_accounting"
 
@@ -160,20 +160,25 @@ def get_list_db(database="keystone", dbtable="project"):
 def update_list_db(ti, database="keystone", dbtable="project"):
     """Query keystone or nova or cinder to get projects or instances or volumes
 
-    For projects (do not take into account admin and service projects)
+    DB = keystone: For projects (do not take into account admin and service projects)
     SELECT id,name,description,enabled
     FROM project
     WHERE (domain_id='default' and name!='admin' and name!='service')
 
-    For instances
+    DB = nova: For instances
     SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
     FROM instances
     WHERE (vm_state != 'error' AND (created_at >= ti OR vm_state = 'active' ))
 
-    For volumes
+    DB = cinder: For volumes
     SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
     FROM volumes
     WHERE created_at >= '2017-06-01' OR status != 'deleted'
+
+    DB = neutron: For public IPs
+    SELECT tenant_id,id,floating_ip_address,status
+    FROM floatingips
+    WHERE status='ACTIVE'
 
     :param ti: date start
     :param database: database to query
@@ -190,6 +195,9 @@ def update_list_db(ti, database="keystone", dbtable="project"):
     if dbtable == "volumes":
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
         condition = "created_at >= %s OR status != 'deleted'"
+    if dbtable == "floatingips":
+        table_str = "tenant_id,id,floating_ip_address,status"
+        condition = "status='ACTIVE'"
 
     conn = db_conn(database)
     cursor = conn.cursor()
@@ -199,7 +207,7 @@ def update_list_db(ti, database="keystone", dbtable="project"):
     qry = "SELECT " + table_str + " FROM " + dbtable + " "
     cond_qry = "WHERE (" + condition + ")"
     query = (qry + cond_qry)
-    if dbtable == "project":
+    if (dbtable == "project") or (dbtable == "floatingips"):
         cursor.execute(query)
     else:
         cursor.execute(query, (tiso_i,))
@@ -215,15 +223,12 @@ def update_list_db(ti, database="keystone", dbtable="project"):
     return rows_list
 
 
-def today():
+def now_acc():
     """
-    :return: Today at midnight 00h:00min:00sec in seconds from epoch
+    :return: now in seconds from epoch
     """
-    year = datetime.datetime.now().year
-    month = datetime.datetime.now().month
-    day = datetime.datetime.now().day
-    to_day = datetime.datetime(year, month, day, 0, 0, 0)
-    return to_secepoc(to_day)
+    nacc = datetime.datetime.now()
+    return to_secepoc(nacc)
 
 
 def to_secepoc(date=DATEINI):

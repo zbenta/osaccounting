@@ -9,7 +9,6 @@
 """Update accounting
 """
 
-import datetime
 from osacc_functions import *
 
 if __name__ == '__main__':
@@ -21,10 +20,11 @@ if __name__ == '__main__':
 
     with h5py.File(filename, 'r+') as f:
         ti = f.attrs['LastRun']
-        tf = today()
+        tf = now_acc()
         projects = update_list_db(ti, "keystone", "project")
         instances = update_list_db(ti, "nova", "instances")
         volumes = update_list_db(ti, "cinder", "volumes")
+        public_ips = update_list_db(ti, "neutron", "floatingips")
         size_a = size_array(year)
         """
         print 80 * "="
@@ -118,6 +118,26 @@ if __name__ == '__main__':
             print 'Vol Start = ', to_isodate(t_create),      ' Vol End = ', to_isodate(t_final)
             print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
             print 'Vol Array Start = ', vol_array[idx_start], " Number of volumes = ", nvol_array[idx_start]
+
+        # This block is to insert the values from Neutron floatingips (Public IPs)
+        for pubip in public_ips:
+            idx_start, idx_end = dt_to_indexes(ti, tf, year)
+            p = filter(lambda pr: pr['id'] == pubip['tenant_id'], projects)
+            if not p:
+                continue
+
+            proj = p[0]
+            grp_name = proj['name']
+            pubip_array = f[grp_name]['npublic_ips']
+            pubip_array[idx_start:idx_end] = pubip_array[idx_start:idx_end] + 1
+
+            print 80*'-'
+            print 10*"x", " PublicIP ID = ", pubip['id']
+            print "ProjID PublicIP  = ", pubip['tenant_id']
+            print "ProjID filt      = ", proj["id"], proj["name"]
+            print 'IDX_Start = ', idx_start, ' IDX_End = ', idx_end
+            print 'TS_Start  = ', to_isodate(ts[idx_start]), ' TS_End  = ', to_isodate(ts[idx_end])
+            print 'PublicIP Array Start = ', pubip_array[idx_start], " Number of PublicIPs = ", pubip_array[idx_start]
 
         # After everything runs - Update the LastRun
         f.attrs['LastRun'] = tf
