@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 print "--> Group = ", group
                 for m in METRICS:
                     graph_list = list()
-                    # print "--> Metric = ", m
+                    print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
                     for i in range(len_ds):
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                         graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
                         if i % ini_list == 0:
-                            print "IIII will restart graphlist i = ", i
+                            # print "IIII will restart graphlist i = ", i
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                                     'server': carbon_server, 'port': carbon_port}
                                 sys.exit(1)
                             sock.sendall(message)
+                            time.sleep(delay)
                             sock.close()
                             graph_list = list()
-                            # time.sleep(delay)
 
