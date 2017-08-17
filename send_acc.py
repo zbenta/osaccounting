@@ -23,7 +23,7 @@ if __name__ == '__main__':
     env = get_env()
     carbon_server = env['carbon_server']
     carbon_port = int(env['carbon_port'])
-    ini_list = 10000 # size of list to initialize
+    ini_list = 30000 # size of list to initialize
     years = get_years()
     # years = [2017]
     delay = 10  # 10 seconds delay
@@ -52,11 +52,10 @@ if __name__ == '__main__':
                         graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
                         if i % ini_list == 0:
-                            # print "IIII will restart graphlist i = ", i
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
-                            print "Size of pickle = ", len(package), " ListSize = ", len(graph_list)
+                            print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                             message = size + package
                             sock = socket.socket()
                             try:
