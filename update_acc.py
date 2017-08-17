@@ -121,6 +121,8 @@ if __name__ == '__main__':
 
         # This block is to insert the values from Neutron floatingips (Public IPs)
         for pubip in public_ips:
+            if ti < tf - 3600.0*72.0:
+                ti = tf - 3600.0 * 72.0
             idx_start, idx_end = dt_to_indexes(ti, tf, year)
             p = filter(lambda pr: pr['id'] == pubip['tenant_id'], projects)
             if not p:
