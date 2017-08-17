@@ -27,6 +27,8 @@ if __name__ == '__main__':
     years = get_years()
     # years = [2017]
     delay = 0  # seconds delay to close connection
+    max_retries = 3  # number of retries for socket connect
+    timeout = 3  # seconds between retries for socket connect
     for year in years:
         print 80 * "="
         filename = get_hdf_filename(year)
@@ -58,14 +60,25 @@ if __name__ == '__main__':
                             print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                             message = size + package
                             sock = socket.socket()
-                            try:
-                                sock.connect((carbon_server, carbon_port))
-                            except:
-                                print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
-                                    'server': carbon_server, 'port': carbon_port}
-                                sys.exit(1)
-                            sock.sendall(message)
-                            time.sleep(delay)
-                            sock.close()
+                            for j in range(max_retries):
+                                try:
+                                    sock.connect((carbon_server, carbon_port))
+                                    sock.sendall(message)
+                                    time.sleep(delay)
+                                except IOError as e:
+                                    print "Couldn't connect to %(server)s on port %(port)d. Retry: %(j)i" % {
+                                        'server': carbon_server, 'port': carbon_port, 'j': j}
+                                    continue
+                                else:
+                                    sock.close()
+                                    break
+
+                            # try:
+                            #     sock.connect((carbon_server, carbon_port))
+                            # except:
+                            #     print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
+                            #         'server': carbon_server, 'port': carbon_port}
+                            #     sys.exit(1)
+
                             graph_list = list()
 
