@@ -15,10 +15,11 @@ The scripts rely on environment variables:
 
 ## Usage
 
-The script get_os_projects.sh creates a json with all projects to be accounted for
+The script setup.sh deploys the scripts in /usr/local/bin and a configuration file to setup the necessary environment
+variables osacc-conf.sh into /etc
 
 ```
-./get_os_projects.sh
+./setup.sh
 ```
 
 
