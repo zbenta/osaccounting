@@ -51,14 +51,6 @@ if __name__ == '__main__':
     print "Start date <ts>- ", to_isodate(DATEINI)
     # This block is to insert the values from Nova Instances
     for inst in instances:
-        t_create = to_secepoc(inst["created_at"])
-        t_final = ts[size_a-1]
-        if inst["deleted_at"]:
-            t_final = to_secepoc(inst["deleted_at"])
-        if t_final > to_secepoc(datetime.datetime.utcnow()):
-            t_final = to_secepoc(datetime.datetime.utcnow())
-
-        idx_start, idx_end = dt_to_indexes(t_create, t_final, year)
         p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
         if not p:
             continue
