@@ -27,29 +27,10 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     year = YEAR_INI
-    filename = create_hdf(year)
     evr = get_env()
     projects = get_list_db("keystone", "project")
     instances = get_list_db("nova", "instances")
     instances_info = get_list_db("nova", "instance_info_caches")
-    volumes = get_list_db("cinder", "volumes")
-    size_a = size_array(year)
-    print 80 * "="
-    print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
-    """
-    print "--> Projects"
-    pprint.pprint(projects)
-    print
-    print "--> Instances"
-    pprint.pprint(instances)
-    print
-    print "--> Volumes"
-    pprint.pprint(volumes)
-    """
-    print 20 * "-"
-
-    print "Start date <ts>- ", to_isodate(DATEINI)
-    # This block is to insert the values from Nova Instances
     for inst in instances:
         p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
         if not p:
