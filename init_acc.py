@@ -27,7 +27,10 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    os.makedirs(ev['out_dir'], 0755)
+    directory = os.path.dirname(ev['out_dir'])
+    if not os.path.exists(directory):
+        os.makedirs(directory, 0755)
+
     for year in get_years():
         filename = create_hdf(year)
         size_a = size_array(year)
