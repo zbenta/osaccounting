@@ -25,8 +25,6 @@ YEAR_INI = 2016
 # Interval of data points in seconds
 DELTA = 60.0
 
-#DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
-#SECEPOC = time.mktime(DATEINI.utctimetuple())
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
 
@@ -53,22 +51,6 @@ def get_conf():
         ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
         ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
 
-    return ev
-
-
-# TODO: TO BE REMOVED after restructure
-def get_env():
-    """Get environment variables
-    :returns dictionary with environment variables
-    """
-    ev = dict()
-    ev['out_dir'] = os.environ['OUT_DIR']
-    ev['mysql_user'] = os.environ['MYSQL_USER']
-    ev['mysql_pass'] = os.environ['MYSQL_PASS']
-    ev['mysql_host'] = os.environ['MYSQL_HOST']
-    ev['carbon_server'] = os.environ['CARBON_SERVER']
-    ev['carbon_port'] = os.environ['CARBON_PORT']
-    ev['graph_ns'] = os.environ['GRAPH_NS']
     return ev
 
 
