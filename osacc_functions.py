@@ -16,7 +16,7 @@ import h5py
 import time
 import numpy
 import mysql.connector
-from ConfigParser import SafeConfigParser
+import ConfigParser
 
 # TODO: to be removed after restruture
 # Set the initial date to start the accounting -> 1st March 2016
@@ -35,7 +35,7 @@ def get_conf():
     """Get configuration options
     :returns dictionary with configuration options
     """
-    parser = SafeConfigParser(allow_no_value=True)
+    parser = ConfigParser.SafeConfigParser(allow_no_value=True)
     parser.read('/etc/osacc.conf')
 
     ev = dict()
@@ -46,9 +46,13 @@ def get_conf():
     ev['mysql_user'] = parser.get('mysql', 'MYSQL_USER')
     ev['mysql_pass'] = parser.get('mysql', 'MYSQL_PASS')
     ev['mysql_host'] = parser.get('mysql', 'MYSQL_HOST')
-    ev['carbon_server'] = parser.get('graphite', 'CARBON_SERVER')
-    ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
-    ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
+
+    # graphite section options are Optional
+    if parser.has_option('graphite', 'CARBON_SERVER'):
+        ev['carbon_server'] = parser.get('graphite', 'CARBON_SERVER')
+        ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
+        ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
+
     return ev
 
 
