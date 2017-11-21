@@ -18,16 +18,15 @@ import numpy
 import mysql.connector
 
 # Set the initial date to start the accounting -> 1st March 2016
-MONTH_INI = 3
-YEAR_INI = 2016
+MONTH_INI = os.environ['MONTH_INI']
+YEAR_INI = os.environ['YEAR_INI']
+# Interval of data points in seconds
+DELTA = os.environ['DELTA_TIME']
+
 DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
 SECEPOC = time.mktime(DATEINI.utctimetuple())
-# Interval of data points in seconds
-DELTA = 60.0
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
-# Graphite namespace
-GRAPH_NS = "os_accounting"
 
 
 def get_env():
@@ -41,6 +40,7 @@ def get_env():
     ev['mysql_host'] = os.environ['MYSQL_HOST']
     ev['carbon_server'] = os.environ['CARBON_SERVER']
     ev['carbon_port'] = os.environ['CARBON_PORT']
+    ev['graph_ns'] = os.environ['GRAPH_NS']
     return ev
 
 

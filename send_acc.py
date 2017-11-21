@@ -45,7 +45,7 @@ if __name__ == '__main__':
                     graph_list = list()
                     print "--> Metric = ", m
                     data = f[group][m]
-                    metric_str = GRAPH_NS + "." + str(group) + "." + str(m)
+                    metric_str = env['graph_ns'] + "." + str(group) + "." + str(m)
                     for i in range(len_ds):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         value = int(data[i])
