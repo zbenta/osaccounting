@@ -160,6 +160,7 @@ def db_conn(database="nova"):
                                    db=database)
 
 
+'''
 def get_list_db(database, dbtable):
     ev = get_conf()
     year = ev['year_ini']
@@ -177,13 +178,11 @@ def get_list_db(database, dbtable):
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
         condition = "created_at BETWEEN %s AND %s"
 
-    return get_table_rows(database, dbtable, table_str, condition, ti, tf)
+    return get_table_rows(database, dbtable, table_str, condition, ti)
+'''
 
 
 def update_list_db(ti, database="keystone", dbtable="project"):
-    ev = get_conf()
-    year = ev['year_ini']
-    tf = datetime.date(year, 12, 31)
     tiso_i = to_isodate(ti)
 
     table_str = "id,name,description,enabled"
@@ -198,10 +197,10 @@ def update_list_db(ti, database="keystone", dbtable="project"):
         table_str = "tenant_id,id,floating_ip_address,status"
         condition = "status='ACTIVE'"
 
-    return get_table_rows(database, dbtable, table_str, condition, tiso_i, tf)
+    return get_table_rows(database, dbtable, table_str, condition, tiso_i)
 
 
-def get_table_rows(database, dbtable, table_str, condition, ti, tf):
+def get_table_rows(database, dbtable, table_str, condition, ti):
     conn = db_conn(database)
     cursor = conn.cursor()
     sep = ","
