@@ -130,10 +130,6 @@ def get_list_db(database="keystone", dbtable="project"):
         table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
         condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
 
-    if dbtable == "instance_info_caches":
-        table_str = "instance_uuid,created_at,deleted_at,network_info"
-        condition = "created_at BETWEEN %s AND %s"
-
     if dbtable == "volumes":
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
         condition = "created_at BETWEEN %s AND %s"

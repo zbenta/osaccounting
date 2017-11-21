@@ -37,12 +37,7 @@ if __name__ == '__main__':
             continue
 
         proj = p[0]
-
         print 80*'-'
         print 10*"x", " Instance ID = ", inst['uuid']
         print "ProjName = ", proj["name"], " VCPUs= ", inst['vcpus'], " Mem_MB= ", inst['memory_mb']
         print 'Inst Start = ', inst["created_at"], ' Inst End = ', inst["deleted_at"]
-
-    for inst_info in instances_info:
-        print 80*'-'
-        print inst_info
