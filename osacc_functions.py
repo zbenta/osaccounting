@@ -16,6 +16,8 @@ import h5py
 import time
 import numpy
 import mysql.connector
+import io
+from ConfigParser import SafeConfigParser
 
 # Set the initial date to start the accounting -> 1st March 2016
 MONTH_INI = os.environ['MONTH_INI']
@@ -29,6 +31,28 @@ SECEPOC = time.mktime(DATEINI.utctimetuple())
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
 
 
+def get_conf():
+    """Get configuration options
+    :returns dictionary with configuration options
+    """
+    parser = SafeConfigParser(allow_no_value=True)
+    parser.read('/etc/osacc.conf')
+
+    ev = dict()
+    ev['out_dir'] = parser.get('DEFAULT', 'OUT_DIR')
+    ev['month_ini'] = parser.getint('DEFAULT', 'MONTH_INI')
+    ev['year_ini'] = parser.getint('DEFAULT', 'YEAR_INI')
+    ev['delta_time'] = parser.getfloat('DEFAULT', 'DELTA_TIME')
+    ev['mysql_user'] = parser.get('mysql', 'MYSQL_USER')
+    ev['mysql_pass'] = parser.get('mysql', 'MYSQL_PASS')
+    ev['mysql_host'] = parser.get('mysql', 'MYSQL_HOST')
+    ev['carbon_server'] = parser.get('graphite', 'CARBON_SERVER')
+    ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
+    ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
+    return ev
+
+
+# TODO: TO BE REMOVED after restructure
 def get_env():
     """Get environment variables
     :returns dictionary with environment variables
@@ -44,19 +68,27 @@ def get_env():
     return ev
 
 
-def get_hdf_filename(year=YEAR_INI):
+def get_years():
+    """List of years
+    :return (list) of years
+    """
+    ev = get_env()
+    tf = datetime.datetime.utcnow()
+    return range(ev['year_ini'], tf.year + 1)
+
+
+def get_hdf_filename(year):
     """Get the HDF5 filename
     :param year: Year
     :return (string) filename
     """
-    evr = get_env()
+    evr = get_conf()
     return evr['out_dir'] + os.sep + str(year) + '.hdf'
 
 
 def create_hdf(year=YEAR_INI):
     """Initial creation of hdf5 files containing 1 group per project and datasets
     for each metric and for each project/group.
-    The size of the datasets depend on the year.
     Attributes are set for each hdf5 group (project) with project ID and Description
     One file is created per year
     :param year: Year
@@ -67,6 +99,12 @@ def create_hdf(year=YEAR_INI):
         month = MONTH_INI
     di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     projects = get_list_db("keystone", "project")
+    # TODO: change to log info
+    """
+    print "--> Projects"
+    pprint.pprint(projects)
+    print 80 * "-"
+    """
     ts = time_series(year)
     file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'w') as f:
@@ -81,6 +119,38 @@ def create_hdf(year=YEAR_INI):
             for m in METRICS:
                 grp.create_dataset(m, data=a, compression="gzip")
     return file_name
+
+
+def create_metric_array(year_l=YEAR_INI):
+    """Create array for a given metric
+    :param year_l: Year to calculate the size of the array
+    :return (numpy array) Array to hold the values of the metric
+    """
+    sizea = size_array(year_l)
+    return numpy.zeros([sizea, ], dtype=int)
+
+
+def size_array(year_l=YEAR_INI):
+    """Number of data points is the size of the arrays for 1 year
+    :param year_l: Year
+    :return (int) size of arrays"""
+    sizea = time_series(year_l)
+    return sizea.size
+
+
+def time_series(year_l=YEAR_INI):
+    """Create a time array (of ints) in epoch format with interval
+    of one hour for a given year
+    :param year_l: Year
+    :returns (numpy array) time_array
+    """
+    month = 1
+    if year_l == YEAR_INI:
+        month = MONTH_INI
+    di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
+    time_array = numpy.arange(di, df, DELTA)
+    return time_array
 
 
 def exists_hdf(year=YEAR_INI):
@@ -242,46 +312,6 @@ def to_secepoc(date=DATEINI):
 
 def to_isodate(date):
     return datetime.datetime.utcfromtimestamp(date)
-
-
-def time_series(year_l=YEAR_INI):
-    """Create a time array (of ints) in epoch format with interval
-    of one hour for a given year
-    :param year_l: Year
-    :returns (numpy array) time_array
-    """
-    month = 1
-    if year_l == YEAR_INI:
-        month = MONTH_INI
-    di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
-    time_array = numpy.arange(di, df, DELTA)
-    return time_array
-
-
-def size_array(year_l=YEAR_INI):
-    """Number of data points is the size of the arrays for 1 year
-    :param year_l: Year
-    :return (int) size of arrays"""
-    sizea = time_series(year_l)
-    return sizea.size
-
-
-def get_years():
-    """List of years
-    :return (list) of years
-    """
-    tf = datetime.datetime.utcnow()
-    return range(DATEINI.year, tf.year + 1)
-
-
-def create_metric_array(year_l=YEAR_INI):
-    """Create array for a given metric
-    :param year_l: Year to calculate the size of the array
-    :return (numpy array) Array to hold the values of the metric
-    """
-    sizea = size_array(year_l)
-    return numpy.zeros([sizea, ], dtype=int)
 
 
 def dt_to_indexes(ti, tf, year):
