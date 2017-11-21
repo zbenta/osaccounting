@@ -16,17 +16,17 @@ import h5py
 import time
 import numpy
 import mysql.connector
-import io
 from ConfigParser import SafeConfigParser
 
+# TODO: to be removed after restruture
 # Set the initial date to start the accounting -> 1st March 2016
-MONTH_INI = os.environ['MONTH_INI']
-YEAR_INI = os.environ['YEAR_INI']
+MONTH_INI = 1
+YEAR_INI = 2016
 # Interval of data points in seconds
-DELTA = os.environ['DELTA_TIME']
+DELTA = 60.0
 
-DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
-SECEPOC = time.mktime(DATEINI.utctimetuple())
+#DATEINI = datetime.datetime(YEAR_INI, MONTH_INI, 1, 0, 0, 0)
+#SECEPOC = time.mktime(DATEINI.utctimetuple())
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
 
@@ -72,7 +72,7 @@ def get_years():
     """List of years
     :return (list) of years
     """
-    ev = get_env()
+    ev = get_conf()
     tf = datetime.datetime.utcnow()
     return range(ev['year_ini'], tf.year + 1)
 
@@ -82,11 +82,11 @@ def get_hdf_filename(year):
     :param year: Year
     :return (string) filename
     """
-    evr = get_conf()
-    return evr['out_dir'] + os.sep + str(year) + '.hdf'
+    ev = get_conf()
+    return ev['out_dir'] + os.sep + str(year) + '.hdf'
 
 
-def create_hdf(year=YEAR_INI):
+def create_hdf(year):
     """Initial creation of hdf5 files containing 1 group per project and datasets
     for each metric and for each project/group.
     Attributes are set for each hdf5 group (project) with project ID and Description
@@ -95,8 +95,10 @@ def create_hdf(year=YEAR_INI):
     :return (string) file_name
     """
     month = 1
-    if year == YEAR_INI:
-        month = MONTH_INI
+    ev = get_conf()
+    if year == ev['year_ini']:
+        month = ev['month_ini']
+
     di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     projects = get_list_db("keystone", "project")
     # TODO: change to log info
@@ -118,50 +120,54 @@ def create_hdf(year=YEAR_INI):
             a = create_metric_array(year)
             for m in METRICS:
                 grp.create_dataset(m, data=a, compression="gzip")
+
     return file_name
 
 
-def create_metric_array(year_l=YEAR_INI):
+def create_metric_array(year):
     """Create array for a given metric
-    :param year_l: Year to calculate the size of the array
+    :param year: Year to calculate the size of the array
     :return (numpy array) Array to hold the values of the metric
     """
-    sizea = size_array(year_l)
+    sizea = size_array(year)
     return numpy.zeros([sizea, ], dtype=int)
 
 
-def size_array(year_l=YEAR_INI):
+def size_array(year):
     """Number of data points is the size of the arrays for 1 year
-    :param year_l: Year
+    :param year: Year
     :return (int) size of arrays"""
-    sizea = time_series(year_l)
+    sizea = time_series(year)
     return sizea.size
 
 
-def time_series(year_l=YEAR_INI):
+def time_series(year):
     """Create a time array (of ints) in epoch format with interval
     of one hour for a given year
-    :param year_l: Year
+    :param year: Year
     :returns (numpy array) time_array
     """
     month = 1
-    if year_l == YEAR_INI:
-        month = MONTH_INI
-    di = to_secepoc(datetime.datetime(year_l, month, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year_l+1, 1, 1, 0, 0, 0))
-    time_array = numpy.arange(di, df, DELTA)
+    ev = get_conf()
+    if year == ev['year_ini']:
+        month = ev['month_ini']
+
+    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
+    time_array = numpy.arange(di, df, ev['delta_time'])
     return time_array
 
 
-def exists_hdf(year=YEAR_INI):
+def exists_hdf(year):
     """Checks if hdf5 file exists
     :param year: Year
-    :return (boolean) true is file exists or false if it doesn't"""
+    :return (boolean) true is file exists or false if it doesn't
+    """
     return os.path.exists(get_hdf_filename(year))
     
 
 def db_conn(database="nova"):
-    ev = get_env()
+    ev = get_conf()
     return mysql.connector.connect(host=ev['mysql_host'],
                                    user=ev['mysql_user'],
                                    passwd=ev['mysql_pass'],
@@ -189,8 +195,9 @@ def get_list_db(database="keystone", dbtable="project"):
     :param dbtable: database table to query
     :return (json dict) all projects
     """
-    year = YEAR_INI
-    month = MONTH_INI
+    ev = get_conf()
+    year = ev['year_ini']
+    month = ev['month_ini']
     ti = datetime.date(year, month, 1)
     tf = datetime.date(year, 12, 31)
 
@@ -302,7 +309,7 @@ def now_acc():
     return to_secepoc(nacc)
 
 
-def to_secepoc(date=DATEINI):
+def to_secepoc(date):
     """Converts datetime to seconds from epoc
     :param date: Date in datetime format
     :returns (float) seconds from epoch
@@ -311,6 +318,10 @@ def to_secepoc(date=DATEINI):
 
 
 def to_isodate(date):
+    """Converts seconds from epoc to utc datetime
+    :param date: Date in seconds to epoc format
+    :returns (datetime) utc datetime
+    """
     return datetime.datetime.utcfromtimestamp(date)
 
 
@@ -333,6 +344,8 @@ def dt_to_indexes(ti, tf, year):
 
 
 def get_last_run():
-    last_run = datetime.datetime(YEAR_INI, 1, 1, 0, 0, 0)
+    ev = get_conf()
+    year = ev['year_ini']
+    last_run = datetime.datetime(year, 1, 1, 0, 0, 0)
     return last_run
 
