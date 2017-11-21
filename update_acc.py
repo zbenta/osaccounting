@@ -12,7 +12,7 @@
 from osacc_functions import *
 
 if __name__ == '__main__':
-    evr = get_env()
+    evr = get_conf()
     year = datetime.datetime.now().year
     filename = get_hdf_filename(year)
     if not exists_hdf(year):
