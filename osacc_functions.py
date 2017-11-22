@@ -152,7 +152,7 @@ def exists_hdf(year):
     return os.path.exists(get_hdf_filename(year))
     
 
-def db_conn(database="nova"):
+def db_conn(database):
     ev = get_conf()
     return mysql.connector.connect(host=ev['mysql_host'],
                                    user=ev['mysql_user'],
@@ -182,40 +182,51 @@ def get_list_db(database, dbtable):
 '''
 
 
-def update_list_db(ti, database="keystone", dbtable="project"):
+def update_list_db(ti, database):
     tiso_i = to_isodate(ti)
 
+    # Default to DB = keystone, dbtable = projects
+    dbtable = "projects"
     table_str = "id,name,description,enabled"
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
-    if dbtable == "instances":
-        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
-        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )"
-    if dbtable == "volumes":
+    if database == "cinder":
+        dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "created_at >= %s OR status != 'deleted'"
-    if dbtable == "floatingips":
-        table_str = "tenant_id,id,floating_ip_address,status"
-        condition = "status='ACTIVE'"
+        condition = "created_at >= %s OR status != 'deleted'" % tiso_i
 
-    return get_table_rows(database, dbtable, table_str, condition, tiso_i)
+    table_coll = table_str.split(",")
+    query = ' '.join((
+        "SELECT " + table_str,
+        "FROM " + dbtable,
+        "WHERE " + condition
+    ))
+
+    if database == "nova":
+        table_coll = ['uuid', 'created_at', 'deleted_at', 'id', 'project_id',
+                      'vm_state', 'memory_mb', 'vcpus', 'root_gb', 'network_info']
+        dbtable = "instances"
+        table_str = "instances.uuid,instances.created_at,instances.deleted_at," \
+                    "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
+                    "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
+        ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
+        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )" % tiso_i
+        query = ' '.join((
+            "SELECT " + table_str,
+            "FROM " + dbtable,
+            "INNER JOIN " + ijoin,
+            "WHERE " + condition
+        ))
+
+    return get_table_rows(database, query, table_coll)
 
 
-def get_table_rows(database, dbtable, table_str, condition, ti):
+def get_table_rows(database, query, table_coll):
     conn = db_conn(database)
     cursor = conn.cursor()
-    sep = ","
-    table_coll = table_str.strip(sep).split(sep)
-    s = len(table_coll)
-    qry = "SELECT " + table_str + " FROM " + dbtable + " "
-    cond_qry = "WHERE (" + condition + ")"
-    query = (qry + cond_qry)
-    if dbtable == "project":
-        cursor.execute(query)
-    else:
-        cursor.execute(query, (ti, tf))
-
+    cursor.execute(query)
     rows = cursor.fetchall()
     rows_list = []
+    s = len(table_coll)
     for r in rows:
         rd = dict()
         for i in range(s):
