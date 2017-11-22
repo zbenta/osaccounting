@@ -101,7 +101,7 @@ def create_hdf(year):
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
         f.attrs['LastRun'] = di
-        f.attrs['LastRunUTC'] = to_isodate(di)
+        f.attrs['LastRunUTC'] = str(to_isodate(di))
         for proj in projects:
             grp_name = proj['name']
             grp = f.create_group(grp_name)
