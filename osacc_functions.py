@@ -149,7 +149,7 @@ def time_series(year):
     utc_f = to_isodate(df)
     utc_time_array = numpy.arange(numpy.datetime64(utc_i),
                                   numpy.datetime64(utc_f),
-                                  numpy.timedelta64(ev['delta_time'], 's'))
+                                  numpy.timedelta64(int(ev['delta_time']), 's'))
     return time_array, utc_time_array
 
 
