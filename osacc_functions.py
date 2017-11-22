@@ -11,19 +11,20 @@
 
 import pprint
 import datetime
+import time
+import tzlocal
 import os
 import h5py
-import time
 import numpy
 import mysql.connector
 import ConfigParser
 
 # TODO: to be removed after restruture
 # Set the initial date to start the accounting -> 1st March 2016
-MONTH_INI = 1
-YEAR_INI = 2016
+# MONTH_INI = 1
+# YEAR_INI = 2016
 # Interval of data points in seconds
-DELTA = 60.0
+# DELTA = 60.0
 
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
@@ -44,6 +45,9 @@ def get_conf():
     ev['mysql_user'] = parser.get('mysql', 'MYSQL_USER')
     ev['mysql_pass'] = parser.get('mysql', 'MYSQL_PASS')
     ev['mysql_host'] = parser.get('mysql', 'MYSQL_HOST')
+
+    dt_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
+    ev['secepoc_ini'] = to_secepoc(dt_ini)
 
     # graphite section options are Optional
     if parser.has_option('graphite', 'CARBON_SERVER'):
@@ -80,12 +84,11 @@ def create_hdf(year):
     :param year: Year
     :return (string) file_name
     """
-    month = 1
     ev = get_conf()
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
-        month = ev['month_ini']
+        di = ev['secepoc_ini']
 
-    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     projects = get_list_db("keystone", "project")
     # TODO: change to log info
     """
@@ -93,11 +96,13 @@ def create_hdf(year):
     pprint.pprint(projects)
     print 80 * "-"
     """
-    ts = time_series(year)
+    (ts, ts_utc) = time_series(year)
     file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
+        f.create_dataset('date_utc', data=ts_utc, compression="gzip")
         f.attrs['LastRun'] = di
+        f.attrs['LastRunUTC'] = to_isodate(di)
         for proj in projects:
             grp_name = proj['name']
             grp = f.create_group(grp_name)
@@ -123,8 +128,8 @@ def size_array(year):
     """Number of data points is the size of the arrays for 1 year
     :param year: Year
     :return (int) size of arrays"""
-    sizea = time_series(year)
-    return sizea.size
+    (ts, ts_utc) = time_series(year)
+    return ts.size
 
 
 def time_series(year):
@@ -133,15 +138,19 @@ def time_series(year):
     :param year: Year
     :returns (numpy array) time_array
     """
-    month = 1
     ev = get_conf()
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
-        month = ev['month_ini']
+        di = ev['secepoc_ini']
 
-    di = to_secepoc(datetime.datetime(year, month, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(di, df, ev['delta_time'])
-    return time_array
+    utc_i = to_isodate(di)
+    utc_f = to_isodate(df)
+    utc_time_array = numpy.arange(numpy.datetime64(utc_i),
+                                  numpy.datetime64(utc_f),
+                                  numpy.timedelta64(ev['delta_time'], 's'))
+    return time_array, utc_time_array
 
 
 def exists_hdf(year):
@@ -182,8 +191,17 @@ def get_list_db(database, dbtable):
 '''
 
 
-def update_list_db(ti, database):
-    tiso_i = to_isodate(ti)
+def get_list_db(ti, database):
+    """Get the list of rows of table from database
+    DB = keystone -> Table = projects
+    DB = cinder   -> Table = volumes
+    DB = nova     -> Table = instances and instance_info_caches
+    :param ti: Date Time in seconds to epoc
+    :param database: Database
+    :return: List of rows of a table in the database
+    """
+    local_timezone = tzlocal.get_localzone()
+    date_time_local = datetime.datetime.fromtimestamp(ti, local_timezone)
 
     # Default to DB = keystone, dbtable = projects
     dbtable = "projects"
@@ -192,7 +210,7 @@ def update_list_db(ti, database):
     if database == "cinder":
         dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "created_at >= %s OR status != 'deleted'" % tiso_i
+        condition = "created_at >= %s OR status != 'deleted'" % date_time_local
 
     table_coll = table_str.split(",")
     query = ' '.join((
@@ -209,7 +227,7 @@ def update_list_db(ti, database):
                     "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
-        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )" % tiso_i
+        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )" % date_time_local
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
@@ -367,7 +385,7 @@ def now_acc():
     """
     :return: now in seconds from epoch
     """
-    nacc = datetime.datetime.now()
+    nacc = datetime.datetime.utcnow()
     return to_secepoc(nacc)
 
 
