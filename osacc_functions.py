@@ -185,7 +185,6 @@ def get_list_db(ti, database):
         "FROM " + dbtable,
         "WHERE " + condition
     ))
-
     if database == "nova":
         table_coll = ['uuid', 'created_at', 'deleted_at', 'id', 'project_id',
                       'vm_state', 'memory_mb', 'vcpus', 'root_gb', 'network_info']
