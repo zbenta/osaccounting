@@ -96,11 +96,10 @@ def create_hdf(year):
     pprint.pprint(projects)
     print 80 * "-"
     """
-    (ts, ts_utc) = time_series(year)
+    ts = time_series(year)
     file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
-        f.create_dataset('date_utc', data=ts_utc, compression="gzip")
         f.attrs['LastRun'] = di
         f.attrs['LastRunUTC'] = to_isodate(di)
         for proj in projects:
@@ -128,7 +127,7 @@ def size_array(year):
     """Number of data points is the size of the arrays for 1 year
     :param year: Year
     :return (int) size of arrays"""
-    (ts, ts_utc) = time_series(year)
+    ts = time_series(year)
     return ts.size
 
 
@@ -145,12 +144,7 @@ def time_series(year):
 
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(di, df, ev['delta_time'])
-    utc_i = to_isodate(di)
-    utc_f = to_isodate(df)
-    utc_time_array = numpy.arange(numpy.datetime64(utc_i),
-                                  numpy.datetime64(utc_f),
-                                  numpy.timedelta64(int(ev['delta_time']), 's'))
-    return time_array, utc_time_array
+    return time_array
 
 
 def exists_hdf(year):
