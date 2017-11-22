@@ -19,6 +19,13 @@ import numpy
 import mysql.connector
 import ConfigParser
 
+# TODO: to be removed after restruture
+# Set the initial date to start the accounting -> 1st March 2016
+# MONTH_INI = 1
+# YEAR_INI = 2016
+# Interval of data points in seconds
+# DELTA = 60.0
+
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
 
@@ -156,16 +163,36 @@ def db_conn(database):
                                    db=database)
 
 
+'''
+def get_list_db(database, dbtable):
+    ev = get_conf()
+    year = ev['year_ini']
+    month = ev['month_ini']
+    ti = datetime.date(year, month, 1)
+    tf = datetime.date(year, 12, 31)
+
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if dbtable == "instances":
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
+
+    if dbtable == "volumes":
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = "created_at BETWEEN %s AND %s"
+
+    return get_table_rows(database, dbtable, table_str, condition, ti)
+'''
+
+
 def get_list_db(ti, database):
     """Get the list of rows of table from database
-    Query keystone, nova or cinder to get projects or instances or volumes
-    For projects (do not take into account admin and service projects)
     DB = keystone -> Table = project
     DB = cinder   -> Table = volumes
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Date Time in seconds to epoc
     :param database: Database
-    :return (json dict): List of rows of a table in the database
+    :return: List of rows of a table in the database
     """
     local_timezone = tzlocal.get_localzone()
     date_time_local = datetime.datetime.fromtimestamp(ti, local_timezone)
@@ -212,6 +239,133 @@ def get_table_rows(database, query, table_coll):
     rows = cursor.fetchall()
     rows_list = []
     s = len(table_coll)
+    for r in rows:
+        rd = dict()
+        for i in range(s):
+            rd[table_coll[i]] = r[i]
+        rows_list.append(rd)
+
+    return rows_list
+
+
+def get_list_db_old(database="keystone", dbtable="project"):
+    """Query keystone or nova or cinder to get projects or instances or volumes
+
+    For projects (do not take into account admin and service projects)
+    SELECT id,name,description,enabled
+    FROM project
+    WHERE (domain_id='default' and name!='admin' and name!='service')
+
+    For instances
+    SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
+    FROM instances
+    WHERE (vm_state != 'error')
+
+    For volumes
+    SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
+    FROM volumes
+
+    :param database: database to query
+    :param dbtable: database table to query
+    :return (json dict) all projects
+    """
+    ev = get_conf()
+    year = ev['year_ini']
+    month = ev['month_ini']
+    ti = datetime.date(year, month, 1)
+    tf = datetime.date(year, 12, 31)
+
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if dbtable == "instances":
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND created_at BETWEEN %s AND %s"
+
+    if dbtable == "volumes":
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = "created_at BETWEEN %s AND %s"
+
+    conn = db_conn(database)
+    cursor = conn.cursor()
+    sep = ","
+    table_coll = table_str.strip(sep).split(sep)
+    s = len(table_coll)
+    qry = "SELECT " + table_str + " FROM " + dbtable + " "
+    cond_qry = "WHERE (" + condition + ")"
+    query = (qry + cond_qry)
+    if dbtable == "project":
+        cursor.execute(query)
+    else:
+        cursor.execute(query, (ti, tf))
+
+    rows = cursor.fetchall()
+    rows_list = []
+    for r in rows:
+        rd = dict()
+        for i in range(s):
+            rd[table_coll[i]] = r[i]
+        rows_list.append(rd)
+
+    return rows_list
+
+
+def update_list_db_old(ti, database="keystone", dbtable="project"):
+    """Query keystone or nova or cinder to get projects or instances or volumes
+
+    DB = keystone: For projects (do not take into account admin and service projects)
+    SELECT id,name,description,enabled
+    FROM project
+    WHERE (domain_id='default' and name!='admin' and name!='service')
+
+    DB = nova: For instances
+    SELECT uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb
+    FROM instances
+    WHERE (vm_state != 'error' AND (created_at >= ti OR vm_state = 'active' ))
+
+    DB = cinder: For volumes
+    SELECT created_at,deleted_at,deleted,id,user_id,project_id,size,status
+    FROM volumes
+    WHERE created_at >= '2017-06-01' OR status != 'deleted'
+
+    DB = neutron: For public IPs
+    SELECT tenant_id,id,floating_ip_address,status
+    FROM floatingips
+    WHERE status='ACTIVE'
+
+    :param ti: date start
+    :param database: database to query
+    :param dbtable: database table to query
+    :return (json dict) all projects
+    """
+    tiso_i = to_isodate(ti)
+
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if dbtable == "instances":
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )"
+    if dbtable == "volumes":
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = "created_at >= %s OR status != 'deleted'"
+    if dbtable == "floatingips":
+        table_str = "tenant_id,id,floating_ip_address,status"
+        condition = "status='ACTIVE'"
+
+    conn = db_conn(database)
+    cursor = conn.cursor()
+    sep = ","
+    table_coll = table_str.strip(sep).split(sep)
+    s = len(table_coll)
+    qry = "SELECT " + table_str + " FROM " + dbtable + " "
+    cond_qry = "WHERE (" + condition + ")"
+    query = (qry + cond_qry)
+    if (dbtable == "project") or (dbtable == "floatingips"):
+        cursor.execute(query)
+    else:
+        cursor.execute(query, (tiso_i,))
+
+    rows = cursor.fetchall()
+    rows_list = []
     for r in rows:
         rd = dict()
         for i in range(s):
