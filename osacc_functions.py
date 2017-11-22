@@ -89,7 +89,7 @@ def create_hdf(year):
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
-    projects = get_list_db("keystone", "project")
+    projects = get_list_db("keystone")
     # TODO: change to log info
     """
     print "--> Projects"
