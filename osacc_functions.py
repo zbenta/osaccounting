@@ -193,7 +193,7 @@ def get_list_db(database, dbtable):
 
 def get_list_db(ti, database):
     """Get the list of rows of table from database
-    DB = keystone -> Table = projects
+    DB = keystone -> Table = project
     DB = cinder   -> Table = volumes
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Date Time in seconds to epoc
@@ -203,8 +203,8 @@ def get_list_db(ti, database):
     local_timezone = tzlocal.get_localzone()
     date_time_local = datetime.datetime.fromtimestamp(ti, local_timezone)
 
-    # Default to DB = keystone, dbtable = projects
-    dbtable = "projects"
+    # Default to DB = keystone, dbtable = project
+    dbtable = "project"
     table_str = "id,name,description,enabled"
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
     if database == "cinder":
