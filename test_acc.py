@@ -26,5 +26,11 @@
 from osacc_functions import *
 
 if __name__ == '__main__':
-    # test script
-    year = 2016
+    ev = get_conf()
+    directory = os.path.dirname(ev['out_dir'])
+    if not os.path.exists(directory):
+        os.makedirs(directory, 0755)
+
+    dt_ini = ev['secepoc_ini']
+    instances = get_list_db(dt_ini, "nova")
+    pprint.pprint(instances)
