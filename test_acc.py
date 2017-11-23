@@ -44,6 +44,7 @@ if __name__ == '__main__':
     a = dict()
     for proj in projects:
         pname = proj['name']
+        a[pname] = dict()
         print 40 * '-'
         for m in METRICS:
             a[pname][m] = numpy.zeros([size_array, ], dtype=int)
