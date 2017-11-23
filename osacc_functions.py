@@ -193,7 +193,8 @@ def get_list_db(ti, database):
                     "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
-        condition = "vm_state != 'error' AND (created_at >= '%s' OR vm_state = 'active' )" % date_time_local
+        condition = "instances.vm_state != 'error' AND " \
+                    "(instances.created_at >= '%s' OR instances.vm_state = 'active' )" % date_time_local
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
