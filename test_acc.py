@@ -32,5 +32,19 @@ if __name__ == '__main__':
         os.makedirs(directory, 0755)
 
     dt_ini = ev['secepoc_ini']
-    db_list = get_list_db(dt_ini, "nova")
-    pprint.pprint(db_list)
+    projects = get_list_db(dt_ini, "keystone")
+    instances = get_list_db(dt_ini, "nova")
+    volumes = get_list_db(dt_ini, "cinder")
+    size_array = 0
+    for year in get_years():
+        size_array = size_array + time_series(year).size
+        print time_series(year).size, size_array
+
+    print 80*'='
+    a = dict()
+    for proj in projects:
+        pname = proj['name']
+        print 40 * '-'
+        for m in METRICS:
+            a[pname][m] = numpy.zeros([size_array, ], dtype=int)
+            print pname, m, a[pname][m][:5]

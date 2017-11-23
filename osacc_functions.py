@@ -100,7 +100,8 @@ def create_hdf(year):
             grp = f.create_group(grp_name)
             grp.attrs['ProjID'] = proj['id']
             grp.attrs['ProjDescription'] = proj['description']
-            a = create_metric_array(year)
+            ts = time_series(year)
+            a = numpy.zeros([ts.size, ], dtype=int)
             for m in METRICS:
                 grp.create_dataset(m, data=a, compression="gzip")
 
@@ -112,16 +113,8 @@ def create_metric_array(year):
     :param year: Year to calculate the size of the array
     :return (numpy array) Array to hold the values of the metric
     """
-    sizea = size_array(year)
-    return numpy.zeros([sizea, ], dtype=int)
-
-
-def size_array(year):
-    """Number of data points is the size of the arrays for 1 year
-    :param year: Year
-    :return (int) size of arrays"""
     ts = time_series(year)
-    return ts.size
+    return numpy.zeros([ts.size, ], dtype=int)
 
 
 def time_series(year):
