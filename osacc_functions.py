@@ -177,7 +177,7 @@ def get_list_db(ti, database):
     if database == "cinder":
         dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "created_at >= %s OR status != 'deleted'" % date_time_local
+        condition = "created_at >= '%s' OR status != 'deleted'" % date_time_local
 
     table_coll = table_str.split(",")
     query = ' '.join((
@@ -193,7 +193,7 @@ def get_list_db(ti, database):
                     "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
-        condition = "vm_state != 'error' AND (created_at >= %s OR vm_state = 'active' )" % date_time_local
+        condition = "vm_state != 'error' AND (created_at >= '%s' OR vm_state = 'active' )" % date_time_local
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
