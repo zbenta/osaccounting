@@ -52,16 +52,6 @@ if __name__ == '__main__':
             t_final = to_secepoc(inst["deleted_at"])
 
         idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
-        print 80 * '='
-        print idx_start, idx_end
-        print t_create, t_final
-        print time_array[idx_start], time_array[idx_end]
-        print t_create-time_array[idx_start], t_final-time_array[idx_end]
-        if t_create-time_array[idx_start] >= 60.0:
-            print "HHHEEELLLPPP dt_create = ", t_create-time_array[idx_start]
-        if t_final-time_array[idx_end] <= -60.0:
-            print "HHHEEELLLPPP dt_create = ", t_final-time_array[idx_end]
-
         p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
         if not p:
             continue
