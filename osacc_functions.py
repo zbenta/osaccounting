@@ -117,9 +117,21 @@ def create_metric_array(year):
     return numpy.zeros([ts.size, ], dtype=int)
 
 
+def time_series_ini():
+    """Create a time array (of ints) in epoch format with interval
+    of delta_time for all years
+    :returns (numpy array) time_array
+    """
+    years = get_years()
+    di = to_secepoc(datetime.datetime(years[0], 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
+    time_array = numpy.arange(di, df, ev['delta_time'])
+    return time_array
+
+
 def time_series(year):
     """Create a time array (of ints) in epoch format with interval
-    of one hour for a given year
+    of delta_time for a given year
     :param year: Year
     :returns (numpy array) time_array
     """
@@ -239,6 +251,23 @@ def to_isodate(date):
     return datetime.datetime.utcfromtimestamp(date)
 
 
+def dt_to_index(ti, tf, time_array):
+    """For a given date in seconds to epoch return the
+    corresponding index in the time_series
+    :param ti: initial date in seconds to epoch in UTC
+    :param tf: final date in seconds to epoch in UTC
+    :param time_array: Time array
+    :return (int, int) index start of interval and end of interval in time series
+    """
+    idxs_i = numpy.argwhere((time_array > ti))
+    idx_ini = idxs_i[0][0] - 1
+    idx_fin = time_array.size - 1
+    if tf < time_array[-1]:
+        idxs_f = numpy.argwhere((time_array < tf))
+        idx_fin = idxs_f[-1][0] + 1
+    return idx_ini, idx_fin
+
+
 def dt_to_indexes(ti, tf, year):
     """For a given date in seconds to epoch return the
     corresponding index in the time_series
@@ -250,7 +279,7 @@ def dt_to_indexes(ti, tf, year):
     ts = time_series(year)
     idxs_i = numpy.argwhere((ts > ti))
     idx_ini = idxs_i[0][0] - 1
-    idx_fin = size_array(year) - 1
+    idx_fin = time_series(year).size - 1
     if tf < ts[-1]:
         idxs_f = numpy.argwhere((ts < tf))
         idx_fin = idxs_f[-1][0] + 1

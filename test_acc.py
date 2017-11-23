@@ -35,11 +35,7 @@ if __name__ == '__main__':
     projects = get_list_db(dt_ini, "keystone")
     instances = get_list_db(dt_ini, "nova")
     volumes = get_list_db(dt_ini, "cinder")
-    size_array = 0
-    for year in get_years():
-        size_array = size_array + time_series(year).size
-        print time_series(year).size, size_array
-
+    time_array = time_series_ini()
     print 80*'='
     a = dict()
     for proj in projects:
@@ -47,4 +43,15 @@ if __name__ == '__main__':
         a[pname] = dict()
         print 20 * '-', pname
         for m in METRICS:
-            a[pname][m] = numpy.zeros([size_array, ], dtype=int)
+            a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+
+    for inst in instances:
+        t_create = to_secepoc(inst["created_at"])
+        t_final = now_acc()
+        if inst["deleted_at"]:
+            t_final = to_secepoc(inst["deleted_at"])
+
+        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
+        p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
+        if not p:
+            continue
