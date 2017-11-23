@@ -122,6 +122,7 @@ def time_series_ini():
     of delta_time for all years
     :returns (numpy array) time_array
     """
+    ev = get_conf()
     years = get_years()
     di = to_secepoc(datetime.datetime(years[0], 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
