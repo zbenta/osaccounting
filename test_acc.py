@@ -56,6 +56,7 @@ if __name__ == '__main__':
         print idx_start, idx_end
         print t_create, t_final
         print time_array[idx_start], time_array[idx_end]
+        print t_create-time_array[idx_start], t_final-time_array[idx_end]
         p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
         if not p:
             continue
