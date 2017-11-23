@@ -201,7 +201,6 @@ def get_list_db(ti, database):
             "WHERE " + condition
         ))
 
-    print "QUERY = ", query
     return get_table_rows(database, query, table_coll)
 
 
