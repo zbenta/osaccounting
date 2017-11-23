@@ -32,5 +32,5 @@ if __name__ == '__main__':
         os.makedirs(directory, 0755)
 
     dt_ini = ev['secepoc_ini']
-    instances = get_list_db(dt_ini, "nova")
-    pprint.pprint(instances)
+    db_list = get_list_db(dt_ini, "keystone")
+    pprint.pprint(db_list)
