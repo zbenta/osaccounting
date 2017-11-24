@@ -34,14 +34,17 @@ if __name__ == '__main__':
             continue
 
         proj = p[0]
-        #a[p]['vcpus'][idx_start:idx_end] = a[p]['vcpus'][idx_start:idx_end] + inst['vcpus']
-        #a[p]['mem_mb'][idx_start:idx_end] = a[p]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
-        #a[p]['disk_gb'][idx_start:idx_end] = a[p]['disk_gb'][idx_start:idx_end] + inst['root_gb']
-        #a[p]['ninstances'][idx_start:idx_end] = a[p]['ninstances'][idx_start:idx_end] + 1
+        a[proj]['vcpus'][idx_start:idx_end] = a[proj]['vcpus'][idx_start:idx_end] + inst['vcpus']
+        a[proj]['mem_mb'][idx_start:idx_end] = a[proj]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
+        a[proj]['disk_gb'][idx_start:idx_end] = a[proj]['disk_gb'][idx_start:idx_end] + inst['root_gb']
+         1
 
-        print type(a[p]['vcpus'])
+        # print type(a[p]['vcpus'])
         if inst['network_info']:
             print 80 * '='
-            pprint.pprint(inst['network_info'])
+            n_ips = inst['network_info'][0]['network']['subnets']['ips']['floating_ips'].size
+            a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + n_ips
+            print 40*'>', n_ips
+            pprint.pprint(inst['network_info'][0]['network']['subnets']['ips']['floating_ips'])
 
 # METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
