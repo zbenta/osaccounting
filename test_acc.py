@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 for n in range(len(net_info[l]['network']['subnets'])):
                     for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
-                        a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + nip
-            pprint.pprint(a[proj]['npublic_ips'][idx_start:idx_start+5])
+                        a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
+            pprint.pprint(a[pname]['npublic_ips'][idx_start:idx_start+5])
 
 # METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
