@@ -39,11 +39,14 @@ if __name__ == '__main__':
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
         a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
-        if inst['network_info']:
+        net_info = json.loads(inst['network_info'])
+        if net_info:
             print 80 * '='
-            #n_ips = inst['network_info'][0]['network']['subnets']['ips']['floating_ips'].size
-            #a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + n_ips
-            #print 40*'>', n_ips
-            pprint.pprint(inst['network_info'][0]['network'])
+            for l in range(net_info):
+                for n in range(net_info[l]['network']['subnets']):
+                    for k in range(net_info[l]['network']['subnets'][n]['ips']):
+                        nip = net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'].size
+                        a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + nip
+            pprint.pprint(a[proj]['npublic_ips'][idx_start:idx_start+5])
 
 # METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']

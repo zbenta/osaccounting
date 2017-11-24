@@ -18,6 +18,7 @@ import h5py
 import numpy
 import mysql.connector
 import ConfigParser
+import json
 
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
