@@ -18,7 +18,6 @@ if __name__ == '__main__':
     for proj in projects:
         pname = proj['name']
         a[pname] = dict()
-        print 20 * '-', pname
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
@@ -41,12 +40,38 @@ if __name__ == '__main__':
         a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
         net_info = json.loads(inst['network_info'])
         if net_info:
-            print 80 * '='
             for l in range(len(net_info)):
                 for n in range(len(net_info[l]['network']['subnets'])):
                     for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
-            pprint.pprint(a[pname]['npublic_ips'][idx_start:idx_start+5])
 
-# METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
+    for vol in volumes:
+        t_create = to_secepoc(inst["created_at"])
+        t_final = now_acc()
+        if vol["deleted"]:
+            t_final = to_secepoc(vol["deleted"])
+
+        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
+        p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
+        if not p:
+            continue
+
+        proj = p[0]
+        pname = proj['name']
+        a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
+        a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
+
+    for year in get_years():
+        filename = get_hdf_filename(year)
+        with h5py.File(filename, 'r+') as f:
+            ts = f['date'][:]
+            idx_start, idx_end = dt_to_index(ts[0], ts[-1], time_array)
+            for proj in projects:
+                grp_name = proj['name']
+                for metric in METRICS:
+                    data_array = f[grp_name][metric]
+                    data_array[:] = a[grp_name][metric][idx_start:idx_end]
+
+
+

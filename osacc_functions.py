@@ -30,7 +30,6 @@ def get_conf():
     """
     parser = ConfigParser.SafeConfigParser(allow_no_value=True)
     parser.read('/etc/osacc.conf')
-
     ev = dict()
     ev['out_dir'] = parser.get('DEFAULT', 'OUT_DIR')
     ev['month_ini'] = parser.getint('DEFAULT', 'MONTH_INI')
@@ -39,7 +38,6 @@ def get_conf():
     ev['mysql_user'] = parser.get('mysql', 'MYSQL_USER')
     ev['mysql_pass'] = parser.get('mysql', 'MYSQL_PASS')
     ev['mysql_host'] = parser.get('mysql', 'MYSQL_HOST')
-
     dt_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
     ev['secepoc_ini'] = to_secepoc(dt_ini)
 
