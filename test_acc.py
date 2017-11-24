@@ -5,38 +5,15 @@
 # Author: Mario David <mariojmdavid@gmail.com>
 #
 
-
-"""Create initial hdf5 file to store accounting data for the first year
-
-    Dictionaries (data structures) returned from the query to database tables
-    - projects  (DB=keystone, TABLE=project)
-    - instances (DB=nova,     TABLE=instances)
-    - volumes   (DB=cinder,   TABLE=volumes)
-    project = { "description": None,
-                "enabled": None,
-                "id": None,
-                "name": None
-               }
-    instances = {
-                }
-    volumes = {
-              }
-"""
-
 from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    directory = os.path.dirname(ev['out_dir'])
-    if not os.path.exists(directory):
-        os.makedirs(directory, 0755)
-
     dt_ini = ev['secepoc_ini']
     projects = get_list_db(dt_ini, "keystone")
     instances = get_list_db(dt_ini, "nova")
     volumes = get_list_db(dt_ini, "cinder")
     time_array = time_series_ini()
-    print 80*'='
     a = dict()
     for proj in projects:
         pname = proj['name']
@@ -55,3 +32,15 @@ if __name__ == '__main__':
         p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
         if not p:
             continue
+
+        proj = p[0]
+        a[p]['vcpus'][idx_start:idx_end] = a[p]['vcpus'][idx_start:idx_end] + inst['vcpus']
+        a[p]['mem_mb'][idx_start:idx_end] = a[p]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
+        a[p]['disk_gb'][idx_start:idx_end] = a[p]['disk_gb'][idx_start:idx_end] + inst['root_gb']
+        a[p]['ninstances'][idx_start:idx_end] = a[p]['ninstances'][idx_start:idx_end] + 1
+
+        if inst['network_info']:
+            print 80 * '='
+            pprint.pprint(inst['network_info'])
+
+# METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']

@@ -5,7 +5,6 @@
 # Author: Mario David <mariojmdavid@gmail.com>
 #
 
-
 """Create initial hdf5 files to store accounting data
 
     Dictionaries (data structures) returned from the query to database tables
@@ -33,7 +32,6 @@ if __name__ == '__main__':
 
     for year in get_years():
         filename = create_hdf(year)
-        size_a = size_array(year)
         # TODO: change this to log info
         print 80 * "="
-        print "Year = %i : Size Array = %i : FileName = %s" % (year, size_a, filename)
+        print "Year = %i : FileName = %s" % (year, filename)
