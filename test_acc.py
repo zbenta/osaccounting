@@ -37,8 +37,7 @@ if __name__ == '__main__':
         a[proj]['vcpus'][idx_start:idx_end] = a[proj]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[proj]['mem_mb'][idx_start:idx_end] = a[proj]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[proj]['disk_gb'][idx_start:idx_end] = a[proj]['disk_gb'][idx_start:idx_end] + inst['root_gb']
-         1
-
+        a[proj]['ninstances'][idx_start:idx_end] = a[proj]['ninstances'][idx_start:idx_end] + 1
         # print type(a[p]['vcpus'])
         if inst['network_info']:
             print 80 * '='
