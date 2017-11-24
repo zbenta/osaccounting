@@ -34,15 +34,15 @@ if __name__ == '__main__':
             continue
 
         proj = p[0]
-        a[proj]['vcpus'][idx_start:idx_end] = a[proj]['vcpus'][idx_start:idx_end] + inst['vcpus']
-        a[proj]['mem_mb'][idx_start:idx_end] = a[proj]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
-        a[proj]['disk_gb'][idx_start:idx_end] = a[proj]['disk_gb'][idx_start:idx_end] + inst['root_gb']
-        a[proj]['ninstances'][idx_start:idx_end] = a[proj]['ninstances'][idx_start:idx_end] + 1
-        # print type(a[p]['vcpus'])
+        #a[proj]['vcpus'][idx_start:idx_end] = a[proj]['vcpus'][idx_start:idx_end] + inst['vcpus']
+        #a[proj]['mem_mb'][idx_start:idx_end] = a[proj]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
+        #a[proj]['disk_gb'][idx_start:idx_end] = a[proj]['disk_gb'][idx_start:idx_end] + inst['root_gb']
+        #a[proj]['ninstances'][idx_start:idx_end] = a[proj]['ninstances'][idx_start:idx_end] + 1
+        print proj, type(a[proj]['vcpus'])
         if inst['network_info']:
             print 80 * '='
             n_ips = inst['network_info'][0]['network']['subnets']['ips']['floating_ips'].size
-            a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + n_ips
+            #a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + n_ips
             print 40*'>', n_ips
             pprint.pprint(inst['network_info'][0]['network']['subnets']['ips']['floating_ips'])
 
