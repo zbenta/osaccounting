@@ -42,10 +42,10 @@ if __name__ == '__main__':
         net_info = json.loads(inst['network_info'])
         if net_info:
             print 80 * '='
-            for l in range(net_info.size):
-                for n in range(net_info[l]['network']['subnets'].size):
-                    for k in range(net_info[l]['network']['subnets'][n]['ips'].size):
-                        nip = net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'].size
+            for l in range(len(net_info)):
+                for n in range(len(net_info[l]['network']['subnets'])):
+                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
+                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[proj]['npublic_ips'][idx_start:idx_end] = a[proj]['npublic_ips'][idx_start:idx_end] + nip
             pprint.pprint(a[proj]['npublic_ips'][idx_start:idx_start+5])
 
