@@ -49,8 +49,8 @@ if __name__ == '__main__':
     for vol in volumes:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
-        if vol["deleted"]:
-            t_final = to_secepoc(vol["deleted"])
+        if vol["deleted_at"]:
+            t_final = to_secepoc(vol["deleted_at"])
 
         idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
         p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
