@@ -14,8 +14,10 @@ from osacc_functions import *
 if __name__ == '__main__':
     ev = get_conf()
     years = get_years()
+
     di = ev['secepoc_ini']
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
+
     time_array = time_series(di, df)
     a = dict()
     get_projects(di, time_array, a)

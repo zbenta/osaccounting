@@ -239,7 +239,7 @@ def get_table_rows(database, query, table_coll):
     return rows_list
 
 
-def get_projects(di, time_array, a):
+def insert_projects(di, time_array, a):
     projects = get_list_db(di, "keystone")
     for proj in projects:
         pname = proj['name']
@@ -248,7 +248,7 @@ def get_projects(di, time_array, a):
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
 
-def get_instances(di, time_array, a):
+def insert_instances(di, time_array, a):
     projects = get_list_db(di, "keystone")
     instances = get_list_db(di, "nova")
     for inst in instances:
@@ -277,7 +277,7 @@ def get_instances(di, time_array, a):
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
 
-def get_volumes(di, time_array, a):
+def insert_volumes(di, time_array, a):
     projects = get_list_db(di, "keystone")
     volumes = get_list_db(di, "cinder")
     for vol in volumes:
