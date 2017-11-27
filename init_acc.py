@@ -31,56 +31,9 @@ if __name__ == '__main__':
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
     time_array = time_series(di, df)
     a = dict()
-
-    projects = get_list_db(di, "keystone")
-    for proj in projects:
-        pname = proj['name']
-        a[pname] = dict()
-        for m in METRICS:
-            a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
-
-    instances = get_list_db(di, "nova")
-    for inst in instances:
-        t_create = to_secepoc(inst["created_at"])
-        t_final = now_acc()
-        if inst["deleted_at"]:
-            t_final = to_secepoc(inst["deleted_at"])
-
-        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
-        p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
-        if not p:
-            continue
-
-        proj = p[0]
-        pname = proj['name']
-        a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
-        a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
-        a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
-        a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
-        net_info = json.loads(inst['network_info'])
-        if net_info:
-            for l in range(len(net_info)):
-                for n in range(len(net_info[l]['network']['subnets'])):
-                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
-                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
-                        a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
-
-    volumes = get_list_db(di, "cinder")
-    for vol in volumes:
-        t_create = to_secepoc(vol["created_at"])
-        t_final = now_acc()
-        if vol["deleted_at"]:
-            t_final = to_secepoc(vol["deleted_at"])
-
-        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
-        p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
-        if not p:
-            continue
-
-        proj = p[0]
-        pname = proj['name']
-        a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
-        a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
+    get_projects(di, time_array, a)
+    get_instances(di, time_array, a)
+    get_volumes(di, time_array, a)
 
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
