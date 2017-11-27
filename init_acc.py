@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     volumes = get_list_db(di, "cinder")
     for vol in volumes:
-        t_create = to_secepoc(inst["created_at"])
+        t_create = to_secepoc(vol["created_at"])
         t_final = now_acc()
         if vol["deleted_at"]:
             t_final = to_secepoc(vol["deleted_at"])
