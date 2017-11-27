@@ -21,7 +21,7 @@ if __name__ == '__main__':
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
-    for inst in instances:
+    for inst in instances[:5]:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if inst["deleted_at"]:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
-    for vol in volumes:
+    for vol in volumes[:5]:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if vol["deleted_at"]:
@@ -70,10 +70,10 @@ if __name__ == '__main__':
             for proj in projects:
                 grp_name = proj['name']
                 for metric in METRICS:
+                    data_array = f[grp_name][metric]
                     c = data_array.size
                     d = a[grp_name][metric][idx_start:idx_end]
                     print "Sizes HDF data_array = ", c, " a = ", d.size
-                    data_array = f[grp_name][metric]
                     data_array[:] = a[grp_name][metric][idx_start:idx_end]
 
 
