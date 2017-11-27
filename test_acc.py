@@ -72,13 +72,18 @@ if __name__ == '__main__':
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start, idx_end = dt_to_index(ts[0], ts[-1], time_array)
+            print 80 * '='
+            print 'ts from the hdf array time_series'
+            print 'First and last ts values ', ts[0], ts[-1]
+            print 'First and last indexes ', idx_start, idx_end
+            print 80 * '='
+
             for proj in projects:
                 grp_name = proj['name']
                 for metric in METRICS:
                     data_array = f[grp_name][metric]
                     c = data_array.size
-                    d = a[grp_name][metric][idx_start:idx_end]
-                    print "Sizes HDF data_array = ", c, " a = ", d.size
+                    print "Sizes HDF data_array = ", c
                     data_array[:] = a[grp_name][metric][idx_start:idx_end]
 
 
