@@ -81,6 +81,7 @@ if __name__ == '__main__':
             print 'ts from the hdf array time_series'
             print 'First and last ts values ', ts[0], ts[-1]
             print 'First and last indexes ', idx_start, idx_end
+            print 'The full time array ', time_array[idx_start], time_array[idx_end]
             print 80 * '='
 
             for proj in projects:
@@ -89,7 +90,7 @@ if __name__ == '__main__':
                     data_array = f[grp_name][metric]
                     c = data_array.size
                     print "Sizes HDF data_array = ", c
-                    data_array[:] = a[grp_name][metric][idx_start:idx_end+1]
+                    data_array[:] = a[grp_name][metric][idx_start:idx_end]
 
 
 
