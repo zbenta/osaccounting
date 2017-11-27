@@ -68,6 +68,14 @@ def get_hdf_filename(year):
     return ev['out_dir'] + os.sep + str(year) + '.hdf'
 
 
+def exists_hdf(year):
+    """Checks if hdf5 file exists
+    :param year: Year
+    :return (boolean) true is file exists or false if it doesn't
+    """
+    return os.path.exists(get_hdf_filename(year))
+
+
 def create_hdf(year):
     """Initial creation of hdf5 files containing 1 group per project and datasets
     for each metric and for each project/group.
@@ -107,13 +115,45 @@ def create_hdf(year):
     return file_name
 
 
-def create_metric_array(year):
-    """Create array for a given metric
-    :param year: Year to calculate the size of the array
-    :return (numpy array) Array to hold the values of the metric
+def to_secepoc(date):
+    """Converts datetime to seconds from epoc
+    :param date: Date in datetime format
+    :returns (float) seconds from epoch
     """
-    ts = time_series(year)
-    return numpy.zeros([ts.size, ], dtype=int)
+    return time.mktime(date.utctimetuple())
+
+
+def to_isodate(date):
+    """Converts seconds from epoc to utc datetime
+    :param date: Date in seconds to epoc format
+    :returns (datetime) utc datetime
+    """
+    return datetime.datetime.utcfromtimestamp(date)
+
+
+def dt_to_index(ti, tf, time_array):
+    """For a given date in seconds to epoch return the
+    corresponding index in the time_series
+    :param ti: initial date in seconds to epoch in UTC
+    :param tf: final date in seconds to epoch in UTC
+    :param time_array: Time array  (numpy array)
+    :return (int, int) index start of interval and end of interval in time series
+    """
+    idxs_i = numpy.argwhere((time_array > ti))
+    idx_ini = idxs_i[0][0] - 1
+    idx_fin = time_array.size - 1
+    if tf < time_array[-1]:
+        idxs_f = numpy.argwhere((time_array < tf))
+        idx_fin = idxs_f[-1][0] + 1
+    return idx_ini, idx_fin
+
+
+def now_acc():
+    """
+    :return: now in seconds from epoch
+    """
+    nacc = datetime.datetime.utcnow()
+    return to_secepoc(nacc)
 
 
 def time_series_ini():
@@ -128,30 +168,6 @@ def time_series_ini():
     time_array = numpy.arange(di, df, ev['delta_time'])
     return time_array
 
-
-def time_series(year):
-    """Create a time array (of ints) in epoch format with interval
-    of delta_time for a given year
-    :param year: Year
-    :returns (numpy array) time_array
-    """
-    ev = get_conf()
-    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
-    if year == ev['year_ini']:
-        di = ev['secepoc_ini']
-
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
-    time_array = numpy.arange(di, df, ev['delta_time'])
-    return time_array
-
-
-def exists_hdf(year):
-    """Checks if hdf5 file exists
-    :param year: Year
-    :return (boolean) true is file exists or false if it doesn't
-    """
-    return os.path.exists(get_hdf_filename(year))
-    
 
 def db_conn(database):
     ev = get_conf()
@@ -224,70 +240,3 @@ def get_table_rows(database, query, table_coll):
         rows_list.append(rd)
 
     return rows_list
-
-
-def now_acc():
-    """
-    :return: now in seconds from epoch
-    """
-    nacc = datetime.datetime.utcnow()
-    return to_secepoc(nacc)
-
-
-def to_secepoc(date):
-    """Converts datetime to seconds from epoc
-    :param date: Date in datetime format
-    :returns (float) seconds from epoch
-    """
-    return time.mktime(date.utctimetuple())
-
-
-def to_isodate(date):
-    """Converts seconds from epoc to utc datetime
-    :param date: Date in seconds to epoc format
-    :returns (datetime) utc datetime
-    """
-    return datetime.datetime.utcfromtimestamp(date)
-
-
-def dt_to_index(ti, tf, time_array):
-    """For a given date in seconds to epoch return the
-    corresponding index in the time_series
-    :param ti: initial date in seconds to epoch in UTC
-    :param tf: final date in seconds to epoch in UTC
-    :param time_array: Time array  (numpy array)
-    :return (int, int) index start of interval and end of interval in time series
-    """
-    idxs_i = numpy.argwhere((time_array > ti))
-    idx_ini = idxs_i[0][0] - 1
-    idx_fin = time_array.size - 1
-    if tf < time_array[-1]:
-        idxs_f = numpy.argwhere((time_array < tf))
-        idx_fin = idxs_f[-1][0] + 1
-    return idx_ini, idx_fin
-
-
-def dt_to_indexes(ti, tf, year):
-    """For a given date in seconds to epoch return the
-    corresponding index in the time_series
-    :param ti: initial date in seconds to epoch in UTC
-    :param tf: final date in seconds to epoch in UTC
-    :param year: year
-    :return (int, int) index start of interval and end of interval in time series
-    """
-    ts = time_series(year)
-    idxs_i = numpy.argwhere((ts > ti))
-    idx_ini = idxs_i[0][0] - 1
-    idx_fin = time_series(year).size - 1
-    if tf < ts[-1]:
-        idxs_f = numpy.argwhere((ts < tf))
-        idx_fin = idxs_f[-1][0] + 1
-    return idx_ini, idx_fin
-
-
-def get_last_run():
-    ev = get_conf()
-    year = ev['year_ini']
-    last_run = datetime.datetime(year, 1, 1, 0, 0, 0)
-    return last_run
-
