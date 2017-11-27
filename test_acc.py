@@ -14,6 +14,11 @@ if __name__ == '__main__':
     instances = get_list_db(dt_ini, "nova")
     volumes = get_list_db(dt_ini, "cinder")
     time_array = time_series_ini()
+    print 80*'='
+    print 'time_series'
+    print time_array[0], time_array[-1]
+    print time_array
+    print 80*'='
     a = dict()
     for proj in projects:
         pname = proj['name']

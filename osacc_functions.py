@@ -255,10 +255,10 @@ def dt_to_index(ti, tf, time_array):
     corresponding index in the time_series
     :param ti: initial date in seconds to epoch in UTC
     :param tf: final date in seconds to epoch in UTC
-    :param time_array: Time array
+    :param time_array: Time array  (numpy array)
     :return (int, int) index start of interval and end of interval in time series
     """
-    idxs_i = numpy.argwhere((time_array > ti))
+    idxs_i = numpy.argwhere((time_array >= ti))
     idx_ini = idxs_i[0][0] - 1
     idx_fin = time_array.size - 1
     if tf < time_array[-1]:
@@ -276,7 +276,7 @@ def dt_to_indexes(ti, tf, year):
     :return (int, int) index start of interval and end of interval in time series
     """
     ts = time_series(year)
-    idxs_i = numpy.argwhere((ts > ti))
+    idxs_i = numpy.argwhere((ts >= ti))
     idx_ini = idxs_i[0][0] - 1
     idx_fin = time_series(year).size - 1
     if tf < ts[-1]:
