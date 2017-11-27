@@ -26,18 +26,20 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    dt_ini = ev['secepoc_ini']
-    projects = get_list_db(dt_ini, "keystone")
-    instances = get_list_db(dt_ini, "nova")
-    volumes = get_list_db(dt_ini, "cinder")
-    time_array = time_series_ini()
+    years = get_years()
+    di = ev['secepoc_ini']
+    df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
+    time_array = time_series(di, df)
     a = dict()
+
+    projects = get_list_db(di, "keystone")
     for proj in projects:
         pname = proj['name']
         a[pname] = dict()
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
+    instances = get_list_db(di, "nova")
     for inst in instances:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
@@ -63,6 +65,7 @@ if __name__ == '__main__':
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
+    volumes = get_list_db(di, "cinder")
     for vol in volumes:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()

@@ -156,15 +156,12 @@ def now_acc():
     return to_secepoc(nacc)
 
 
-def time_series_ini():
+def time_series(di, df):
     """Create a time array (of ints) in epoch format with interval
     of delta_time for all years
     :returns (numpy array) time_array
     """
     ev = get_conf()
-    years = get_years()
-    di = to_secepoc(datetime.datetime(years[0], 1, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
     time_array = numpy.arange(di, df, ev['delta_time'])
     return time_array
 
