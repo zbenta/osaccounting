@@ -14,24 +14,14 @@ if __name__ == '__main__':
     instances = get_list_db(dt_ini, "nova")
     volumes = get_list_db(dt_ini, "cinder")
     time_array = time_series_ini()
-    print 80*'='
-    print 'time_series'
-    print time_array[0], time_array[-1]
-    print time_array.size
-    print time_array
-    print 80*'='
     a = dict()
     for proj in projects:
         pname = proj['name']
         a[pname] = dict()
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
-            print 80*'='
-            print 'metrics ', pname, m
-            print a[pname][m].size
-            print 80*'='
 
-    for inst in instances[:5]:
+    for inst in instances:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if inst["deleted_at"]:
@@ -56,7 +46,7 @@ if __name__ == '__main__':
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
-    for vol in volumes[:5]:
+    for vol in volumes:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if vol["deleted_at"]:
@@ -72,25 +62,24 @@ if __name__ == '__main__':
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
 
-    for year in get_years():
+    years = get_years()
+    for year in years:
         filename = get_hdf_filename(year)
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start, idx_end = dt_to_index(ts[0], ts[-1], time_array)
-            print 80 * '='
-            print 'ts from the hdf array time_series'
-            print 'First and last ts values ', ts[0], ts[-1]
-            print 'First and last indexes ', idx_start, idx_end
-            print 'The full time array ', time_array[idx_start], time_array[idx_end]
-            print 80 * '='
-
             for proj in projects:
                 grp_name = proj['name']
                 for metric in METRICS:
                     data_array = f[grp_name][metric]
-                    c = data_array.size
-                    print "Sizes HDF data_array = ", c
-                    data_array[:] = a[grp_name][metric][idx_start:idx_end]
+                    data_array[:] = a[grp_name][metric][idx_start:idx_end+1]
+
+            tnow = now_acc()
+            f.attrs['LastRun'] = tnow
+            f.attrs['LastRunUTC'] = str(to_isodate(tnow))
+            if year < years[-1]:
+                f.attrs['LastRun'] = ts[-1]
+                f.attrs['LastRunUTC'] = str(to_isodate(ts[-1]))
 
 
 
