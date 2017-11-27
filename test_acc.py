@@ -17,6 +17,7 @@ if __name__ == '__main__':
     print 80*'='
     print 'time_series'
     print time_array[0], time_array[-1]
+    print time_array.size
     print time_array
     print 80*'='
     a = dict()
@@ -25,6 +26,10 @@ if __name__ == '__main__':
         a[pname] = dict()
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+            print 80*'='
+            print 'metrics ', pname, m
+            print a[pname][m].size
+            print 80*'='
 
     for inst in instances[:5]:
         t_create = to_secepoc(inst["created_at"])
@@ -84,7 +89,7 @@ if __name__ == '__main__':
                     data_array = f[grp_name][metric]
                     c = data_array.size
                     print "Sizes HDF data_array = ", c
-                    data_array[:] = a[grp_name][metric][idx_start:idx_end]
+                    data_array[:] = a[grp_name][metric][idx_start:idx_end+1]
 
 
 
