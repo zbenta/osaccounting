@@ -86,7 +86,7 @@ def create_hdf(year):
     """
     ev = get_conf()
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0)) - ev['delta_time']
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
