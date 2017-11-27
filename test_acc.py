@@ -70,6 +70,9 @@ if __name__ == '__main__':
             for proj in projects:
                 grp_name = proj['name']
                 for metric in METRICS:
+                    c = data_array.size
+                    d = a[grp_name][metric][idx_start:idx_end]
+                    print "Sizes HDF data_array = ", c, " a = ", d.size
                     data_array = f[grp_name][metric]
                     data_array[:] = a[grp_name][metric][idx_start:idx_end]
 
