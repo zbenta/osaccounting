@@ -86,6 +86,7 @@ def create_hdf(year):
     """
     ev = get_conf()
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0)) - ev['delta_time']
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
@@ -96,7 +97,7 @@ def create_hdf(year):
     pprint.pprint(projects)
     print 80 * "-"
     """
-    ts = time_series(year)
+    ts = time_series(di, df)
     file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
