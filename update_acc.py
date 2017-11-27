@@ -13,16 +13,17 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    years = get_years()
+    y = datetime.datetime.utcnow()
+    year_now = y.year
 
     di = ev['secepoc_ini']
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
-
     time_array = time_series(di, df)
+    projects = get_list_db(di, "keystone")
     a = dict()
-    get_projects(di, time_array, a)
-    get_instances(di, time_array, a)
-    get_volumes(di, time_array, a)
+    insert_projects(di, time_array, a)
+    insert_instances(di, time_array, a)
+    insert_volumes(di, time_array, a)
 
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):

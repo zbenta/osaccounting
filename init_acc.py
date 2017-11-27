@@ -42,6 +42,9 @@ if __name__ == '__main__':
 
     years = get_years()
     for year in years:
+        print 80*'='
+        print year
+        print ' '
         filename = create_hdf(year)
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
@@ -50,6 +53,8 @@ if __name__ == '__main__':
                 grp_name = proj['name']
                 for metric in METRICS:
                     data_array = f[grp_name][metric]
+                    print 'hdf data_array size = ', data_array.size
+                    print 'idx_start = ', idx_start, ' idx_end = ', idx_end
                     data_array[:] = a[grp_name][metric][idx_start:idx_end+1]
 
             tnow = now_acc()
