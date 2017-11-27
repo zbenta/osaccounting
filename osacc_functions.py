@@ -108,7 +108,6 @@ def create_hdf(year):
             grp = f.create_group(grp_name)
             grp.attrs['ProjID'] = proj['id']
             grp.attrs['ProjDescription'] = proj['description']
-            ts = time_series(year)
             a = numpy.zeros([ts.size, ], dtype=int)
             for m in METRICS:
                 grp.create_dataset(m, data=a, compression="gzip")
