@@ -40,7 +40,7 @@ if __name__ == '__main__':
                     print 'hdf data_array size = ', data_array.size
                     print 'idx_start = ', idx_start, ' idx_end = ', idx_end
                     print "array_metrics[idx_start] = ", array_metrics[grp_name][metric][idx_start]
-                    print "array_metrics[idx_end] = ", array_metrics[grp_name][metric][idx_end]
+                    print "array_metrics[idx_end] = ", array_metrics[grp_name][metric][idx_end-1]
                     data_array[:] = array_metrics[grp_name][metric][idx_start:idx_end]
 
             tnow = now_acc()
