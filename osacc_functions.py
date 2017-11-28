@@ -77,45 +77,6 @@ def exists_hdf(year):
     return os.path.exists(get_hdf_filename(year))
 
 
-def create_hdf(year):
-    """Initial creation of hdf5 files containing 1 group per project and datasets
-    for each metric and for each project/group.
-    Attributes are set for each hdf5 group (project) with project ID and Description
-    One file is created per year
-    :param year: Year
-    :return (string) file_name
-    """
-    ev = get_conf()
-    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
-    if year == ev['year_ini']:
-        di = ev['secepoc_ini']
-
-    projects = get_list_db(di, "keystone")
-    # TODO: change to log info
-    """
-    print "--> Projects"
-    pprint.pprint(projects)
-    print 80 * "-"
-    """
-    ts = time_series(di, df)
-    file_name = get_hdf_filename(year)
-    with h5py.File(file_name, 'w') as f:
-        f.create_dataset('date', data=ts, compression="gzip")
-        f.attrs['LastRun'] = di
-        f.attrs['LastRunUTC'] = str(to_isodate(di))
-        for proj in projects:
-            grp_name = proj['name']
-            grp = f.create_group(grp_name)
-            grp.attrs['ProjID'] = proj['id']
-            grp.attrs['ProjDescription'] = proj['description']
-            a = numpy.zeros([ts.size, ], dtype=int)
-            for m in METRICS:
-                grp.create_dataset(m, data=a, compression="gzip")
-
-    return file_name
-
-
 def create_hdf_year(year):
     """Initial creation of hdf5 files containing the time_series dataset
     One file is created per year
@@ -185,23 +146,6 @@ def to_isodate(date):
     :returns (datetime) utc datetime
     """
     return datetime.datetime.utcfromtimestamp(date)
-
-
-def dt_to_index(ti, tf, time_array):
-    """For a given date in seconds to epoch return the
-    corresponding index in the time_series
-    :param ti: initial date in seconds to epoch in UTC
-    :param tf: final date in seconds to epoch in UTC
-    :param time_array: Time array  (numpy array)
-    :return (int, int) index start of interval and end of interval in time series
-    """
-    idxs_i = numpy.argwhere((time_array > ti))
-    idx_ini = idxs_i[0][0] - 1
-    idx_fin = time_array.size - 1
-    if tf < time_array[-1]:
-        idxs_f = numpy.argwhere((time_array < tf))
-        idx_fin = idxs_f[-1][0] + 1
-    return idx_ini, idx_fin
 
 
 def time2index(ts, time_array):
@@ -330,64 +274,6 @@ def get_projects(di, state):
     return p_dict
 
 
-def insert_projects(di, time_array, a, state):
-    projects = get_list_db(di, "keystone", state)
-    for proj in projects:
-        pname = proj['name']
-        a[pname] = dict()
-        for m in METRICS:
-            a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
-
-
-def insert_instances(di, time_array, a, state):
-    projects = get_list_db(di, "keystone", state)
-    instances = get_list_db(di, "nova", state)
-    for inst in instances:
-        t_create = to_secepoc(inst["created_at"])
-        t_final = now_acc()
-        if inst["deleted_at"]:
-            t_final = to_secepoc(inst["deleted_at"])
-
-        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
-        p = filter(lambda pr: pr['id'] == inst['project_id'], projects)
-        if not p:
-            continue
-
-        proj = p[0]
-        pname = proj['name']
-        a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
-        a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
-        a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
-        a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
-        net_info = json.loads(inst['network_info'])
-        if net_info:
-            for l in range(len(net_info)):
-                for n in range(len(net_info[l]['network']['subnets'])):
-                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
-                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
-                        a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
-
-
-def insert_volumes(di, time_array, a, state):
-    projects = get_list_db(di, "keystone", state)
-    volumes = get_list_db(di, "cinder", state)
-    for vol in volumes:
-        t_create = to_secepoc(vol["created_at"])
-        t_final = now_acc()
-        if vol["deleted_at"]:
-            t_final = to_secepoc(vol["deleted_at"])
-
-        idx_start, idx_end = dt_to_index(t_create, t_final, time_array)
-        p = filter(lambda pr: pr['id'] == vol['project_id'], projects)
-        if not p:
-            continue
-
-        proj = p[0]
-        pname = proj['name']
-        a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
-        a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
-
-
 def process_inst(di, time_array, a, projects_in, state):
     """
     Process instances, create/update projects metrics arrays
@@ -416,13 +302,6 @@ def process_inst(di, time_array, a, projects_in, state):
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
-        print 80*"-"
-        print "idx_start = ", idx_start
-        print "idx_end = ", idx_end
-        print "pname = ", pname
-        print "proj_id = ", proj_id
-        print "projects_in = ", projects_in
-        print "a[pname] = ", a[pname]
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
