@@ -15,7 +15,7 @@ if __name__ == '__main__':
     ev = get_conf()
     y = datetime.datetime.utcnow()
     year_now = y.year
-    di = to_secepoc(datetime.datetime(year_now[-1], 1, 1, 0, 0, 0))
+    di = to_secepoc(datetime.datetime(year_now, 1, 1, 0, 0, 0))
     df = now_acc()
     filename = get_hdf_filename(year_now)
     if not exists_hdf(year_now):
