@@ -417,6 +417,13 @@ def process_inst(di, time_array, a, projects_in, state):
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
+        print 80*"-"
+        print "idx_start = ", idx_start
+        print "idx_end = ", idx_end
+        print "pname = ", pname
+        print "proj_id = ", proj_id
+        print "projects_in = ", projects_in
+        print "p_dict = ", p_dict
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
