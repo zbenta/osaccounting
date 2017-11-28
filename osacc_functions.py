@@ -174,7 +174,7 @@ def db_conn(database):
                                    db=database)
 
 
-def get_list_db(ti, database):
+def get_list_db(ti, database, state):
     """Get the list of rows of table from database
     Query keystone, nova or cinder to get projects or instances or volumes
     For projects (do not take into account admin and service projects)
@@ -183,10 +183,17 @@ def get_list_db(ti, database):
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Date Time in seconds to epoc
     :param database: Database
+    :param state: one of the two values - init (default), upd
     :return (json dict): List of rows of a table in the database
     """
     local_timezone = tzlocal.get_localzone()
     date_time_local = datetime.datetime.fromtimestamp(ti, local_timezone)
+
+    # The condition is created_at >= date_time_local if in initialization
+    # The condition is deleted_at < date_time_local if in update
+    cnd_state = "created_at >= '%s'" % date_time_local
+    if state == "upd":
+        cnd_state = "deleted_at < '%s'" % date_time_local
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
@@ -195,7 +202,7 @@ def get_list_db(ti, database):
     if database == "cinder":
         dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "created_at >= '%s' OR status != 'deleted'" % date_time_local
+        condition = cnd_state + " OR status != 'deleted'"
 
     table_coll = table_str.split(",")
     query = ' '.join((
@@ -212,7 +219,7 @@ def get_list_db(ti, database):
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
         condition = "instances.vm_state != 'error' AND " \
-                    "(instances.created_at >= '%s' OR instances.vm_state = 'active' )" % date_time_local
+                    "(instances." + cnd_state + " OR instances.vm_state = 'active' )"
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
@@ -239,8 +246,8 @@ def get_table_rows(database, query, table_coll):
     return rows_list
 
 
-def insert_projects(di, time_array, a):
-    projects = get_list_db(di, "keystone")
+def insert_projects(di, time_array, a, state):
+    projects = get_list_db(di, "keystone", state)
     for proj in projects:
         pname = proj['name']
         a[pname] = dict()
@@ -248,9 +255,9 @@ def insert_projects(di, time_array, a):
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
 
-def insert_instances(di, time_array, a):
-    projects = get_list_db(di, "keystone")
-    instances = get_list_db(di, "nova")
+def insert_instances(di, time_array, a, state):
+    projects = get_list_db(di, "keystone", state)
+    instances = get_list_db(di, "nova", state)
     for inst in instances:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
@@ -277,9 +284,9 @@ def insert_instances(di, time_array, a):
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
 
-def insert_volumes(di, time_array, a):
-    projects = get_list_db(di, "keystone")
-    volumes = get_list_db(di, "cinder")
+def insert_volumes(di, time_array, a, state):
+    projects = get_list_db(di, "keystone", state)
+    volumes = get_list_db(di, "cinder", state)
     for vol in volumes:
         t_create = to_secepoc(vol["created_at"])
         t_final = now_acc()

@@ -30,11 +30,12 @@ if __name__ == '__main__':
     di = ev['secepoc_ini']
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
     time_array = time_series(di, df)
-    projects = get_list_db(di, "keystone")
+    state = "init"
+    projects = get_list_db(di, "keystone", state)
     a = dict()
-    insert_projects(di, time_array, a)
-    insert_instances(di, time_array, a)
-    insert_volumes(di, time_array, a)
+    insert_projects(di, time_array, a, state)
+    insert_instances(di, time_array, a, state)
+    insert_volumes(di, time_array, a, state)
 
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
