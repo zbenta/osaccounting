@@ -288,7 +288,7 @@ def get_list_db(ti, database, state):
         table_str = "instances.uuid,instances.created_at,instances.deleted_at," \
                     "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
-        ijoin = "instance_info_caches on uuid=instance_info_caches.instance_uuid"
+        ijoin = "instance_info_caches ON uuid=instance_info_caches.instance_uuid"
         condition = "instances.vm_state != 'error' AND " \
                     "(instances." + cnd_state + " OR instances.vm_state = 'active' )"
         query = ' '.join((
@@ -413,6 +413,8 @@ def process_inst(di, time_array, a, projects_in, state):
             projects_in.append(proj_id)
             pname = p_dict[proj_id][0]
             a[pname] = dict()
+            for m in METRICS:
+                a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
@@ -438,12 +440,14 @@ def process_vol(di, time_array, a, projects_in, state):
 
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array)
-        proj_id = inst['project_id']
+        proj_id = vol['project_id']
         pname = ""
         if proj_id not in projects_in:
             projects_in.append(proj_id)
             pname = p_dict[proj_id][0]
             a[pname] = dict()
+            for m in METRICS:
+                a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
