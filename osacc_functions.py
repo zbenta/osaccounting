@@ -286,7 +286,7 @@ def process_inst(di, time_array, a, projects_in, state):
     """
     instances = get_list_db(di, "nova", state)
     p_dict = get_projects(di, state)
-    for inst in instances[:20]:
+    for inst in instances[:80]:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if inst["deleted_at"]:
@@ -318,7 +318,7 @@ def process_inst(di, time_array, a, projects_in, state):
 def process_vol(di, time_array, a, projects_in, state):
     volumes = get_list_db(di, "cinder", state)
     p_dict = get_projects(di, state)
-    for vol in volumes[:20]:
+    for vol in volumes[:80]:
         t_create = to_secepoc(vol["created_at"])
         t_final = now_acc()
         if vol["deleted_at"]:
