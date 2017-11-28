@@ -116,6 +116,61 @@ def create_hdf(year):
     return file_name
 
 
+def create_hdf_year(year):
+    """Initial creation of hdf5 files containing the time_series dataset
+    One file is created per year
+    :param year: Year
+    :return (string) file_name
+    """
+    ev = get_conf()
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
+    if year == ev['year_ini']:
+        di = ev['secepoc_ini']
+
+    ts = time_series(di, df)
+    file_name = get_hdf_filename(year)
+    with h5py.File(file_name, 'w') as f:
+        f.create_dataset('date', data=ts, compression="gzip")
+        f.attrs['LastRun'] = di
+        f.attrs['LastRunUTC'] = str(to_isodate(di))
+
+    return file_name
+
+
+def create_proj_datasets(year, proj_id):
+    """Initial creation of metrics hdf5 dataset containing 1 group per project and datasets
+    for each metric.
+    Attributes are set for each hdf5 group (project) with project ID and Description
+    The projects dictionary is
+    proj_dict = { "proj_id": ["project name", "project description"], }
+    proj_dict[proj_id][0] - gives the project name
+    proj_dict[proj_id][1] - gives the project description
+    :param year: Year
+    :param proj_id: Project ID
+    :return (string) file_name
+    """
+    ev = get_conf()
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
+    if year == ev['year_ini']:
+        di = ev['secepoc_ini']
+
+    proj_dict = get_projects(di, "init")
+    ts = time_series(di, df)
+    file_name = get_hdf_filename(year)
+    with h5py.File(file_name, 'r+') as f:
+        grp_name = proj_dict[proj_id][0]
+        grp = f.create_group(grp_name)
+        grp.attrs['ProjID'] = proj_id
+        grp.attrs['ProjDescription'] = proj_dict[proj_id][1]
+        a = numpy.zeros([ts.size, ], dtype=int)
+        for m in METRICS:
+            grp.create_dataset(m, data=a, compression="gzip")
+
+    return file_name
+
+
 def to_secepoc(date):
     """Converts datetime to seconds from epoc
     :param date: Date in datetime format
@@ -243,6 +298,9 @@ def get_list_db(ti, database, state):
             "WHERE " + condition
         ))
 
+    print 10*"SQLs-"
+    print query
+    print 10*"SQLe-"
     return get_table_rows(database, query, table_coll)
 
 
@@ -260,6 +318,15 @@ def get_table_rows(database, query, table_coll):
         rows_list.append(rd)
 
     return rows_list
+
+
+def get_projects(di, state):
+    projects = get_list_db(di, "keystone", state)
+    p_dict = dict()
+    for proj in projects:
+        p_dict[proj['id']] = [proj['name'], proj['description']]
+
+    return p_dict
 
 
 def insert_projects(di, time_array, a, state):
@@ -316,5 +383,67 @@ def insert_volumes(di, time_array, a, state):
 
         proj = p[0]
         pname = proj['name']
+        a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
+        a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
+
+
+def process_inst(di, time_array, a, projects_in, state):
+    """
+    Process instances, create/update projects metrics arrays
+    :param di:
+    :param time_array:
+    :param a: dictionary with array of metrics for each project
+    :param projects_in:
+    :param state:
+    :return:
+    """
+    instances = get_list_db(di, "nova", state)
+    p_dict = get_projects(di, state)
+    for inst in instances[:20]:
+        t_create = to_secepoc(inst["created_at"])
+        t_final = now_acc()
+        if inst["deleted_at"]:
+            t_final = to_secepoc(inst["deleted_at"])
+
+        idx_start = time2index(t_create, time_array)
+        idx_end = time2index(t_final, time_array)
+        proj_id = inst['project_id']
+        pname = ""
+        if proj_id not in projects_in:
+            projects_in.append(proj_id)
+            pname = p_dict[proj_id][0]
+            a[pname] = dict()
+
+        a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
+        a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
+        a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
+        a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
+        net_info = json.loads(inst['network_info'])
+        if net_info:
+            for l in range(len(net_info)):
+                for n in range(len(net_info[l]['network']['subnets'])):
+                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
+                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
+                        a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
+
+
+def process_vol(di, time_array, a, projects_in, state):
+    volumes = get_list_db(di, "cinder", state)
+    p_dict = get_projects(di, state)
+    for vol in volumes[:20]:
+        t_create = to_secepoc(vol["created_at"])
+        t_final = now_acc()
+        if vol["deleted_at"]:
+            t_final = to_secepoc(vol["deleted_at"])
+
+        idx_start = time2index(t_create, time_array)
+        idx_end = time2index(t_final, time_array)
+        proj_id = inst['project_id']
+        pname = ""
+        if proj_id not in projects_in:
+            projects_in.append(proj_id)
+            pname = p_dict[proj_id][0]
+            a[pname] = dict()
+
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
