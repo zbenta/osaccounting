@@ -117,7 +117,7 @@ def create_proj_datasets(year, proj_id):
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
-    proj_dict = get_projects(di, "init")
+    proj_dict = get_projects(di, df, "init")
     ts = time_series(di, df)
     file_name = get_hdf_filename(year)
     with h5py.File(file_name, 'r+') as f:
