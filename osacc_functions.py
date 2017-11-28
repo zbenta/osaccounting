@@ -291,6 +291,8 @@ def process_inst(di, time_array, a, projects_in, state):
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array) + 1
         proj_id = inst['project_id']
+        if proj_id not in p_dict:
+            continue
         pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
             projects_in.append(proj_id)
@@ -323,6 +325,8 @@ def process_vol(di, time_array, a, projects_in, state):
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array) + 1
         proj_id = vol['project_id']
+        if proj_id not in p_dict:
+            continue
         pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
             projects_in.append(proj_id)
