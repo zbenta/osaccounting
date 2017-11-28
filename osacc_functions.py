@@ -283,8 +283,8 @@ def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in):
 
     idx_start = time2index(t_create, time_array)
     idx_end = time2index(t_final, time_array) + 1
-    if proj_id not in p_dict:
-        continue
+    #if proj_id not in p_dict:
+    #    continue
 
     pname = p_dict[proj_id][0]
     if proj_id not in projects_in:
