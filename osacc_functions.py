@@ -211,8 +211,8 @@ def get_list_db(ti, te, database, state):
     cnd_state = "created_at >= '%s'" % dtlocal_i
     cnd_state_nova = "instances.created_at >= '%s'" % dtlocal_i
     if state == "upd":
-        cnd_state = "((deleted_at < '%s' AND deleted_at > '%s')" % (dtlocal_i, dtlocal_e)
-        cnd_state_nova = "((instances.deleted_at < '%s' AND instances.deleted_at > '%s')" % (dtlocal_i, dtlocal_e)
+        cnd_state = "((deleted_at > '%s' AND deleted_at < '%s')" % (dtlocal_i, dtlocal_e)
+        cnd_state_nova = "((instances.deleted_at > '%s' AND instances.deleted_at < '%s')" % (dtlocal_i, dtlocal_e)
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
