@@ -44,6 +44,7 @@ if __name__ == '__main__':
         print "idx_end = ", idx_end
         print "idx_start_ds = ", idx_start_ds
         print "idx_end_ds = ", idx_end_ds
+        print "ds_array size = ", (ts[idx_start_ds:idx_end_ds]).size
         for proj_id in projects_in:
             grp_name = p_dict[proj_id][0]
             if grp_name not in proj_hdf:
