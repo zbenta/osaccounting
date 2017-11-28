@@ -409,10 +409,9 @@ def process_inst(di, time_array, a, projects_in, state):
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array)
         proj_id = inst['project_id']
-        pname = ""
+        pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
             projects_in.append(proj_id)
-            pname = p_dict[proj_id][0]
             a[pname] = dict()
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
@@ -423,7 +422,7 @@ def process_inst(di, time_array, a, projects_in, state):
         print "pname = ", pname
         print "proj_id = ", proj_id
         print "projects_in = ", projects_in
-        print "p_dict = ", p_dict
+        print "a[pname] = ", a[pname]
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
