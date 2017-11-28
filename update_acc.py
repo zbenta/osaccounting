@@ -20,12 +20,16 @@ if __name__ == '__main__':
     filename = get_hdf_filename(year_now)
     if not exists_hdf(year_now):
         filename = create_hdf_year(year_now)
+        print ">>>> file created: ", filename
 
     with h5py.File(filename, 'r+') as f:
         di = f.attrs['LastRun']
         proj_hdf = f.keys()
 
-    print "Timestamp Ini = ", di, " hdf groups/project = ", proj_hdf
+    proj_hdf.remove("date")
+    print "Timestamp Ini = ", to_isodate(di)
+    print "Timestamp End = ", to_isodate(df)
+    print "hdf groups/project = ", proj_hdf
     time_array_all = time_series(di, df)
     state = "upd"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes

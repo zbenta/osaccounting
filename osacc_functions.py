@@ -281,6 +281,10 @@ def process_inst(di, time_array, a, projects_in, state):
     :return:
     """
     instances = get_list_db(di, "nova", state)
+    print 80*"o"
+    print "Instances selected from DB n = ", len(instances)
+    pprint.pprint(instances)
+    print 80*"o"
     p_dict = get_projects(di, state)
     for inst in instances:
         t_create = to_secepoc(inst["created_at"])
