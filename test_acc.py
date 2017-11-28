@@ -27,7 +27,6 @@ if __name__ == '__main__':
     for year in years:
         print 80*'='
         print year
-        print ' '
         filename = create_hdf_year(year)
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
