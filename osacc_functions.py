@@ -448,10 +448,9 @@ def process_vol(di, time_array, a, projects_in, state):
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array)
         proj_id = vol['project_id']
-        pname = ""
+        pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
             projects_in.append(proj_id)
-            pname = p_dict[proj_id][0]
             a[pname] = dict()
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
