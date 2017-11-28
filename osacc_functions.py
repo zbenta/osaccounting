@@ -275,10 +275,32 @@ def get_projects(di, df, state):
     return p_dict
 
 
+def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in):
+    t_create = to_secepoc(created)
+    t_final = now_acc()
+    if deleted:
+        t_final = to_secepoc(deleted)
+
+    idx_start = time2index(t_create, time_array)
+    idx_end = time2index(t_final, time_array) + 1
+    if proj_id not in p_dict:
+        continue
+
+    pname = p_dict[proj_id][0]
+    if proj_id not in projects_in:
+        projects_in.append(proj_id)
+        a[pname] = dict()
+        for m in METRICS:
+            a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+
+    return idx_start, idx_end
+
+
 def process_inst(di, df, time_array, a, projects_in, state):
     """
     Process instances, create/update projects metrics arrays
     :param di:
+    :param df:
     :param time_array:
     :param a: dictionary with array of metrics for each project
     :param projects_in:
@@ -288,7 +310,7 @@ def process_inst(di, df, time_array, a, projects_in, state):
     instances = get_list_db(di, df, "nova", state)
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
-    pprint.pprint(instances)
+    # pprint.pprint(instances)
     print 80*"o"
     p_dict = get_projects(di, df, state)
     for inst in instances:
