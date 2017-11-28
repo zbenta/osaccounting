@@ -33,13 +33,13 @@ if __name__ == '__main__':
     state = "init"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
-    process_inst(di, time_array_all, array_metrics, projects_in, state)
-    process_vol(di, time_array_all, array_metrics, projects_in, state)
+    process_inst(di, df, time_array_all, array_metrics, projects_in, state)
+    process_vol(di, df, time_array_all, array_metrics, projects_in, state)
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
         os.makedirs(directory, 0755)
 
-    p_dict = get_projects(di, state)
+    p_dict = get_projects(di, df, state)
     years = get_years()
     for year in years:
         print 80*'='

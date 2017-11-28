@@ -189,26 +189,30 @@ def db_conn(database):
                                    db=database)
 
 
-def get_list_db(ti, database, state):
+def get_list_db(ti, te, database, state):
     """Get the list of rows of table from database
     Query keystone, nova or cinder to get projects or instances or volumes
     For projects (do not take into account admin and service projects)
     DB = keystone -> Table = project
     DB = cinder   -> Table = volumes
     DB = nova     -> Table = instances and instance_info_caches
-    :param ti: Date Time in seconds to epoc
+    :param ti: Initial Date Time in seconds to epoc
+    :param te: End Date Time in seconds to epoc
     :param database: Database
     :param state: one of the two values - init (default), upd
     :return (json dict): List of rows of a table in the database
     """
     local_timezone = tzlocal.get_localzone()
-    date_time_local = datetime.datetime.fromtimestamp(ti, local_timezone)
+    dtlocal_i = datetime.datetime.fromtimestamp(ti, local_timezone)
+    dtlocal_e = datetime.datetime.fromtimestamp(te, local_timezone)
 
     # The condition is created_at >= date_time_local if in initialization
     # The condition is deleted_at < date_time_local if in update
-    cnd_state = "created_at >= '%s'" % date_time_local
+    cnd_state = "created_at >= '%s'" % dtlocal_i
+    cnd_state_nova = "instances.created_at >= '%s'" % dtlocal_i
     if state == "upd":
-        cnd_state = "deleted_at < '%s'" % date_time_local
+        cnd_state = "((deleted_at < '%s' AND deleted_at > '%s')" % (dtlocal_i, dtlocal_e)
+        cnd_state_nova = "((instances.deleted_at < '%s' AND instances.deleted_at > '%s')" % (dtlocal_i, dtlocal_e)
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
@@ -234,7 +238,7 @@ def get_list_db(ti, database, state):
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches ON uuid=instance_info_caches.instance_uuid"
         condition = "instances.vm_state != 'error' AND " \
-                    "(instances." + cnd_state + " OR instances.vm_state = 'active' )"
+                    "(" + cnd_state_nova + " OR instances.vm_state = 'active' )"
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
@@ -242,6 +246,7 @@ def get_list_db(ti, database, state):
             "WHERE " + condition
         ))
 
+    print query
     return get_table_rows(database, query, table_coll)
 
 
@@ -261,8 +266,8 @@ def get_table_rows(database, query, table_coll):
     return rows_list
 
 
-def get_projects(di, state):
-    projects = get_list_db(di, "keystone", state)
+def get_projects(di, df, state):
+    projects = get_list_db(di, df, "keystone", state)
     p_dict = dict()
     for proj in projects:
         p_dict[proj['id']] = [proj['name'], proj['description']]
@@ -270,7 +275,7 @@ def get_projects(di, state):
     return p_dict
 
 
-def process_inst(di, time_array, a, projects_in, state):
+def process_inst(di, df, time_array, a, projects_in, state):
     """
     Process instances, create/update projects metrics arrays
     :param di:
@@ -280,12 +285,12 @@ def process_inst(di, time_array, a, projects_in, state):
     :param state:
     :return:
     """
-    instances = get_list_db(di, "nova", state)
+    instances = get_list_db(di, df, "nova", state)
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
     pprint.pprint(instances)
     print 80*"o"
-    p_dict = get_projects(di, state)
+    p_dict = get_projects(di, df, state)
     for inst in instances:
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
@@ -317,9 +322,9 @@ def process_inst(di, time_array, a, projects_in, state):
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
 
-def process_vol(di, time_array, a, projects_in, state):
-    volumes = get_list_db(di, "cinder", state)
-    p_dict = get_projects(di, state)
+def process_vol(di, df, time_array, a, projects_in, state):
+    volumes = get_list_db(di, df, "cinder", state)
+    p_dict = get_projects(di, df, state)
     for vol in volumes:
         t_create = to_secepoc(vol["created_at"])
         t_final = now_acc()

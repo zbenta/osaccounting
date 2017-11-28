@@ -34,9 +34,9 @@ if __name__ == '__main__':
     state = "upd"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
-    process_inst(df, time_array_all, array_metrics, projects_in, state)
-    process_vol(df, time_array_all, array_metrics, projects_in, state)
-    p_dict = get_projects(df, state)
+    process_inst(di, df, time_array_all, array_metrics, projects_in, state)
+    process_vol(di, df, time_array_all, array_metrics, projects_in, state)
+    p_dict = get_projects(di, df, state)
     with h5py.File(filename, 'r+') as f:
         ts = f['date'][:]
         idx_start = time2index(di, time_array_all)
