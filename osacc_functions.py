@@ -407,7 +407,7 @@ def process_inst(di, time_array, a, projects_in, state):
             t_final = to_secepoc(inst["deleted_at"])
 
         idx_start = time2index(t_create, time_array)
-        idx_end = time2index(t_final, time_array)
+        idx_end = time2index(t_final, time_array) + 1
         proj_id = inst['project_id']
         pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
@@ -446,7 +446,7 @@ def process_vol(di, time_array, a, projects_in, state):
             t_final = to_secepoc(vol["deleted_at"])
 
         idx_start = time2index(t_create, time_array)
-        idx_end = time2index(t_final, time_array)
+        idx_end = time2index(t_final, time_array) + 1
         proj_id = vol['project_id']
         pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
