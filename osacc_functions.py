@@ -19,6 +19,7 @@ import numpy
 import mysql.connector
 import ConfigParser
 import json
+import math
 
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
@@ -146,6 +147,21 @@ def dt_to_index(ti, tf, time_array):
         idxs_f = numpy.argwhere((time_array < tf))
         idx_fin = idxs_f[-1][0] + 1
     return idx_ini, idx_fin
+
+
+def time2index(ts, time_array):
+    """
+    Linear equation: index(t) = floor[1/Dt * (t-t0)]
+    y = a + bx -> a = -t0/Dt  b = 1/Dt
+    :param ts: timestamp in seconds to epoc
+    :param time_array: array of timestamps
+    :return: index
+    """
+    ev = get_conf()
+    dt = ev['delta_time']
+    t0 = time_array[0]
+    index = math.floor(1.0 * (ts-t0)/dt)
+    return index
 
 
 def now_acc():
