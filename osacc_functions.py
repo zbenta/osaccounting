@@ -215,7 +215,7 @@ def time2index(ts, time_array):
     ev = get_conf()
     dt = ev['delta_time']
     t0 = time_array[0]
-    index = math.floor(1.0 * (ts-t0)/dt)
+    index = int(math.floor(1.0 * (ts-t0)/dt))
     return index
 
 
@@ -298,9 +298,10 @@ def get_list_db(ti, database, state):
             "WHERE " + condition
         ))
 
-    print 10*"SQLs-"
+    print 10*"S"
+    print "DB ---- ", database
     print query
-    print 10*"SQLe-"
+    print 10*"E"
     return get_table_rows(database, query, table_coll)
 
 
