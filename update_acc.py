@@ -17,9 +17,9 @@ if __name__ == '__main__':
     year_now = y.year
     di = to_secepoc(datetime.datetime(year_now, 1, 1, 0, 0, 0))
     df = now_acc()
-    filename = get_hdf_filename(year_now)
+    filename = get_hdf_filename(ev, year_now)
     if not exists_hdf(year_now):
-        filename = create_hdf_year(year_now)
+        filename = create_hdf_year(ev, year_now)
         print ">>>> file created: ", filename
 
     with h5py.File(filename, 'r+') as f:
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     state = "upd"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
-    process_inst(di, df, time_array_all, array_metrics, projects_in, state)
-    process_vol(di, df, time_array_all, array_metrics, projects_in, state)
+    process_inst(ev, di, df, time_array_all, array_metrics, projects_in, state)
+    process_vol(ev, di, df, time_array_all, array_metrics, projects_in, state)
     p_dict = get_projects(di, df, state)
     with h5py.File(filename, 'r+') as f:
         ts = f['date'][:]
