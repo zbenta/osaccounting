@@ -275,7 +275,7 @@ def get_projects(di, df, state):
     return p_dict
 
 
-def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in):
+def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a):
     t_create = to_secepoc(created)
     t_final = now_acc()
     if deleted:
@@ -283,8 +283,6 @@ def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in):
 
     idx_start = time2index(t_create, time_array)
     idx_end = time2index(t_final, time_array) + 1
-    #if proj_id not in p_dict:
-    #    continue
 
     pname = p_dict[proj_id][0]
     if proj_id not in projects_in:
@@ -293,7 +291,7 @@ def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in):
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
 
-    return idx_start, idx_end
+    return pname, idx_start, idx_end
 
 
 def process_inst(di, df, time_array, a, projects_in, state):
@@ -314,6 +312,15 @@ def process_inst(di, df, time_array, a, projects_in, state):
     print 80*"o"
     p_dict = get_projects(di, df, state)
     for inst in instances:
+        proj_id = inst['project_id']
+        if proj_id not in p_dict:
+            continue
+
+        created = inst["created_at"]
+        deleted = inst["deleted_at"]
+        pname, idx_start, idx_end = prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a)
+
+        """ TODO: To be removed
         t_create = to_secepoc(inst["created_at"])
         t_final = now_acc()
         if inst["deleted_at"]:
@@ -321,15 +328,12 @@ def process_inst(di, df, time_array, a, projects_in, state):
 
         idx_start = time2index(t_create, time_array)
         idx_end = time2index(t_final, time_array) + 1
-        proj_id = inst['project_id']
-        if proj_id not in p_dict:
-            continue
-        pname = p_dict[proj_id][0]
         if proj_id not in projects_in:
             projects_in.append(proj_id)
             a[pname] = dict()
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+        """
 
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
@@ -348,6 +352,15 @@ def process_vol(di, df, time_array, a, projects_in, state):
     volumes = get_list_db(di, df, "cinder", state)
     p_dict = get_projects(di, df, state)
     for vol in volumes:
+        proj_id = vol['project_id']
+        if proj_id not in p_dict:
+            continue
+
+        created = vol["created_at"]
+        deleted = vol["deleted_at"]
+        pname, idx_start, idx_end = prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a)
+
+        """ TODO - to be removed
         t_create = to_secepoc(vol["created_at"])
         t_final = now_acc()
         if vol["deleted_at"]:
@@ -364,6 +377,7 @@ def process_vol(di, df, time_array, a, projects_in, state):
             a[pname] = dict()
             for m in METRICS:
                 a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+        """
 
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
