@@ -147,18 +147,18 @@ def to_isodate(date):
     return datetime.datetime.utcfromtimestamp(date)
 
 
-def time2index(ts, time_array):
+def time2index(ev, tstamp, time_array):
     """
     Linear equation: index(t) = floor[1/Dt * (t-t0)]
     y = a + bx -> a = -t0/Dt  b = 1/Dt
-    :param ts: timestamp in seconds to epoc
+    :param ev: configuration options
+    :param tstamp: timestamp in seconds to epoc
     :param time_array: array of timestamps
     :return: index
     """
-    ev = get_conf()
     dt = ev['delta_time']
     t0 = time_array[0]
-    index = int(math.floor(1.0 * (ts-t0)/dt))
+    index = int(math.floor(1.0 * (tstamp-t0)/dt))
     return index
 
 
@@ -173,6 +173,9 @@ def now_acc():
 def time_series(ev, di, df):
     """Create a time array (of ints) in epoch format with interval
     of delta_time for all years
+    :param ev:
+    :param di:
+    :param df:
     :returns (numpy array) time_array
     """
     return numpy.arange(di, df, ev['delta_time'])
