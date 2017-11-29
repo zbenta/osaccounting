@@ -27,10 +27,12 @@ if __name__ == '__main__':
         proj_hdf = f.keys()
 
     proj_hdf.remove("date")
-    print "Timestamp Ini = ", to_isodate(di)
-    print "Timestamp End = ", to_isodate(df)
-    print "hdf groups/project = ", proj_hdf
     time_array_all = time_series(di, df)
+    print "Timestamp Ini      = ", to_isodate(di)
+    print "Timestamp IniArray = ", to_isodate(time_array_all[0])
+    print "Timestamp End      = ", to_isodate(df)
+    print "Timestamp EndArray = ", to_isodate(time_array_all[-1])
+    print "hdf groups/project = ", proj_hdf
     state = "upd"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project

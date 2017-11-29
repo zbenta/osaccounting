@@ -207,12 +207,12 @@ def get_list_db(ti, te, database, state):
     dtlocal_e = datetime.datetime.fromtimestamp(te, local_timezone)
 
     # The condition is created_at >= date_time_local if in initialization
-    # The condition is deleted_at < date_time_local if in update
+    # The condition is dtlocal_i < deleted_at =< dtlocal_e if in update
     cnd_state = "created_at >= '%s'" % dtlocal_i
     cnd_state_nova = "instances.created_at >= '%s'" % dtlocal_i
     if state == "upd":
         cnd_state = "(deleted_at > '%s' AND deleted_at < '%s')" % (dtlocal_i, dtlocal_e)
-        cnd_state_nova = "(instances.deleted_at > '%s' AND instances.deleted_at < '%s')" % (dtlocal_i, dtlocal_e)
+        cnd_state_nova = "(instances.deleted_at > '%s' AND instances.deleted_at =< '%s')" % (dtlocal_i, dtlocal_e)
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
@@ -246,7 +246,6 @@ def get_list_db(ti, te, database, state):
             "WHERE " + condition
         ))
 
-    print query
     return get_table_rows(database, query, table_coll)
 
 
@@ -275,23 +274,29 @@ def get_projects(di, df, state):
     return p_dict
 
 
-def prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a):
-    t_create = to_secepoc(created)
-    t_final = now_acc()
-    if deleted:
-        t_final = to_secepoc(deleted)
-
-    idx_start = time2index(t_create, time_array)
-    idx_end = time2index(t_final, time_array) + 1
-
+def prep_metrics(time_array, p_dict, proj_id, projects_in, a):
     pname = p_dict[proj_id][0]
     if proj_id not in projects_in:
         projects_in.append(proj_id)
         a[pname] = dict()
         for m in METRICS:
             a[pname][m] = numpy.zeros([time_array.size, ], dtype=int)
+    return pname
 
-    return pname, idx_start, idx_end
+
+def get_indexes(created, deleted, di, df, time_array, state):
+    t_create = di
+    t_final = df
+    crt_sec = to_secepoc(created)
+    if deleted:
+        t_final = to_secepoc(deleted)
+
+    if (state == "upd") and (crt_sec > di):
+            t_create = crt_sec
+
+    idx_start = time2index(t_create, time_array)
+    idx_end = time2index(t_final, time_array) + 1
+    return idx_start, idx_end
 
 
 def process_inst(di, df, time_array, a, projects_in, state):
@@ -308,7 +313,7 @@ def process_inst(di, df, time_array, a, projects_in, state):
     instances = get_list_db(di, df, "nova", state)
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
-    pprint.pprint(instances)
+    # pprint.pprint(instances)
     print 80*"o"
     p_dict = get_projects(di, df, state)
     for inst in instances:
@@ -316,10 +321,13 @@ def process_inst(di, df, time_array, a, projects_in, state):
         if proj_id not in p_dict:
             continue
 
-        created = inst["created_at"]
-        deleted = inst["deleted_at"]
-        print "instance = <%s>  -  created = <%s>  -  deleted = <%s>" %(inst['uuid'], created, deleted)
-        pname, idx_start, idx_end = prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a)
+        crt = inst["created_at"]
+        dlt = inst["deleted_at"]
+        print "instance = <%s> - created = <%s> - deleted = <%s>" % (inst['uuid'], crt, dlt)
+        print "                       di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        print 20 * "_"
+        pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
+        idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
@@ -338,16 +346,19 @@ def process_vol(di, df, time_array, a, projects_in, state):
     p_dict = get_projects(di, df, state)
     print 80*"o"
     print "Volumes selected from DB n = ", len(volumes)
-    pprint.pprint(volumes)
+    # pprint.pprint(volumes)
     print 80*"o"
     for vol in volumes:
         proj_id = vol['project_id']
         if proj_id not in p_dict:
             continue
 
-        created = vol["created_at"]
-        deleted = vol["deleted_at"]
-        print "volume = <%s>  -  created = <%s>  -  deleted = <%s>" %(vol['id'], created, deleted)
-        pname, idx_start, idx_end = prep_metrics(created, deleted, time_array, p_dict, proj_id, projects_in, a)
+        crt = vol["created_at"]
+        dlt = vol["deleted_at"]
+        print "volume = <%s> - created = <%s> - deleted = <%s>" % (vol['id'], crt, dlt)
+        print "                     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        print 20 * "_"
+        pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
+        idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
