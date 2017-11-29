@@ -51,21 +51,20 @@ def get_conf():
     return ev
 
 
-def get_years():
+def get_years(ev):
     """List of years
     :return (list) of years
     """
-    ev = get_conf()
     tf = datetime.datetime.utcnow()
     return range(ev['year_ini'], tf.year + 1)
 
 
-def get_hdf_filename(year):
+def get_hdf_filename(ev, year):
     """Get the HDF5 filename
+    :param ev: configuration options
     :param year: Year
     :return (string) filename
     """
-    ev = get_conf()
     return ev['out_dir'] + os.sep + str(year) + '.hdf'
 
 
@@ -77,20 +76,20 @@ def exists_hdf(year):
     return os.path.exists(get_hdf_filename(year))
 
 
-def create_hdf_year(year):
+def create_hdf_year(ev, year):
     """Initial creation of hdf5 files containing the time_series dataset
     One file is created per year
+    :param ev: configuration options
     :param year: Year
     :return (string) file_name
     """
-    ev = get_conf()
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
-    ts = time_series(di, df)
-    file_name = get_hdf_filename(year)
+    ts = time_series(ev, di, df)
+    file_name = get_hdf_filename(ev, year)
     with h5py.File(file_name, 'w') as f:
         f.create_dataset('date', data=ts, compression="gzip")
         f.attrs['LastRun'] = di
@@ -171,14 +170,12 @@ def now_acc():
     return to_secepoc(nacc)
 
 
-def time_series(di, df):
+def time_series(ev, di, df):
     """Create a time array (of ints) in epoch format with interval
     of delta_time for all years
     :returns (numpy array) time_array
     """
-    ev = get_conf()
-    time_array = numpy.arange(di, df, ev['delta_time'])
-    return time_array
+    return numpy.arange(di, df, ev['delta_time'])
 
 
 def db_conn(database):
@@ -299,13 +296,14 @@ def get_indexes(created, deleted, di, df, time_array, state):
     return idx_start, idx_end
 
 
-def process_inst(di, df, time_array, a, projects_in, state):
+def process_inst(di, df, time_array, a, p_dict, projects_in, state):
     """
     Process instances, create/update projects metrics arrays
     :param di:
     :param df:
     :param time_array:
     :param a: dictionary with array of metrics for each project
+    :param p_dict: projects dictionary from keystone
     :param projects_in:
     :param state:
     :return:
@@ -315,7 +313,6 @@ def process_inst(di, df, time_array, a, projects_in, state):
     print "Instances selected from DB n = ", len(instances)
     # pprint.pprint(instances)
     print 80*"o"
-    p_dict = get_projects(di, df, state)
     for inst in instances:
         proj_id = inst['project_id']
         if proj_id not in p_dict:
@@ -342,9 +339,8 @@ def process_inst(di, df, time_array, a, projects_in, state):
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
 
-def process_vol(di, df, time_array, a, projects_in, state):
+def process_vol(di, df, time_array, a, p_dict, projects_in, state):
     volumes = get_list_db(di, df, "cinder", state)
-    p_dict = get_projects(di, df, state)
     print 80*"o"
     print "Volumes selected from DB n = ", len(volumes)
     # pprint.pprint(volumes)

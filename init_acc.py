@@ -26,25 +26,24 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    years = get_years()
+    years = get_years(ev)
     di = ev['secepoc_ini']
     df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
-    time_array_all = time_series(di, df)
+    time_array_all = time_series(ev, di, df)
     state = "init"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
-    process_inst(di, df, time_array_all, array_metrics, projects_in, state)
-    process_vol(di, df, time_array_all, array_metrics, projects_in, state)
+    p_dict = get_projects(di, df, state)
+    process_inst(di, df, time_array_all, array_metrics, p_dict, projects_in, state)
+    process_vol(di, df, time_array_all, array_metrics, p_dict, projects_in, state)
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
         os.makedirs(directory, 0755)
 
-    p_dict = get_projects(di, df, state)
-    years = get_years()
     for year in years:
         print 80*'='
         print year
-        filename = create_hdf_year(year)
+        filename = create_hdf_year(ev, year)
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start = time2index(ts[0], time_array_all)
