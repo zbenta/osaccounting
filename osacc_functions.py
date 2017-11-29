@@ -98,7 +98,7 @@ def create_hdf_year(ev, year):
     return file_name
 
 
-def create_proj_datasets(ev, year, proj_id, proj_dict):
+def create_proj_datasets(ev, year, proj_id, p_dict):
     """Initial creation of metrics hdf5 dataset containing 1 group per project and datasets
     for each metric.
     Attributes are set for each hdf5 group (project) with project ID and Description
@@ -119,14 +119,14 @@ def create_proj_datasets(ev, year, proj_id, proj_dict):
 
     ts = time_series(ev, di, df)
     file_name = get_hdf_filename(ev, year)
+    grp_name = p_dict[proj_id][0]
     with h5py.File(file_name, 'r+') as f:
-        grp_name = proj_dict[proj_id][0]
         grp = f.create_group(grp_name)
         grp.attrs['ProjID'] = proj_id
-        grp.attrs['ProjDescription'] = proj_dict[proj_id][1]
-        a = numpy.zeros([ts.size, ], dtype=int)
+        grp.attrs['ProjDescription'] = p_dict[proj_id][1]
+        ds = numpy.zeros([ts.size, ], dtype=int)
         for m in METRICS:
-            grp.create_dataset(m, data=a, compression="gzip")
+            grp.create_dataset(m, data=ds, compression="gzip")
 
     return file_name
 
@@ -266,6 +266,15 @@ def get_table_rows(database, query, table_coll):
 
 
 def get_projects(di, df, state):
+    """
+    Get all projects in keystone database
+    Returns a dictionary with all projects
+    p_dict = {'project_id': ['project_name', 'project_description'], }
+    :param di: Initial DateTime in seconds to epoch
+    :param df: End DateTime in seconds to epoch
+    :param state: Either "init" or "upd" of accounting
+    :return: p_dict
+    """
     projects = get_list_db(di, df, "keystone", state)
     p_dict = dict()
     for proj in projects:

@@ -41,9 +41,9 @@ if __name__ == '__main__':
         os.makedirs(directory, 0755)
 
     for year in years:
-        print 80*'='
-        print year
         filename = create_hdf_year(ev, year)
+        print 80*'='
+        print year, filename
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start = time2index(ev, ts[0], time_array_all)
