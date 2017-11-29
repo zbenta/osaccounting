@@ -327,7 +327,7 @@ def process_inst(di, df, time_array, a, projects_in, state):
         idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
         print "created = <%s> - deleted = <%s> - instance = <%s>" % (crt, dlt, inst['uuid'])
         print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-1]))
+        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
         print 20 * "_"
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
@@ -360,7 +360,7 @@ def process_vol(di, df, time_array, a, projects_in, state):
         idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
         print "created = <%s> - deleted = <%s> - volume = <%s>" % (crt, dlt, vol['id'])
         print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-1]))
+        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
         print 20 * "_"
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
