@@ -323,11 +323,12 @@ def process_inst(di, df, time_array, a, projects_in, state):
 
         crt = inst["created_at"]
         dlt = inst["deleted_at"]
-        print "instance = <%s> - created = <%s> - deleted = <%s>" % (inst['uuid'], crt, dlt)
-        print "                       di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        print 20 * "_"
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
         idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
+        print "created = <%s> - deleted = <%s> - instance = <%s>" % (crt, dlt, inst['uuid'])
+        print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end]))
+        print 20 * "_"
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
@@ -355,10 +356,11 @@ def process_vol(di, df, time_array, a, projects_in, state):
 
         crt = vol["created_at"]
         dlt = vol["deleted_at"]
-        print "volume = <%s> - created = <%s> - deleted = <%s>" % (vol['id'], crt, dlt)
-        print "                     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        print 20 * "_"
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
         idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
+        print "created = <%s> - deleted = <%s> - volume = <%s>" % (crt, dlt, vol['id'])
+        print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end]))
+        print 20 * "_"
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
