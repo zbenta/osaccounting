@@ -34,8 +34,8 @@ if __name__ == '__main__':
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
     p_dict = get_projects(di, df, state)
-    process_inst(di, df, time_array_all, array_metrics, p_dict, projects_in, state)
-    process_vol(di, df, time_array_all, array_metrics, p_dict, projects_in, state)
+    process_inst(ev, di, df, time_array_all, array_metrics, p_dict, projects_in, state)
+    process_vol(ev, di, df, time_array_all, array_metrics, p_dict, projects_in, state)
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
         os.makedirs(directory, 0755)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             idx_start = time2index(ev, ts[0], time_array_all)
             idx_end = time2index(ev, ts[-1], time_array_all) + 1
             for proj_id in projects_in:
-                create_proj_datasets(year, proj_id)
+                create_proj_datasets(ev, year, proj_id, p_dict)
                 grp_name = p_dict[proj_id][0]
                 for metric in METRICS:
                     data_array = f[grp_name][metric]

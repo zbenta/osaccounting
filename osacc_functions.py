@@ -98,7 +98,7 @@ def create_hdf_year(ev, year):
     return file_name
 
 
-def create_proj_datasets(year, proj_id):
+def create_proj_datasets(ev, year, proj_id, proj_dict):
     """Initial creation of metrics hdf5 dataset containing 1 group per project and datasets
     for each metric.
     Attributes are set for each hdf5 group (project) with project ID and Description
@@ -106,19 +106,19 @@ def create_proj_datasets(year, proj_id):
     proj_dict = { "proj_id": ["project name", "project description"], }
     proj_dict[proj_id][0] - gives the project name
     proj_dict[proj_id][1] - gives the project description
+    :param ev: configuration options
     :param year: Year
     :param proj_id: Project ID
+    :param p_dict: projects dictionary from keystone
     :return (string) file_name
     """
-    ev = get_conf()
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
     df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
-    proj_dict = get_projects(di, df, "init")
-    ts = time_series(di, df)
-    file_name = get_hdf_filename(year)
+    ts = time_series(ev, di, df)
+    file_name = get_hdf_filename(ev, year)
     with h5py.File(file_name, 'r+') as f:
         grp_name = proj_dict[proj_id][0]
         grp = f.create_group(grp_name)
@@ -284,7 +284,7 @@ def prep_metrics(time_array, p_dict, proj_id, projects_in, a):
     return pname
 
 
-def get_indexes(created, deleted, di, df, time_array, state):
+def get_indexes(ev, created, deleted, di, df, time_array, state):
     t_create = di
     t_final = df
     crt_sec = to_secepoc(created)
@@ -294,14 +294,15 @@ def get_indexes(created, deleted, di, df, time_array, state):
     if (state == "upd") and (crt_sec > di):
             t_create = crt_sec
 
-    idx_start = time2index(t_create, time_array)
-    idx_end = time2index(t_final, time_array) + 1
+    idx_start = time2index(ev, t_create, time_array)
+    idx_end = time2index(ev, t_final, time_array) + 1
     return idx_start, idx_end
 
 
-def process_inst(di, df, time_array, a, p_dict, projects_in, state):
+def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     """
     Process instances, create/update projects metrics arrays
+    :param ev:
     :param di:
     :param df:
     :param time_array:
@@ -324,7 +325,7 @@ def process_inst(di, df, time_array, a, p_dict, projects_in, state):
         crt = inst["created_at"]
         dlt = inst["deleted_at"]
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
-        idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
+        idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
         print "created = <%s> - deleted = <%s> - instance = <%s>" % (crt, dlt, inst['uuid'])
         print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
         print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
@@ -342,7 +343,7 @@ def process_inst(di, df, time_array, a, p_dict, projects_in, state):
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
 
 
-def process_vol(di, df, time_array, a, p_dict, projects_in, state):
+def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
     volumes = get_list_db(di, df, "cinder", state)
     print 80*"o"
     print "Volumes selected from DB n = ", len(volumes)
@@ -356,7 +357,7 @@ def process_vol(di, df, time_array, a, p_dict, projects_in, state):
         crt = vol["created_at"]
         dlt = vol["deleted_at"]
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
-        idx_start, idx_end = get_indexes(crt, dlt, di, df, time_array, state)
+        idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
         print "created = <%s> - deleted = <%s> - volume = <%s>" % (crt, dlt, vol['id'])
         print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
         print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
