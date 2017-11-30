@@ -68,12 +68,12 @@ def get_hdf_filename(ev, year):
     return ev['out_dir'] + os.sep + str(year) + '.hdf'
 
 
-def exists_hdf(year):
+def exists_hdf(ev, year):
     """Checks if hdf5 file exists
     :param year: Year
     :return (boolean) true is file exists or false if it doesn't
     """
-    return os.path.exists(get_hdf_filename(year))
+    return os.path.exists(get_hdf_filename(ev, year))
 
 
 def create_hdf_year(ev, year):
