@@ -268,10 +268,10 @@ def get_list_db2(ti, database, state):
     dtlocal_i = datetime.datetime.fromtimestamp(ti, local_timezone)
 
     # The condition is created_at >= date_time_local if in initialization
-    # The condition is dtlocal_i < deleted_at if in update
-    cnd_state = "created_at >= '%s'" % dtlocal_i
+    # The condition is deleted_at >= date_time_local if in update
+    cnd_state = " "
     if state == "upd":
-        cnd_state = "deleted_at > '%s'" % dtlocal_i
+        cnd_state = " AND deleted_at >= '%s'" % dtlocal_i
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
@@ -280,12 +280,12 @@ def get_list_db2(ti, database, state):
     if database == "cinder":
         dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = cnd_state + " OR status != 'deleted'"
+        condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
 
     if database == "nova":
         dbtable = "instances"
         table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
-        condition = "vm_state != 'error' AND (" + cnd_state + " OR vm_state = 'active')"
+        condition = "(vm_state = 'active' OR vm_state = 'stopped') OR (vm_state = 'deleted'" + cnd_state + ")"
 
     table_coll = table_str.split(",")
     query = ' '.join((
