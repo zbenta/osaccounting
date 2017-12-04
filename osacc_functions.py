@@ -251,6 +251,51 @@ def get_list_db(ti, te, database, state):
     return get_table_rows(database, query, table_coll)
 
 
+def get_list_db2(ti, database, state):
+    """Get the list of rows of table from database
+    Query keystone, nova or cinder to get projects or instances or volumes
+    For projects (do not take into account admin and service projects)
+    DB = keystone -> Table = project
+    DB = cinder   -> Table = volumes
+    DB = nova     -> Table = instances and instance_info_caches
+    :param ti: Initial Date Time in seconds to epoc
+    :param database: Database
+    :param state: one of the two values - init (default), upd
+    :return (json dict): List of rows of a table in the database
+    """
+    local_timezone = tzlocal.get_localzone()
+    dtlocal_i = datetime.datetime.fromtimestamp(ti, local_timezone)
+
+    # The condition is created_at >= date_time_local if in initialization
+    # The condition is dtlocal_i < deleted_at if in update
+    cnd_state = "created_at >= '%s'" % dtlocal_i
+    if state == "upd":
+        cnd_state = "deleted_at > '%s'" % dtlocal_i
+
+    # Default to DB = keystone, dbtable = project
+    dbtable = "project"
+    table_str = "id,name,description,enabled"
+    condition = "domain_id='default' AND name!='admin' AND name!='service'"
+    if database == "cinder":
+        dbtable = "volumes"
+        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+        condition = cnd_state + " OR status != 'deleted'"
+
+    if database == "nova":
+        dbtable = "instances"
+        table_str = "uuid,created_at,deleted_at,id,project_id,vm_state,memory_mb,vcpus,root_gb"
+        condition = "vm_state != 'error' AND (" + cnd_state + " OR vm_state = 'active')"
+
+    table_coll = table_str.split(",")
+    query = ' '.join((
+        "SELECT " + table_str,
+        "FROM " + dbtable,
+        "WHERE " + condition
+    ))
+
+    return get_table_rows(database, query, table_coll)
+
+
 def get_table_rows(database, query, table_coll):
     conn = db_conn(database)
     cursor = conn.cursor()
@@ -326,7 +371,8 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param state:
     :return:
     """
-    instances = get_list_db(di, df, "nova", state)
+    instances = get_list_db2(di, "nova", state)
+    # instances = get_list_db(di, df, "nova", state)
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
     # pprint.pprint(instances)
@@ -349,6 +395,7 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
         a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
+        """
         net_info = json.loads(inst['network_info'])
         if net_info:
             for l in range(len(net_info)):
@@ -356,10 +403,11 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
                     for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
-
+        """
 
 def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
-    volumes = get_list_db(di, df, "cinder", state)
+    volumes = get_list_db2(di, "cinder", state)
+    # volumes = get_list_db(di, df, "cinder", state)
     print 80*"o"
     print "Volumes selected from DB n = ", len(volumes)
     # pprint.pprint(volumes)
