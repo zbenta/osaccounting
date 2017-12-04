@@ -376,6 +376,10 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
     # pprint.pprint(instances)
+    js_file = state + ".json"
+    with open(js_file, 'w') as outfile:
+        json.dump(instances, outfile)
+
     print 80*"o"
     for inst in instances:
         proj_id = inst['project_id']
