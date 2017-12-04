@@ -55,9 +55,8 @@ if __name__ == '__main__':
                     data_array = f[grp_name][metric]
                     data_array[:] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-            tnow = now_acc()
-            f.attrs['LastRun'] = tnow
-            f.attrs['LastRunUTC'] = str(to_isodate(tnow))
+            f.attrs['LastRun'] = time_array_all[-1]
+            f.attrs['LastRunUTC'] = str(to_isodate(time_array_all[-1]))
             if year < years[-1]:
                 f.attrs['LastRun'] = ts[-1]
                 f.attrs['LastRunUTC'] = str(to_isodate(ts[-1]))

@@ -54,8 +54,8 @@ if __name__ == '__main__':
                 data_array = f[grp_name][metric]
                 data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-        f.attrs['LastRun'] = df
-        f.attrs['LastRunUTC'] = str(to_isodate(df))
+        f.attrs['LastRun'] = time_array_all[-1]
+        f.attrs['LastRunUTC'] = str(to_isodate(time_array_all[-1]))
 
        # print 80*"="
        # print "idx_start = ", idx_start
