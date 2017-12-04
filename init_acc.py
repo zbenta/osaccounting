@@ -28,7 +28,7 @@ if __name__ == '__main__':
     ev = get_conf()
     years = get_years(ev)
     di = ev['secepoc_ini']
-    df = to_secepoc(datetime.datetime(years[-1]+1, 1, 1, 0, 0, 0))
+    df = now_acc()
     time_array_all = time_series(ev, di, df)
     state = "init"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
