@@ -20,6 +20,7 @@ import mysql.connector
 import ConfigParser
 import json
 import math
+import cPickle as pickle
 
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
@@ -376,9 +377,8 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
     # pprint.pprint(instances)
-    js_file = state + ".json"
-    with open(js_file, 'w') as outfile:
-        json.dump(instances, outfile)
+    pickle_file = state + ".pkl"
+    pickle.dump(instances, open(pickle_file, "wb"))
 
     print 80*"o"
     for inst in instances:
