@@ -51,7 +51,7 @@ if __name__ == '__main__':
             idx_start_ds = time2index(ev, ts[0], ts)
             idx_end_ds = time2index(ev, df, ts)
             if year < years[-1]:
-                idx_end = time2index(ev, ts[-1], time_array_all) + 1
+                idx_end = time2index(ev, ts[-1], time_array_all)
                 idx_end_ds = time2index(ev, ts[-1], ts)
 
             print "Timestamp Ini      = ", to_isodate(di)
