@@ -47,7 +47,7 @@ if __name__ == '__main__':
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start = time2index(ev, ts[0], time_array_all)
-            idx_end = time2index(ev, df, time_array_all)
+            idx_end = time2index(ev, df, time_array_all) + 1
             idx_start_ds = time2index(ev, ts[0], ts)
             idx_end_ds = time2index(ev, df, ts)
             if year < years[-1]:
