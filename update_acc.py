@@ -54,12 +54,5 @@ if __name__ == '__main__':
                 data_array = f[grp_name][metric]
                 data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-        f.attrs['LastRun'] = time_array_all[-1]
-        f.attrs['LastRunUTC'] = str(to_isodate(time_array_all[-1]))
-
-       # print 80*"="
-       # print "idx_start = ", idx_start
-       # print "idx_end = ", idx_end
-       # print "idx_start_ds = ", idx_start_ds
-       # print "idx_end_ds = ", idx_end_ds
-       # print "ds_array size = ", (ts[idx_start_ds:idx_end_ds]).size
+        f.attrs['LastRun'] = ts[idx_end_ds - 1]
+        f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds - 1]))
