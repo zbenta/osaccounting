@@ -212,7 +212,6 @@ def get_list_db(ti, database, state):
         cnd_state = " AND deleted_at >= '%s'" % dtlocal_i
         cnd_state_nova = " AND instances.deleted_at > '%s'" % dtlocal_i
 
-    # Default to DB = keystone, dbtable = project
     dbtable = "project"
     table_str = "id,name,description,enabled"
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
