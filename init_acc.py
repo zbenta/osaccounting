@@ -51,8 +51,8 @@ if __name__ == '__main__':
             idx_start_ds = time2index(ev, ts[0], ts)
             idx_end_ds = time2index(ev, df, ts) + 1
             if year < years[-1]:
-                idx_end = time2index(ev, ts[-1], time_array_all)
-                idx_end_ds = time2index(ev, ts[-1], ts)
+                idx_end = time2index(ev, ts[-1], time_array_all) + 1
+                idx_end_ds = time2index(ev, ts[-1], ts) + 1
 
             print "Size DS HDF   = ", len(ts)
             print "Size ArrayAll = ", len(time_array_all)
@@ -68,11 +68,12 @@ if __name__ == '__main__':
             print "--"
             print "TSMetric Ini         = ", to_isodate(ts[idx_start_ds])
             print "TSMetric IniArrayAll = ", to_isodate(time_array_all[idx_start])
-            print "TSMetric End         = ", to_isodate(ts[idx_end_ds])
-            if year < years[-1]:
-                print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
-            else:
-                print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
+            print "TSMetric End         = ", to_isodate(ts[idx_end_ds-1])
+            print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
+            # if year < years[-1]:
+            #     print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
+            # else:
+            #     print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
 
             for proj_id in projects_in:
                 create_proj_datasets(ev, year, proj_id, p_dict)
