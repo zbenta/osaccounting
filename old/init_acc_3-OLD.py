@@ -43,7 +43,7 @@ if __name__ == '__main__':
     for year in years:
         filename = create_hdf_year(ev, year)
         print 80*'='
-        print ">>>> file created: ", filename
+        print year, filename
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start = time2index(ev, ts[0], time_array_all)
@@ -53,6 +53,27 @@ if __name__ == '__main__':
             if year < years[-1]:
                 idx_end = time2index(ev, ts[-1], time_array_all) + 1
                 idx_end_ds = time2index(ev, ts[-1], ts) + 1
+
+            print "Size DS HDF   = ", len(ts)
+            print "Size ArrayAll = ", len(time_array_all)
+            print "Timestamp Ini         = ", to_isodate(di)
+            print "Timestamp IniArrayAll = ", to_isodate(ts[0])
+            print "Timestamp End         = ", to_isodate(df)
+            print "Timestamp EndArrayAll = ", to_isodate(ts[-1])
+            print "--"
+            print "Index Ini         = ", idx_start_ds
+            print "Index IniArrayAll = ", idx_start
+            print "Index End         = ", idx_end_ds
+            print "Index EndArrayAll = ", idx_end
+            print "--"
+            print "TSMetric Ini         = ", to_isodate(ts[idx_start_ds])
+            print "TSMetric IniArrayAll = ", to_isodate(time_array_all[idx_start])
+            print "TSMetric End         = ", to_isodate(ts[idx_end_ds-1])
+            print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
+            # if year < years[-1]:
+            #     print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
+            # else:
+            #     print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
 
             for proj_id in projects_in:
                 create_proj_datasets(ev, year, proj_id, p_dict)
