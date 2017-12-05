@@ -33,7 +33,7 @@ if __name__ == '__main__':
     state = "init"  # state is either "init" if first time accounting or "upd"
     projects_in = list()  # fill list of project ID when processing instances or volumes
     array_metrics = dict()  # array with metrics for each project
-    p_dict = get_projects(di, df, state)
+    p_dict = get_projects(di, state)
     process_inst(ev, di, df, time_array_all, array_metrics, p_dict, projects_in, state)
     process_vol(ev, di, df, time_array_all, array_metrics, p_dict, projects_in, state)
     directory = os.path.dirname(ev['out_dir'])
