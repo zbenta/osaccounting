@@ -69,7 +69,11 @@ if __name__ == '__main__':
             print "TSMetric Ini         = ", to_isodate(ts[idx_start_ds])
             print "TSMetric IniArrayAll = ", to_isodate(time_array_all[idx_start])
             print "TSMetric End         = ", to_isodate(ts[idx_end_ds])
-            print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
+            if year < years[-1]:
+                print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
+            else:
+                print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
+
 
             # idx_start = time2index(ev, ts[0], time_array_all)
             # idx_end = time2index(ev, ts[-1], time_array_all) + 1
