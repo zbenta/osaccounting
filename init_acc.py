@@ -66,8 +66,8 @@ if __name__ == '__main__':
             print "--"
             print "TSMetric Ini      = ", to_isodate(ts[idx_start_ds])
             print "TSMetric IniArray = ", to_isodate(time_array_all[idx_start])
-            print "TSMetric End      = ", to_isodate(ts[idx_end_ds-1])
-            print "TSMetric EndArray = ", to_isodate(time_array_all[idx_end-1])
+            print "TSMetric End      = ", to_isodate(ts[idx_end_ds])
+            print "TSMetric EndArray = ", to_isodate(time_array_all[idx_end])
 
             # idx_start = time2index(ev, ts[0], time_array_all)
             # idx_end = time2index(ev, ts[-1], time_array_all) + 1
@@ -76,7 +76,6 @@ if __name__ == '__main__':
                 grp_name = p_dict[proj_id][0]
                 for metric in METRICS:
                     data_array = f[grp_name][metric]
-                    data_array[:] = array_metrics[grp_name][metric][idx_start:idx_end]
                     data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
             f.attrs['LastRun'] = time_array_all[-1]
