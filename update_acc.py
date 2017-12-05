@@ -18,6 +18,8 @@ if __name__ == '__main__':
     di = to_secepoc(datetime.datetime(year_now, 1, 1, 0, 0, 0))
     df = now_acc()
     filename = get_hdf_filename(ev, year_now)
+    print 80*"-"
+    print "Running update Openstack accounting: ", to_isodate(df)
     if not exists_hdf(ev, year_now):
         filename = create_hdf_year(ev, year_now)
         print ">>>> file created: ", filename
