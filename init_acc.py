@@ -49,25 +49,27 @@ if __name__ == '__main__':
             idx_start = time2index(ev, ts[0], time_array_all)
             idx_end = time2index(ev, df, time_array_all) + 1
             idx_start_ds = time2index(ev, ts[0], ts)
-            idx_end_ds = time2index(ev, df, ts)
+            idx_end_ds = time2index(ev, df, ts) + 1
             if year < years[-1]:
                 idx_end = time2index(ev, ts[-1], time_array_all)
                 idx_end_ds = time2index(ev, ts[-1], ts)
 
-            print "Timestamp Ini      = ", to_isodate(di)
-            print "Timestamp IniArray = ", to_isodate(ts[0])
-            print "Timestamp End      = ", to_isodate(df)
-            print "Timestamp EndArray = ", to_isodate(ts[-1])
+            print "Size DS HDF   = ", len(ts)
+            print "Size ArrayAll = ", len(time_array_all)
+            print "Timestamp Ini         = ", to_isodate(di)
+            print "Timestamp IniArrayAll = ", to_isodate(ts[0])
+            print "Timestamp End         = ", to_isodate(df)
+            print "Timestamp EndArrayAll = ", to_isodate(ts[-1])
             print "--"
-            print "Index Ini      = ", idx_start_ds
-            print "Index IniArray = ", idx_start
-            print "Index End      = ", idx_end_ds
-            print "Index EndArray = ", idx_end
+            print "Index Ini         = ", idx_start_ds
+            print "Index IniArrayAll = ", idx_start
+            print "Index End         = ", idx_end_ds
+            print "Index EndArrayAll = ", idx_end
             print "--"
-            print "TSMetric Ini      = ", to_isodate(ts[idx_start_ds])
-            print "TSMetric IniArray = ", to_isodate(time_array_all[idx_start])
-            print "TSMetric End      = ", to_isodate(ts[idx_end_ds])
-            print "TSMetric EndArray = ", to_isodate(time_array_all[idx_end])
+            print "TSMetric Ini         = ", to_isodate(ts[idx_start_ds])
+            print "TSMetric IniArrayAll = ", to_isodate(time_array_all[idx_start])
+            print "TSMetric End         = ", to_isodate(ts[idx_end_ds])
+            print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end])
 
             # idx_start = time2index(ev, ts[0], time_array_all)
             # idx_end = time2index(ev, ts[-1], time_array_all) + 1
