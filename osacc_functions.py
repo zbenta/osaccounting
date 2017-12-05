@@ -52,6 +52,7 @@ def get_conf():
 
 def get_years(ev):
     """List of years
+    :param ev: configuration options
     :return (list) of years
     """
     tf = datetime.datetime.utcnow()
@@ -69,6 +70,7 @@ def get_hdf_filename(ev, year):
 
 def exists_hdf(ev, year):
     """Checks if hdf5 file exists
+    :param ev: configuration options
     :param year: Year
     :return (boolean) true is file exists or false if it doesn't
     """
@@ -148,8 +150,8 @@ def to_isodate(date):
 
 def time2index(ev, tstamp, time_array):
     """
-    Linear equation: index(t) = floor[1/Dt * (t-t0)]
-    y = a + bx -> a = -t0/Dt  b = 1/Dt
+    Linear step equation: index(t) = floor(1/Dt * (t-t0))
+    y = floor(a + bx) -> a = -t0/Dt  b = 1/Dt
     :param ev: configuration options
     :param tstamp: timestamp in seconds to epoc
     :param time_array: array of timestamps
@@ -163,24 +165,28 @@ def time2index(ev, tstamp, time_array):
 
 def now_acc():
     """
-    :return: now in seconds from epoch
+    :return: datetime now in seconds from epoch
     """
     nacc = datetime.datetime.utcnow()
     return to_secepoc(nacc)
 
 
 def time_series(ev, di, df):
-    """Create a time array (of ints) in epoch format with interval
+    """Create a time array (of ints) in seconds to epoch format with interval
     of delta_time for all years
-    :param ev:
-    :param di:
-    :param df:
+    :param ev: configuration options
+    :param di: Initial Date Time in seconds to epoc
+    :param df: Final Date Time in seconds to epoc
     :returns (numpy array) time_array
     """
     return numpy.arange(di, df, ev['delta_time'])
 
 
 def db_conn(database):
+    """Create Mysql database connection
+    :param database: database name
+    :return: mysql connector
+    """
     ev = get_conf()
     return mysql.connector.connect(host=ev['mysql_host'],
                                    user=ev['mysql_user'],
@@ -196,8 +202,8 @@ def get_list_db(ti, database, state):
     DB = cinder   -> Table = volumes
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Initial Date Time in seconds to epoc
-    :param database: Database
-    :param state: one of the two values - init (default), upd
+    :param database: Database name
+    :param state: one of the two values - `init` accounting (default), `upd` update
     :return (json dict): List of rows of a table in the database
     """
     local_timezone = tzlocal.get_localzone()
@@ -246,6 +252,12 @@ def get_list_db(ti, database, state):
 
 
 def get_table_rows(database, query, table_coll):
+    """Creates a list with rows of database table
+    :param database: database name
+    :param query: database query
+    :param table_coll: list with names of table columns
+    :return:
+    """
     conn = db_conn(database)
     cursor = conn.cursor()
     cursor.execute(query)
@@ -261,15 +273,14 @@ def get_table_rows(database, query, table_coll):
     return rows_list
 
 
-def get_projects(di, df, state):
+def get_projects(di, state):
     """
     Get all projects in keystone database
     Returns a dictionary with all projects
     p_dict = {'project_id': ['project_name', 'project_description'], }
     :param di: Initial DateTime in seconds to epoch
-    :param df: End DateTime in seconds to epoch
-    :param state: Either "init" or "upd" of accounting
-    :return: p_dict
+    :param state: Either ``init`` or ``upd`` of accounting
+    :return: dictionary with keystone projects
     """
     projects = get_list_db(di, "keystone", state)
     p_dict = dict()
@@ -280,6 +291,14 @@ def get_projects(di, df, state):
 
 
 def prep_metrics(time_array, p_dict, proj_id, projects_in, a):
+    """Prepare numpy arrays of metrics for a given project
+    :param time_array: numpy array with timestamps
+    :param p_dict: dictionary with keystone projects
+    :param proj_id: project ID
+    :param projects_in: list of projects
+    :param a: dictionary of metrics per project
+    :return: project name
+    """
     pname = p_dict[proj_id][0]
     if proj_id not in projects_in:
         projects_in.append(proj_id)
@@ -290,6 +309,17 @@ def prep_metrics(time_array, p_dict, proj_id, projects_in, a):
 
 
 def get_indexes(ev, created, deleted, di, df, time_array, state):
+    """Get indexes corresponding to a timestamp interval for a given
+    nova instance
+    :param ev: configuration options
+    :param created: Nova instance creation time
+    :param deleted: Nova instance delete time
+    :param di: Initial DateTime in seconds to epoch
+    :param df: Final DateTime in seconds to epoch
+    :param time_array: numpy array with timestamps
+    :param state: one of the two values - `init` accounting (default), `upd` update
+    :return: start index of time_array, end index of time_array
+    """
     t_create = di
     t_final = df
     crt_sec = to_secepoc(created)
@@ -308,17 +338,16 @@ def get_indexes(ev, created, deleted, di, df, time_array, state):
 
 
 def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
-    """
-    Process instances, create/update projects metrics arrays
-    :param ev:
-    :param di:
-    :param df:
-    :param time_array:
+    """Process instances, create/update projects metrics arrays
+    array of metrics is filled
+    :param ev: configuration options
+    :param di: Initial DateTime in seconds to epoch
+    :param df: Final DateTime in seconds to epoch
+    :param time_array: numpy array with timestamps
     :param a: dictionary with array of metrics for each project
     :param p_dict: projects dictionary from keystone
-    :param projects_in:
-    :param state:
-    :return:
+    :param projects_in: list of projects to process
+    :param state: one of the two values - `init` accounting (default), `upd` update
     """
     instances = get_list_db(di, "nova", state)
     print 80*"="
@@ -346,6 +375,17 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
 
 
 def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
+    """Process volumes, create/update projects metrics arrays
+    array of metrics is filled
+    :param ev: configuration options
+    :param di: Initial DateTime in seconds to epoch
+    :param df: Final DateTime in seconds to epoch
+    :param time_array: numpy array with timestamps
+    :param a: dictionary with array of metrics for each project
+    :param p_dict: projects dictionary from keystone
+    :param projects_in: list of projects to process
+    :param state: one of the two values - `init` accounting (default), `upd` update
+    """
     volumes = get_list_db(di, "cinder", state)
     print 80*"="
     print "Volumes selected from DB n = ", len(volumes)
