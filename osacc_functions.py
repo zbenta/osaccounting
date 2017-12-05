@@ -189,7 +189,7 @@ def db_conn(database):
                                    db=database)
 
 
-def get_list_db(ti, te, database, state):
+def get_list_db(ti, database, state):
     """Get the list of rows of table from database
     Query keystone, nova or cinder to get projects or instances or volumes
     For projects (do not take into account admin and service projects)
@@ -197,24 +197,20 @@ def get_list_db(ti, te, database, state):
     DB = cinder   -> Table = volumes
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Initial Date Time in seconds to epoc
-    :param te: End Date Time in seconds to epoc
     :param database: Database
     :param state: one of the two values - init (default), upd
     :return (json dict): List of rows of a table in the database
     """
     local_timezone = tzlocal.get_localzone()
     dtlocal_i = datetime.datetime.fromtimestamp(ti, local_timezone)
-    dtlocal_e = datetime.datetime.fromtimestamp(te, local_timezone)
 
-    # The condition is created_at >= date_time_local if in initialization
-    # The condition is dtlocal_i < deleted_at =< dtlocal_e if in update
-    cnd_state = "created_at >= '%s'" % dtlocal_i
-    cnd_state_nova = "instances.created_at >= '%s'" % dtlocal_i
+    # The cnd_state is "All" if in initialization
+    # The cnd_state is deleted_at >= date_time_local if in update
+    cnd_state = " "
+    cnd_state_nova = " "
     if state == "upd":
-        cnd_state = "deleted_at > '%s'" % dtlocal_i
-        cnd_state_nova = "instances.deleted_at > '%s'" % dtlocal_i
-        # cnd_state = "(deleted_at > '%s' AND deleted_at < '%s')" % (dtlocal_i, dtlocal_e)
-        # cnd_state_nova = "(instances.deleted_at > '%s' AND instances.deleted_at <= '%s')" % (dtlocal_i, dtlocal_e)
+        cnd_state = " AND deleted_at >= '%s'" % dtlocal_i
+        cnd_state_nova = " AND instances.deleted_at > '%s'" % dtlocal_i
 
     # Default to DB = keystone, dbtable = project
     dbtable = "project"
@@ -223,7 +219,7 @@ def get_list_db(ti, te, database, state):
     if database == "cinder":
         dbtable = "volumes"
         table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = cnd_state + " OR status != 'deleted'"
+        condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
 
     table_coll = table_str.split(",")
     query = ' '.join((
@@ -239,8 +235,8 @@ def get_list_db(ti, te, database, state):
                     "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
                     "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
         ijoin = "instance_info_caches ON uuid=instance_info_caches.instance_uuid"
-        condition = "instances.vm_state != 'error' AND " \
-                    "(" + cnd_state_nova + " OR instances.vm_state = 'active' )"
+        condition = "(instances.vm_state = 'active' OR instances.vm_state = 'stopped') OR " \
+                    "(instances.vm_state = 'deleted'" + cnd_state_nova + ")"
         query = ' '.join((
             "SELECT " + table_str,
             "FROM " + dbtable,
@@ -322,7 +318,7 @@ def get_projects(di, df, state):
     :param state: Either "init" or "upd" of accounting
     :return: p_dict
     """
-    projects = get_list_db(di, df, "keystone", state)
+    projects = get_list_db(di, "keystone", state)
     p_dict = dict()
     for proj in projects:
         p_dict[proj['id']] = [proj['name'], proj['description']]
@@ -371,11 +367,9 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param state:
     :return:
     """
-    instances = get_list_db2(di, "nova", state)
-    # instances = get_list_db(di, df, "nova", state)
+    instances = get_list_db(di, "nova", state)
     print 80*"o"
     print "Instances selected from DB n = ", len(instances)
-    print 80*"o"
     for inst in instances:
         proj_id = inst['project_id']
         if proj_id not in p_dict:
@@ -385,16 +379,15 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
         dlt = inst["deleted_at"]
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
         idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
-        #print "created = <%s> - deleted = <%s> - instance = %s" % (crt, dlt, inst['uuid'])
-        #print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        #print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
-        #print "pname = %s - vcpus = %i - mem = %i" % (pname, inst['vcpus'], inst['memory_mb'])
-        #print 20 * "_"
+        # print "created = <%s> - deleted = <%s> - instance = %s" % (crt, dlt, inst['uuid'])
+        # print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        # print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
+        # print "pname = %s - vcpus = %i - mem = %i" % (pname, inst['vcpus'], inst['memory_mb'])
+        # print 20 * "_"
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
         a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
         a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
-        """
         net_info = json.loads(inst['network_info'])
         if net_info:
             for l in range(len(net_info)):
@@ -402,15 +395,13 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
                     for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
                         nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
                         a[pname]['npublic_ips'][idx_start:idx_end] = a[pname]['npublic_ips'][idx_start:idx_end] + nip
-        """
+
 
 def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
-    volumes = get_list_db2(di, "cinder", state)
-    # volumes = get_list_db(di, df, "cinder", state)
+    volumes = get_list_db(di, "cinder", state)
     print 80*"o"
     print "Volumes selected from DB n = ", len(volumes)
     # pprint.pprint(volumes)
-    print 80*"o"
     for vol in volumes:
         proj_id = vol['project_id']
         if proj_id not in p_dict:
@@ -420,9 +411,9 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
         dlt = vol["deleted_at"]
         pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
         idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
-        #print "created = <%s> - deleted = <%s> - volume = <%s>" % (crt, dlt, vol['id'])
-        #print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
-        #print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
-        #print 20 * "_"
+        # print "created = <%s> - deleted = <%s> - volume = <%s>" % (crt, dlt, vol['id'])
+        # print "     di = <%s> -      df = <%s>" % (to_isodate(di), to_isodate(df))
+        # print "   ta_i = <%s> -    ta_f = <%s>" % (to_isodate(time_array[idx_start]), to_isodate(time_array[idx_end-2]))
+        # print 20 * "_"
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1

@@ -74,9 +74,6 @@ if __name__ == '__main__':
             else:
                 print "TSMetric EndArrayAll = ", to_isodate(time_array_all[idx_end-1])
 
-
-            # idx_start = time2index(ev, ts[0], time_array_all)
-            # idx_end = time2index(ev, ts[-1], time_array_all) + 1
             for proj_id in projects_in:
                 create_proj_datasets(ev, year, proj_id, p_dict)
                 grp_name = p_dict[proj_id][0]
@@ -84,8 +81,5 @@ if __name__ == '__main__':
                     data_array = f[grp_name][metric]
                     data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-            f.attrs['LastRun'] = time_array_all[-1]
-            f.attrs['LastRunUTC'] = str(to_isodate(time_array_all[-1]))
-            if year < years[-1]:
-                f.attrs['LastRun'] = ts[-1]
-                f.attrs['LastRunUTC'] = str(to_isodate(ts[-1]))
+            f.attrs['LastRun'] = ts[idx_end_ds]
+            f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds]))
