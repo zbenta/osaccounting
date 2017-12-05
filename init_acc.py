@@ -58,6 +58,11 @@ if __name__ == '__main__':
             print "Timestamp IniArray = ", to_isodate(ts[0])
             print "Timestamp End      = ", to_isodate(df)
             print "Timestamp EndArray = ", to_isodate(ts[-1])
+            print "--"
+            print "Index Ini      = ", idx_start_ds
+            print "Index IniArray = ", idx_start
+            print "Index End      = ", idx_end_ds
+            print "Index EndArray = ", idx_end
 
             # idx_start = time2index(ev, ts[0], time_array_all)
             # idx_end = time2index(ev, ts[-1], time_array_all) + 1
