@@ -82,5 +82,5 @@ if __name__ == '__main__':
                     data_array = f[grp_name][metric]
                     data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-            f.attrs['LastRun'] = ts[idx_end_ds]
-            f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds]))
+            f.attrs['LastRun'] = ts[idx_end_ds-1]
+            f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds-1]))
