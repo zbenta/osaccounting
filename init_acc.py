@@ -63,6 +63,11 @@ if __name__ == '__main__':
             print "Index IniArray = ", idx_start
             print "Index End      = ", idx_end_ds
             print "Index EndArray = ", idx_end
+            print "--"
+            print "TSMetric Ini      = ", to_isodate(ts[idx_start_ds])
+            print "TSMetric IniArray = ", to_isodate(time_array_all[idx_start])
+            print "TSMetric End      = ", to_isodate(ts[idx_end_ds-1])
+            print "TSMetric EndArray = ", to_isodate(time_array_all[idx_end-1])
 
             # idx_start = time2index(ev, ts[0], time_array_all)
             # idx_end = time2index(ev, ts[-1], time_array_all) + 1
