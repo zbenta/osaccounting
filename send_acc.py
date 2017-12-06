@@ -20,18 +20,18 @@ except ImportError:
 from osacc_functions import *
 
 if __name__ == '__main__':
-    env = get_env()
-    carbon_server = env['carbon_server']
-    carbon_port = int(env['carbon_port'])
-    ini_list = 1000 # size of list to initialize
-    years = get_years()
+    ev = get_conf()
+    carbon_server = ev['carbon_server']
+    carbon_port = int(ev['carbon_port'])
+    ini_list = 1000  # size of list to initialize
+    years = get_years(ev)
     # years = [2017]
     delay = 0  # seconds delay to close connection
     max_retries = 3  # number of retries for socket connect
     timeout = 3  # seconds between retries for socket connect
+    print 80 * "="
     for year in years:
-        print 80 * "="
-        filename = get_hdf_filename(year)
+        filename = get_hdf_filename(ev, year)
         print " Filename = ", filename
         with h5py.File(filename, 'r') as f:
             ti = f.attrs['LastRun']
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                     graph_list = list()
                     print "--> Metric = ", m
                     data = f[group][m]
-                    metric_str = env['graph_ns'] + "." + str(group) + "." + str(m)
+                    metric_str = ev['graph_ns'] + "." + str(group) + "." + str(m)
                     for i in range(len_ds):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         value = int(data[i])
@@ -73,12 +73,4 @@ if __name__ == '__main__':
                                     sock.close()
                                     break
 
-                            # try:
-                            #     sock.connect((carbon_server, carbon_port))
-                            # except:
-                            #     print "Couldn't connect to %(server)s on port %(port)d, is carbon-agent.py running?" % {
-                            #         'server': carbon_server, 'port': carbon_port}
-                            #     sys.exit(1)
-
                             graph_list = list()
-
