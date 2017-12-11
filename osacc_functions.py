@@ -47,6 +47,14 @@ def get_conf():
         ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
         ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
 
+    # influxdb section options are Optional
+    if parser.has_option('influxdb', 'DBHOST'):
+        ev['dbhost'] = parser.get('influxdb', 'DBHOST')
+        ev['dbport'] = parser.getint('influxdb', 'DBPORT')
+        ev['dbuser'] = parser.get('influxdb', 'DBUSER')
+        ev['dbpass'] = parser.get('influxdb', 'DBPASS')
+        ev['dbname'] = parser.get('influxdb', 'DBNAME')
+
     return ev
 
 
