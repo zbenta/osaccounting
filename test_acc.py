@@ -15,6 +15,6 @@ if __name__ == '__main__':
     dbuser = ev['dbuser']
     dbpass = ev['dbpass']
     dbname = ev['dbname']
-    client = InfluxDBClient(dbhost, dbport, dbuser, dbpass, dbname)
+    client = InfluxDBClient(dbhost, dbport, dbuser, dbpass, dbname, ssl=True, verify_ssl=False)
     result = client.query('SHOW DATABASES;')
     print("Result: {0}".format(result))
