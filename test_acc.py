@@ -5,10 +5,10 @@
 # Author: Mario David <mariojmdavid@gmail.com>
 #
 
+import pprint
 from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
     client = get_influxclient()
-    result = client.query('SHOW DATABASES;')
-    print("Result: {0}".format(result))
+    pprint.pprint(client.get_list_database())
