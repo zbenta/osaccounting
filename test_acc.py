@@ -12,3 +12,4 @@ if __name__ == '__main__':
     ev = get_conf()
     client = get_influxclient()
     pprint.pprint(client.get_list_database())
+    pprint.pprint(client.get_list_retention_policies('osacc'))

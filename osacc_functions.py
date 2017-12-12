@@ -45,7 +45,7 @@ def get_conf():
     # graphite section options are Optional
     if parser.has_option('graphite', 'CARBON_SERVER'):
         ev['carbon_server'] = parser.get('graphite', 'CARBON_SERVER')
-        ev['carbon_port'] = parser.get('graphite', 'CARBON_PORT')
+        ev['carbon_port'] = parser.getint('graphite', 'CARBON_PORT')
         ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
 
     # influxdb section options are Optional

@@ -22,7 +22,7 @@ from osacc_functions import *
 if __name__ == '__main__':
     ev = get_conf()
     carbon_server = ev['carbon_server']
-    carbon_port = int(ev['carbon_port'])
+    carbon_port = ev['carbon_port']
     ini_list = 1000  # size of list to initialize
     years = get_years(ev)
     # years = [2017]
@@ -43,7 +43,6 @@ if __name__ == '__main__':
                 print "--> Group = ", group
                 for m in METRICS:
                     graph_list = list()
-                    print "--> Metric = ", m
                     data = f[group][m]
                     metric_str = ev['graph_ns'] + "." + str(group) + "." + str(m)
                     for i in range(len_ds):
@@ -57,7 +56,7 @@ if __name__ == '__main__':
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
-                            print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
+                            # print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                             message = size + package
                             sock = socket.socket()
                             for j in range(max_retries):
