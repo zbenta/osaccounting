@@ -56,7 +56,7 @@ if __name__ == '__main__':
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
-                            # print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
+                            print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                             message = size + package
                             sock = socket.socket()
                             for j in range(max_retries):
