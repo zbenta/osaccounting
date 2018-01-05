@@ -1,6 +1,6 @@
 # Accounting for Openstack
 
-Accounting for Openstack, uses hdf5 to store time series of number of VCPUs, amount of memmory, amount of local disk, aamount of cinder volumes
+Accounting for Openstack, uses hdf5 to store time series of number of VCPUs, amount of memmory, amount of local disk, number and amount of cinder volumes
 
 ## Configuration
 
@@ -11,7 +11,7 @@ The scripts rely on environment variables:
 * MYSQL_PASS - database password for the cinder DB
 * MYSQL_HOST - database host
 * CARBON_SERVER - graphite/carbon server
-* CARBON_PORT - graphite/carbon (default 2003)
+* CARBON_PORT - graphite/carbon
 
 ## Usage
 
