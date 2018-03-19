@@ -24,6 +24,7 @@ if __name__ == '__main__':
     carbon_server = ev['carbon_server']
     carbon_port = ev['carbon_port']
     graph_ns = ev['graph_ns']
+    send_inter = ev['send_inter']
     ini_list = 1000  # size of list to initialize
     years = get_years(ev)
     # years = [2017]
