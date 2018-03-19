@@ -35,7 +35,7 @@ if __name__ == '__main__':
     filename = get_hdf_filename(ev, year)
     print " Filename = ", filename
     with h5py.File(filename, 'r') as f:
-        df = f.attrs['LastRun']
+        df = int(f.attrs['LastRun'])
         di = df - send_inter
         ts = f['date'][:]
         idx_start_ds = time2index(ev, di, ts)
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                 graph_list = list()
                 data = f[group][m]
                 metric_str = graph_ns + "." + str(group) + "." + str(m)
-                for i in range(di, df):
+                for i in range(idx_start_ds, idx_end_ds):
                     graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                     value = int(data[i])
                     timestamp = int(ts[i])
