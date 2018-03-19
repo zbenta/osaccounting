@@ -412,17 +412,3 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
         idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
         a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
         a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
-
-def get_influxclient():
-    """Get InfluxDB Client
-    :return: InfluxDB Client
-    """
-    ev = get_conf()
-    dbhost = ev['dbhost']
-    dbport = ev['dbport']
-    dbuser = ev['dbuser']
-    dbpass = ev['dbpass']
-    dbname = ev['dbname']
-    bssl = ev['ssl']
-    bverify_ssl = ev['verify_ssl']
-    return InfluxDBClient(dbhost, dbport, dbuser, dbpass, dbname, ssl=bssl, verify_ssl=bverify_ssl)
