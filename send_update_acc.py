@@ -35,9 +35,12 @@ if __name__ == '__main__':
     filename = get_hdf_filename(ev, year)
     print " Filename = ", filename
     with h5py.File(filename, 'r') as f:
-        ti = f.attrs['LastRun']
+        df = f.attrs['LastRun']
+        di = df - send_inter
         ts = f['date'][:]
-        len_ds = len(ts)
+        idx_start_ds = time2index(ev, di, ts)
+        idx_end_ds = time2index(ev, df, ts) + 1
+        print "di =", to_isodate(di), " df =", to_isodate(df)
         for group in f:
             if group == "date":
                 continue
@@ -46,14 +49,14 @@ if __name__ == '__main__':
                 graph_list = list()
                 data = f[group][m]
                 metric_str = graph_ns + "." + str(group) + "." + str(m)
-                for i in range(len_ds):
+                for i in range(di, df):
                     graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                     value = int(data[i])
                     timestamp = int(ts[i])
                     metric = str(metric_str)
                     graph_ds = (metric, (timestamp, value))
                     graph_list.append(graph_ds)
-                    if (i % ini_list == 0) or (i == len_ds - 1):
+                    if (i % ini_list == 0) or (i == idx_end_ds - 1):
                         # pprint.pprint(graph_list)
                         package = pickle.dumps(graph_list, protocol=2)
                         size = struct.pack('!L', len(package))
