@@ -45,7 +45,6 @@ if __name__ == '__main__':
             if group == "date":
                 continue
             for m in METRICS:
-                print "--> Group = ", group, " Metric =", m
                 graph_list = list()
                 data = f[group][m]
                 metric_str = graph_ns + "." + str(group) + "." + str(m)
@@ -57,7 +56,6 @@ if __name__ == '__main__':
                     graph_ds = (metric, (timestamp, value))
                     graph_list.append(graph_ds)
                     if (i % ini_list == 0) or (i == idx_end_ds - 1):
-                        # pprint.pprint(graph_list)
                         package = pickle.dumps(graph_list, protocol=2)
                         size = struct.pack('!L', len(package))
                         print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
