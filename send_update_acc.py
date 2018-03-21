@@ -41,6 +41,8 @@ if __name__ == '__main__':
         ts = f['date'][:]
         idx_start_ds = time2index(ev, di, ts)
         idx_end_ds = time2index(ev, df, ts) + 1
+        print "di =", di, " df =", df
+        print "idx =", idx_start_ds, idx_end_ds
         print "di =", to_isodate(di), " df =", to_isodate(df)
         for group in f:
             if group == "date":
@@ -58,6 +60,9 @@ if __name__ == '__main__':
                     graph_ds = (metric, (timestamp, value))
                     graph_list.append(graph_ds)
                     if (i % ini_list == 0) or (i == idx_end_ds - 1):
+                        print 5*"#"
+                        print "i =", i, " date =", to_isodate(timestamp)
+                        pprint.pprint(graph_list)
                         package = pickle.dumps(graph_list, protocol=2)
                         size = struct.pack('!L', len(package))
                         message = size + package
