@@ -43,7 +43,7 @@ if __name__ == '__main__':
         idx_end_ds = time2index(ev, df, ts) + 1
         print "di =", di, " df =", df
         print "idx =", idx_start_ds, idx_end_ds
-        print "di =", to_isodate(di), " df =", to_isodate(df)
+        print "di =", to_isodate(ts[idx_start_ds]), " df =", to_isodate(ts[idx_end_ds])
         for group in f:
             if group == "date":
                 continue
