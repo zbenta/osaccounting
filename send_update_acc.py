@@ -26,7 +26,7 @@ if __name__ == '__main__':
     carbon_port = ev['carbon_port']
     graph_ns = ev['graph_ns']
     send_inter = ev['send_inter']
-    ini_list = 1000  # size of list to initialize
+    ini_list = 60  # size of list to send
     now = datetime.datetime.utcnow()
     year = now.year
     delay = 0  # seconds delay to close connection
