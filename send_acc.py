@@ -25,8 +25,8 @@ if __name__ == '__main__':
     carbon_port = ev['carbon_port']
     graph_ns = ev['graph_ns']
     ini_list = 1000  # size of list to initialize
-    years = get_years(ev)
-    # years = [2017]
+    # years = get_years(ev)
+    years = [2016, 2017]
     delay = 0  # seconds delay to close connection
     max_retries = 3  # number of retries for socket connect
     timeout = 3  # seconds between retries for socket connect
