@@ -53,7 +53,7 @@ if __name__ == '__main__':
                         metric = str(metric_str)
                         graph_ds = (metric, (timestamp, value))
                         graph_list.append(graph_ds)
-                        if (i % ini_list == 0) or ( i == len_ds-1):
+                        if (i % ini_list == 0) or (i == len_ds-1):
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
