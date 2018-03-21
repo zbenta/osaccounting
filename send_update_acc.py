@@ -60,12 +60,11 @@ if __name__ == '__main__':
                     graph_ds = (metric, (timestamp, value))
                     graph_list.append(graph_ds)
                     if (i % ini_list == 0) or (i == idx_end_ds - 1):
-                        print 5*"#"
-                        print "i =", i, " date =", to_isodate(timestamp)
-                        pprint.pprint(graph_list)
                         package = pickle.dumps(graph_list, protocol=2)
                         size = struct.pack('!L', len(package))
                         message = size + package
+                        print 5*"#"
+                        print "i =", i, " Length =", len(graph_list), " Size =", size, " date =", to_isodate(timestamp)
                         sock = socket.socket()
                         for j in range(max_retries):
                             try:
