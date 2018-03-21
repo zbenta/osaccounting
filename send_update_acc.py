@@ -64,7 +64,7 @@ if __name__ == '__main__':
                         size = struct.pack('!L', len(package))
                         message = size + package
                         print 5*"#"
-                        print "i =", i, " Length =", len(graph_list), " Size =", size, " date =", to_isodate(timestamp)
+                        print "i =", i, " Length =", len(graph_list), " Size =", len(package), " date =", to_isodate(timestamp)
                         sock = socket.socket()
                         for j in range(max_retries):
                             try:
