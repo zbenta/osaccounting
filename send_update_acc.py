@@ -11,6 +11,7 @@
 
 import socket
 import struct
+import pprint
 import sys
 try:
     import cPickle as pickle
@@ -55,12 +56,12 @@ if __name__ == '__main__':
                     metric = str(metric_str)
                     graph_ds = (metric, (timestamp, value))
                     graph_list.append(graph_ds)
-                    print graph_ds
                     if (i % ini_list == 0) or (i == idx_end_ds - 1):
                         package = pickle.dumps(graph_list, protocol=2)
                         size = struct.pack('!L', len(package))
                         # print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                         message = size + package
+                        pprint.pprint(message)
                         sock = socket.socket()
                         for j in range(max_retries):
                             try:
