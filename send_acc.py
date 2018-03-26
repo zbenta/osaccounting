@@ -28,7 +28,9 @@ if __name__ == '__main__':
     years = [2016]
     METR_1 = ['vcpus', 'mem_mb']
     METR_2 = ['disk_gb', 'volume_gb']
-    METR_3 = ['ninstances', 'nvolumes', 'npublic_ips']
+    METR_3 = ['ninstances', 'nvolumes']
+    METR_4 = ['npublic_ips']
+    METR = METR_1
     delay = 0  # seconds delay to close connection
     max_retries = 3  # number of retries for socket connect
     timeout = 3  # seconds between retries for socket connect
@@ -43,7 +45,7 @@ if __name__ == '__main__':
             for group in f:
                 if group == "date":
                     continue
-                for m in METR_1:
+                for m in METR:
                     print "--> Group = ", group, " Metric =", m
                     graph_list = list()
                     data = f[group][m]
