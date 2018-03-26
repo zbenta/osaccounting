@@ -25,7 +25,7 @@ if __name__ == '__main__':
     graph_ns = ev['graph_ns']
     ini_list = 1000  # size of list to initialize
     years = get_years(ev)
-    # years = [2016, 2017]
+    years = [2016]
     METR_1 = ['vcpus', 'mem_mb']
     METR_2 = ['disk_gb', 'volume_gb']
     METR_3 = ['ninstances', 'nvolumes', 'npublic_ips']
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                             # pprint.pprint(graph_list)
                             package = pickle.dumps(graph_list, protocol=2)
                             size = struct.pack('!L', len(package))
-                            print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
+                            # print i, " Size of pickle = ", len(package), " ListSize = ", len(graph_list)
                             message = size + package
                             sock = socket.socket()
                             for j in range(max_retries):
