@@ -11,7 +11,6 @@
 
 import socket
 import struct
-import sys
 try:
     import cPickle as pickle
 except ImportError:
@@ -25,8 +24,11 @@ if __name__ == '__main__':
     carbon_port = ev['carbon_port']
     graph_ns = ev['graph_ns']
     ini_list = 1000  # size of list to initialize
-    # years = get_years(ev)
-    years = [2016, 2017]
+    years = get_years(ev)
+    # years = [2016, 2017]
+    METR_1 = ['vcpus', 'mem_mb']
+    METR_2 = ['disk_gb', 'volume_gb']
+    METR_3 = ['ninstances', 'nvolumes', 'npublic_ips']
     delay = 0  # seconds delay to close connection
     max_retries = 3  # number of retries for socket connect
     timeout = 3  # seconds between retries for socket connect
@@ -41,7 +43,7 @@ if __name__ == '__main__':
             for group in f:
                 if group == "date":
                     continue
-                for m in METRICS:
+                for m in METR_1:
                     print "--> Group = ", group, " Metric =", m
                     graph_list = list()
                     data = f[group][m]
