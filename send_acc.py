@@ -26,7 +26,7 @@ if __name__ == '__main__':
     graph_ns = ev['graph_ns']
     ini_list = 1000  # size of list to initialize
     years = get_years(ev)
-    years = [2018]
+    years = [2016, 2017]
     METR_1 = ['vcpus', 'mem_mb']
     METR_2 = ['disk_gb', 'volume_gb']
     METR_3 = ['ninstances', 'nvolumes']
