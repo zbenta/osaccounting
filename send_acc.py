@@ -11,6 +11,7 @@
 
 import socket
 import struct
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     graph_ns = ev['graph_ns']
     ini_list = 1000  # size of list to initialize
     years = get_years(ev)
-    years = [2016]
+    years = [2018]
     METR_1 = ['vcpus', 'mem_mb']
     METR_2 = ['disk_gb', 'volume_gb']
     METR_3 = ['ninstances', 'nvolumes']
@@ -39,9 +40,9 @@ if __name__ == '__main__':
         filename = get_hdf_filename(ev, year)
         print " Filename = ", filename
         with h5py.File(filename, 'r') as f:
-            ti = f.attrs['LastRun']
+            df = int(f.attrs['LastRun'])
             ts = f['date'][:]
-            len_ds = len(ts)
+            idx_end_ds = time2index(ev, df, ts) + 1
             for group in f:
                 if group == "date":
                     continue
@@ -50,7 +51,7 @@ if __name__ == '__main__':
                     graph_list = list()
                     data = f[group][m]
                     metric_str = graph_ns + "." + str(group) + "." + str(m)
-                    for i in range(len_ds):
+                    for i in range(idx_end_ds):
                         graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
                         value = int(data[i])
                         timestamp = int(ts[i])

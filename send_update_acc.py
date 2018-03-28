@@ -11,8 +11,7 @@
 
 import socket
 import struct
-import pprint
-import sys
+
 try:
     import cPickle as pickle
 except ImportError:
