@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 if group == "date":
                     continue
                 for m in METR:
-                    print "--> Group = ", group, " Metric =", m
+                    print "--> Group = ", group, " Metric =", m, " LastRun =", df, " LastIDX =", idx_end_ds
                     graph_list = list()
                     data = f[group][m]
                     metric_str = graph_ns + "." + str(group) + "." + str(m)
