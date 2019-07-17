@@ -21,6 +21,7 @@
 """
 from __future__ import print_function
 import pprint
+import json
 from osacc_functions import *
 
 if __name__ == '__main__':
@@ -37,5 +38,7 @@ if __name__ == '__main__':
     for inst in inst_info:
         print(80*'-')
         print(inst['id'])
-        print(3*'-')
-        pprint.pprint(inst['network_info'])
+        net_info = json.loads(inst['network_info'])
+        if not net_info:
+            print(3*'-')
+            pprint.pprint(net_info)
