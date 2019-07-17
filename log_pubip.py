@@ -38,4 +38,4 @@ if __name__ == '__main__':
         print(80*'-')
         print(inst['id'])
         print(3*'-')
-        pprint(inst['network_info'])
+        pprint.pprint(inst['network_info'])
