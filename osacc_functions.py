@@ -19,7 +19,6 @@ import mysql.connector
 import ConfigParser
 import json
 import math
-# from influxdb import InfluxDBClient
 
 # List of metrics
 METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
