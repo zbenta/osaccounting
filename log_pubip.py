@@ -19,10 +19,23 @@
     instances = {
                 }
 """
-
+from __future__ import print_function
+import pprint
 from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
     # List of collumns of table: nova.instance_info_caches
-    table_coll = []
+    tstr_inst_info = 'created_at,id,network_info,deleted'
+    t_inst_info = tstr_inst_info.split(",")
+    dbtable = 'instance_info_caches'
+    query = ' '.join((
+        "SELECT " + tstr_inst_info,
+        "FROM " + dbtable
+    ))
+    inst_info = get_table_rows('nova', query, t_inst_info)
+    for inst in inst_info:
+        print(80*'-')
+        print(inst['id'])
+        print(3*'-')
+        pprint(inst['network_info'])
