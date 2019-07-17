@@ -39,6 +39,6 @@ if __name__ == '__main__':
         print(80*'-')
         print(inst['id'])
         net_info = json.loads(inst['network_info'])
-        if not net_info:
+        if net_info:
             print(3*'-')
             pprint.pprint(net_info)
