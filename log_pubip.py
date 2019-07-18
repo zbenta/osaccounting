@@ -39,7 +39,7 @@ if __name__ == '__main__':
     out_info = dict()
     # List of collumns of table: nova.instance_info_caches
     tstr_inst_info = ("instances.uuid,instances.hostname,instances.created_at,"
-                      "instances.deleted_at,instances.deleted"
+                      "instances.deleted_at,instances.deleted,"
                       "instances.key_name,keystone.project.name,"
                       "keystone.user.extra,instance_info_caches.network_info")
     t_inst_info = ["uuid", "hostname", "created_at", "deleted_at", "deleted",
