@@ -44,40 +44,11 @@ if __name__ == '__main__':
     tstr_fips = 'floating_ip_address,floating_port_id'
     t_fips = ['fip', 'devid']
     dbtable = 'floatingips'
-
-
-
-
-    # List of collumns of table: nova.instance_info_caches
-    tstr_inst_info = 'created_at,id,network_info,deleted'
-    t_inst_info = tstr_inst_info.split(",")
-    dbtable = 'instance_info_caches'
     query = ' '.join((
-        "SELECT " + tstr_inst_info,
-        "FROM " + dbtable
+        "SELECT floating_ip_address,ports.device_id",
+        "FROM floatingips",
+        "INNER JOIN neutron.ports ON floating_port_id = ports.id"
     ))
-    inst_info = get_table_rows('nova', query, t_inst_info)
-    for inst in inst_info:
-        print(80*'-')
-        inst_id = inst['id']
-        net_info = json.loads(inst['network_info'])
-        if net_info:
-            print(3*'-')
-            for l in range(len(net_info)):
-                for n in range(len(net_info[l]['network']['subnets'])):
-                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
-                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
-                        if nip:
-                            fip = net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'][0]['address']
-                            print(fip)
-
-        tstr_instances = 'created_at,id,user_id,project_id,key_name,hostname,host,deleted'
-        t_instances = tstr_inst_info.split(",")
-        dbtable = 'instances'
-        condition = "(id = '" + str(inst_id) + "' )"
-        query = ' '.join((
-            "SELECT " + tstr_inst_info,
-            "FROM " + dbtable,
-            "WHERE " + condition
-        ))
-        inst_info = get_table_rows('nova', query, t_instances)
+    net_fips = get_table_rows('neutron', query, t_fips)
+    for fip in net_fips:
+        pprint.pprint(fip)
