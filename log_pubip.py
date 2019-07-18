@@ -24,8 +24,9 @@ import pprint
 import json
 from osacc_functions import *
 
-if __name__ == '__main__':
-    ''' SQL query
+
+def get_out_info():
+    """ SQL query
     SELECT instances.uuid,instances.hostname,instances.created_at,
         instances.deleted_at,instances.deleted,instances.key_name,
         instance_info_caches.network_info,keystone.project.name,
@@ -34,8 +35,11 @@ if __name__ == '__main__':
     INNER JOIN instance_info_caches ON instances.id = instance_info_caches.id
     INNER JOIN keystone.project ON instances.project_id = keystone.project.id
     INNER JOIN keystone.user ON instances.user_id = keystone.user.id;
-    '''
+
+    :return list with VMs information
+    """
     ev = get_conf()
+    vm_list = list()
     out_info = dict()
     # List of collumns of table: nova.instance_info_caches
     tstr_inst_info = ("instances.uuid,instances.hostname,instances.created_at,"
@@ -68,4 +72,11 @@ if __name__ == '__main__':
                 if key != 'net_info':
                     out_info[key] = inst[key]
 
-            pprint.pprint(out_info)
+            vm_list.append(out_info)
+
+    return vm_list
+
+
+if __name__ == '__main__':
+    vm_info = get_out_info()
+    pprint.pprint(vm_info)
