@@ -25,30 +25,47 @@ import json
 from osacc_functions import *
 
 if __name__ == '__main__':
-    ''' SQL queries
-    select floating_ip_address,floating_port_id from neutron.floatingips;
-    select id,device_id from neutron.ports;
-    select id,uuid,hostname,user_id,project_id,created_at,deleted_at,key_name from nova.instances;
-    select id,name from keystone.project;
-    select id,extra from keystone.user;
-    
-    Just for future reference
-    SELECT neutron.floatingips.floating_ip_address,nova.instances.uuid,nova.instances.hostname,nova.instances.created_at,keystone.project.name
-    FROM neutron.floatingips
-    INNER JOIN neutron.ports ON neutron.floatingips.floating_port_id = neutron.ports.id
-    INNER JOIN nova.instances ON neutron.ports.device_id = nova.instances.uuid
-    INNER JOIN keystone.project ON nova.instances.project_id = keystone.project.id
-    INNER JOIN keystone.user ON nova.instances.user_id = keystone.user.id
+    ''' SQL query
+    SELECT instances.uuid,instances.hostname,instances.created_at,
+        instances.deleted_at,instances.deleted,instances.key_name,
+        instance_info_caches.network_info,keystone.project.name,
+        keystone.user.extra
+    FROM instances
+    INNER JOIN instance_info_caches ON instances.id = instance_info_caches.id
+    INNER JOIN keystone.project ON instances.project_id = keystone.project.id
+    INNER JOIN keystone.user ON instances.user_id = keystone.user.id;
     '''
     ev = get_conf()
-    tstr_fips = 'floating_ip_address,floating_port_id'
-    t_fips = ['fip', 'devid']
-    dbtable = 'floatingips'
+    out_info = dict()
+    # List of collumns of table: nova.instance_info_caches
+    tstr_inst_info = ("instances.uuid,instances.hostname,instances.created_at,"
+                      "instances.deleted_at,instances.deleted"
+                      "instances.key_name,keystone.project.name,"
+                      "keystone.user.extra,instance_info_caches.network_info")
+    t_inst_info = ["uuid", "hostname", "created_at", "deleted_at", "deleted",
+                   "key_name", "project", "user", "net_info"]
+    dbtable = 'instance_info_caches'
     query = ' '.join((
-        "SELECT floating_ip_address,ports.device_id",
-        "FROM floatingips",
-        "INNER JOIN neutron.ports ON floating_port_id = ports.id"
+        "SELECT " +  tstr_inst_info,
+        "FROM instances ",
+        "INNER JOIN instance_info_caches ON instances.id = instance_info_caches.id ",
+        "INNER JOIN keystone.project ON instances.project_id = keystone.project.id ",
+        "INNER JOIN keystone.user ON instances.user_id = keystone.user.id"
     ))
-    net_fips = get_table_rows('neutron', query, t_fips)
-    for fip in net_fips:
-        pprint.pprint(fip)
+    inst_info = get_table_rows('nova', query, t_inst_info)
+    for inst in inst_info:
+        net_info = json.loads(inst['net_info'])
+        if net_info:
+            print(3*'-')
+            for l in range(len(net_info)):
+                for n in range(len(net_info[l]['network']['subnets'])):
+                    for k in range(len(net_info[l]['network']['subnets'][n]['ips'])):
+                        nip = len(net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'])
+                        if nip:
+                            out_info['net_info'] = net_info[l]['network']['subnets'][n]['ips'][k]['floating_ips'][0]['address']
+
+            for key in t_inst_info:
+                if key != 'net_info':
+                    out_info[key] = inst[key]
+
+            pprint.pprint(out_info)
