@@ -25,6 +25,41 @@ import json
 from elasticsearch import Elasticsearch
 from osacc_functions import *
 
+t_inst_info = ["uuid", "hostname", "created_at", "deleted_at", "deleted",
+               "key_name", "project", "user", "net_info"]
+doctype = 'vm_info'
+esbody = {doctype: {
+              "properties": {
+                  "uuid": {
+                      "type": "text"
+                      },
+                  "hostname": {
+                      "type": "text"
+                  },
+                  "created_at": {
+                      "type": "date"
+                  },
+                  "deleted_at": {
+                      "type": "date"
+                  },
+                  "deleted": {
+                      "type": "int"
+                  },
+                  "key_name": {
+                      "type": "text"
+                  },
+                  "project": {
+                      "type": "text"
+                  },
+                  "user": {
+                      "type": "text"
+                  },
+                  "net_info": {
+                      "type": "ip"
+                  },
+              }
+            }
+         }
 
 def get_out_info():
     """ SQL query
@@ -47,9 +82,6 @@ def get_out_info():
                       "instances.deleted_at,instances.deleted,"
                       "instances.key_name,keystone.project.name,"
                       "keystone.user.extra,instance_info_caches.network_info")
-    t_inst_info = ["uuid", "hostname", "created_at", "deleted_at", "deleted",
-                   "key_name", "project", "user", "net_info"]
-    dbtable = 'instance_info_caches'
     query = ' '.join((
         "SELECT " +  tstr_inst_info,
         "FROM instances ",
@@ -103,5 +135,5 @@ def es_insert(vm_info):
 
 if __name__ == '__main__':
     vm_info = get_out_info()
-    es_insert(vm_info)
+    #es_insert(vm_info)
     #pprint.pprint(vm_info)
