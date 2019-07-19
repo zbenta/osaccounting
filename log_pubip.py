@@ -91,9 +91,13 @@ def get_es_conn():
 
 def es_insert(vm_info):
     esconn = get_es_conn()
-    esconn.indices.create(index='pub_ips', ignore=400)
+    sidx = esconn.indices.create(index='pub_ips', ignore=400)
+    print('{}'.format(sidx))
     for vm in vm_info:
-        s = esconn.search(index='pub_ips', body=vm)
+        print(80*'-')
+        pprint.pprint(vm)
+        print(5*'=')
+        s = esconn.search(index='pub_ips', body={"query": {"match": vm}})
         print('{}'.format(s))
 
 
