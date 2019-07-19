@@ -122,18 +122,25 @@ def get_es_conn():
 
 
 def es_insert(vm_info):
+    idx_name = 'pub_ips'
     esconn = get_es_conn()
-    sidx = esconn.indices.create(index='pub_ips', ignore=400)
+    sidx = esconn.indices.create(index=idx_name, ignore=400)
     print('{}'.format(sidx))
+    esconn.indices.put_mapping(
+        index=idx_name,
+        doc_type=doctype,
+        ignore=400,
+        body=esbody)
+
     for vm in vm_info:
         print(80*'-')
         pprint.pprint(vm)
         print(5*'=')
-        s = esconn.search(index='pub_ips', body={"query": {"match": vm}})
+        s = esconn.index(index=idx_name, doc_type=doctype, body=vm)
         print('{}'.format(s))
 
 
 if __name__ == '__main__':
     vm_info = get_out_info()
-    #es_insert(vm_info)
+    es_insert(vm_info)
     #pprint.pprint(vm_info)
