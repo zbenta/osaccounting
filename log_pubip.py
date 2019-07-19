@@ -22,6 +22,7 @@
 from __future__ import print_function
 import pprint
 import json
+from elasticsearch import Elasticsearch
 from osacc_functions import *
 
 
@@ -77,6 +78,26 @@ def get_out_info():
     return vm_list
 
 
+def get_es_conn():
+    ev = get_conf()
+    try:
+        es = Elasticsearch([{'host':ev['eshost'],'port': ev['esport']}])
+        print('Connected {}'.format(es))
+        return es
+    except Exception as ex:
+        print('Error {}'.format(ex))
+        return None
+
+
+def es_insert(vm_info):
+    esconn = get_es_conn()
+    esconn.indices.create(index='pub_ips', ignore=400)
+    for vm in vm_info:
+        s = esconn.search(index='pub_ips', body=vm)
+        print('{}'.format(s))
+
+
 if __name__ == '__main__':
     vm_info = get_out_info()
-    pprint.pprint(vm_info)
+    es_insert(vm_info)
+    #pprint.pprint(vm_info)

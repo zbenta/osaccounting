@@ -48,6 +48,11 @@ def get_conf():
         ev['graph_ns'] = parser.get('graphite', 'GRAPH_NS')
         ev['send_inter'] = parser.getint('graphite', 'SEND_INTER')
 
+    # elasticsearch section options are Optional
+    if parser.has_option('elasticsearch', 'ESHOST'):
+        ev['eshost'] = parser.get('elasticsearch', 'ESHOST')
+        ev['esport'] = parser.getint('elasticsearch', 'ESPORT')
+
     # influxdb section options are Optional
     if parser.has_option('influxdb', 'DBHOST'):
         ev['dbhost'] = parser.get('influxdb', 'DBHOST')
