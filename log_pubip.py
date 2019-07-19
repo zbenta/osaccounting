@@ -136,7 +136,11 @@ def es_insert(vm_info):
         print(80*'-')
         pprint.pprint(vm)
         print(5*'=')
-        s = esconn.index(index=idx_name, doc_type=doctype, body=vm)
+        obj = dict()
+        for k,v in vm:
+            obj[k] = vm[k]
+
+        s = esconn.index(index=idx_name, doc_type=doctype, body=obj)
         print('{}'.format(s))
 
 
