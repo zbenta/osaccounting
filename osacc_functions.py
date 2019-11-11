@@ -16,7 +16,7 @@ import os
 import h5py
 import numpy
 import mysql.connector
-import ConfigParser
+import configparser
 import json
 import math
 
@@ -28,7 +28,7 @@ def get_conf():
     """Get configuration options
     :returns dictionary with configuration options
     """
-    parser = ConfigParser.SafeConfigParser(allow_no_value=True)
+    parser = configparser.SafeConfigParser(allow_no_value=True)
     parser.read('/etc/osacc.conf')
     ev = dict()
     ev['out_dir'] = parser.get('DEFAULT', 'OUT_DIR')
@@ -72,7 +72,7 @@ def get_years(ev):
     :return (list) of years
     """
     tf = datetime.datetime.utcnow()
-    return range(ev['year_ini'], tf.year + 1)
+    return list(range(ev['year_ini'], tf.year + 1))
 
 
 def get_hdf_filename(ev, year):
@@ -366,8 +366,8 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param state: one of the two values - `init` accounting (default), `upd` update
     """
     instances = get_list_db(di, "nova", state)
-    print 80*"="
-    print "Instances selected from DB n = ", len(instances)
+    print(80*"=")
+    print("Instances selected from DB n = ", len(instances))
     for inst in instances:
         proj_id = inst['project_id']
         if proj_id not in p_dict:
@@ -403,8 +403,8 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param state: one of the two values - `init` accounting (default), `upd` update
     """
     volumes = get_list_db(di, "cinder", state)
-    print 80*"="
-    print "Volumes selected from DB n = ", len(volumes)
+    print(80*"=")
+    print("Volumes selected from DB n = ", len(volumes))
     for vol in volumes:
         proj_id = vol['project_id']
         if proj_id not in p_dict:

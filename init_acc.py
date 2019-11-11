@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # -*- encoding: utf-8 -*-
 #
 # Copyright 2017 LIP
@@ -38,12 +40,12 @@ if __name__ == '__main__':
     process_vol(ev, di, df, time_array_all, array_metrics, p_dict, projects_in, state)
     directory = os.path.dirname(ev['out_dir'])
     if not os.path.exists(directory):
-        os.makedirs(directory, 0755)
+        os.makedirs(directory, 0o755)
 
     for year in years:
         filename = create_hdf_year(ev, year)
-        print 80*'='
-        print ">>>> file created: ", filename
+        print("="*80)
+        print(">>>> file created: ", filename)
         with h5py.File(filename, 'r+') as f:
             ts = f['date'][:]
             idx_start = time2index(ev, ts[0], time_array_all)

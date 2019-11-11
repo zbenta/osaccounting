@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # -*- encoding: utf-8 -*-
 #
 # Copyright 2017 LIP
@@ -18,15 +20,15 @@ if __name__ == '__main__':
     di = to_secepoc(datetime.datetime(year_now, 1, 1, 0, 0, 0))
     df = now_acc()
     filename = get_hdf_filename(ev, year_now)
-    print 80*"-"
-    print "Running update Openstack accounting: ", to_isodate(df)
+    print(80*"-")
+    print("Running update Openstack accounting: ", to_isodate(df))
     if not exists_hdf(ev, year_now):
         filename = create_hdf_year(ev, year_now)
-        print ">>>> file created: ", filename
+        print(">>>> file created: ", filename)
 
     with h5py.File(filename, 'r+') as f:
         di = f.attrs['LastRun']
-        proj_hdf = f.keys()
+        proj_hdf = list(f.keys())
 
     proj_hdf.remove("date")
     time_array_all = time_series(ev, di, df)
