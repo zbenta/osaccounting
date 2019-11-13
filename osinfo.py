@@ -24,9 +24,11 @@ osinfo_json =
         "users": [
             {
                 "id": "string",
-                "name": "string",
+                "username": "string",
                 "email": "string",
-                "description": "string"
+                "description": "string",
+                "created_at": "timestamp",
+                "created": bool
             },
         ],
         "servers": [
@@ -55,6 +57,7 @@ osinfo_json =
 ]
 """
 import json
+import csv
 import pprint
 from osacc_functions import *
 
@@ -74,9 +77,11 @@ def create_proj():
 def create_user():
     user_info = {
             "id": None,
-            "name": None,
+            "username": None,
             "email": None,
-            "description": None
+            "description": None,
+            "created_at": None,
+            "created": None
         }
     return user_info
 
@@ -178,25 +183,72 @@ def get_storage(proj_id):
 
     return vol_list
 
+def get_users(proj_id, proj_name):
+    """ Get list with information of all users for a given proj_id
+    :return list with user information
+    """
+    user_list = list()
+
+    # Users not created in keystone
+    ev = get_conf()
+    ufiledir = ev['ufile_dir']
+    fileuser = ufiledir + "/" + "users-stratus-disabled.csv"
+    with open(fileuser) as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            info = create_user()
+            if line_count == 0:
+                line_count += 1
+            if row["Project"] == proj_name:
+                info["username"] = row["Name"]
+                info["email"] = row["Email"]
+                info["description"] = row["Description"]
+                info["created"] = False
+                line_count += 1
+                user_list.append(info)
+
+    # Users created in keystone
+    t_info = ["id", "extra", "created_at"]
+    tstr_info = "id,extra,created_at"
+    query = "SELECT %s FROM user WHERE default_project_id=\'%s\'" % (tstr_info, proj_id)
+    user_info = get_table_rows('keystone', query, t_info)
+    for user in user_info:
+        info = create_user()
+        info['id'] = user['id']
+        info['created_at'] = to_secepoc(user['created_at'])
+        info["created"] = True
+        user_json = json.loads(user['extra'])
+        if 'email' in user_json.keys():
+            info['username'] = user_json['email']
+            info['email'] = user_json['email']
+
+        if 'description' in user_json.keys():
+            info['description'] = user_json['description']
+
+        user_list.append(info)
+
+    return user_list
+
 if __name__ == '__main__':
     os_info_list = list()
     tstamp = now_acc()
 
     # proj_dict: project list from keystone database
     proj_dict = get_projects(tstamp, "init")
-    print(tstamp)
-    print(proj_dict)
     for proj in proj_dict:
         proj_info = create_proj()
         proj_info["timestamp"] = tstamp
         proj_info["project_id"] = proj
         proj_info["project_name"] = proj_dict[proj][0]         # idx 0 - name
         proj_info["project_description"] = proj_dict[proj][1]  # idx 1 - description
+
         server_list = get_servers(proj_info["project_id"])
         proj_info["servers"] = server_list
         vol_list = get_storage(proj_info["project_id"])
         proj_info["storage"] = vol_list
-
+        user_list = get_users(proj_info["project_id"], proj_info["project_name"])
+        proj_info["users"] = user_list
         os_info_list.append(proj_info)
 
     with open('data.json', 'w') as outjson:

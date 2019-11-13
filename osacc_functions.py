@@ -38,6 +38,7 @@ def get_conf():
     ev['mysql_user'] = parser.get('mysql', 'MYSQL_USER')
     ev['mysql_pass'] = parser.get('mysql', 'MYSQL_PASS')
     ev['mysql_host'] = parser.get('mysql', 'MYSQL_HOST')
+    ev['ufile_dir'] = parser.get('osinfo', 'UFILE_DIR')
     dt_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
     ev['secepoc_ini'] = to_secepoc(dt_ini)
 
