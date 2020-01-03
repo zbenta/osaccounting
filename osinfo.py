@@ -2,7 +2,7 @@
 
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2017 LIP
+# Copyright 2019 LIP
 #
 # Author: Mario David <mariojmdavid@gmail.com>
 #
@@ -59,6 +59,7 @@ osinfo_json =
 import json
 import csv
 import pprint
+import datetime
 from osacc_functions import *
 
 
@@ -251,7 +252,10 @@ if __name__ == '__main__':
         proj_info["users"] = user_list
         os_info_list.append(proj_info)
 
-    with open('data.json', 'w') as outjson:
+    dt_date = datetime.datetime.now()
+    str_date = dt_date.strftime("%Y-%m-%d_%H-%M")
+    json_file = '/var/log/osinfo/data_' + str_date + '.json'
+    with open(json_file, 'w') as outjson:
         json.dump(os_info_list, outjson)
 
-    pprint.pprint(os_info_list)
+    # pprint.pprint(os_info_list)
