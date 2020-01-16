@@ -261,3 +261,4 @@ if __name__ == '__main__':
         json.dump(os_info_list, outjson)
 
     # pprint.pprint(os_info_list)
+    sys.exit(0)
