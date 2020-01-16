@@ -119,7 +119,7 @@ def get_servers(proj_id):
     vm_list = list()
     t_inst_info = ["uuid", "hostname", "created_at", "description", "key_name"]
     tstr_inst_info = "uuid,hostname,created_at,display_description,key_name"
-    query = "SELECT %s FROM instances WHERE (deleted=\'0\' AND project_id=\'%s\')" % (tstr_inst_info, proj_id)
+    query = "SELECT %s FROM instances WHERE (vm_state=\'active\' AND project_id=\'%s\')" % (tstr_inst_info, proj_id)
     inst_info = get_table_rows('nova', query, t_inst_info)
     for inst in inst_info:
         server_info = create_server()
