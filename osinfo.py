@@ -56,6 +56,7 @@ osinfo_json =
     },
 ]
 """
+import sys
 import json
 import csv
 import pprint
@@ -234,6 +235,9 @@ def get_users(proj_id, proj_name):
 if __name__ == '__main__':
     os_info_list = list()
     tstamp = now_acc()
+    if len(sys.argv) < 2:
+        print('Error json file not specified: %s <data.json>' %sys.argv[0])
+        sys.exit(1)
 
     # proj_dict: project list from keystone database
     proj_dict = get_projects(tstamp, "init")
@@ -252,9 +256,7 @@ if __name__ == '__main__':
         proj_info["users"] = user_list
         os_info_list.append(proj_info)
 
-    dt_date = datetime.datetime.now()
-    str_date = dt_date.strftime("%Y-%m-%d_%H-%M")
-    json_file = '/var/log/osinfo/data_' + str_date + '.json'
+    json_file = sys.argv[1]
     with open(json_file, 'w') as outjson:
         json.dump(os_info_list, outjson)
 
