@@ -28,7 +28,7 @@ from osacc_functions import *
 
 if __name__ == '__main__':
     ev = get_conf()
-    years = get_years(ev)
+    year = ev['year_ini']
     di = ev['secepoc_ini']
     df = now_acc()
     time_array_all = time_series(ev, di, df)
@@ -42,26 +42,25 @@ if __name__ == '__main__':
     if not os.path.exists(directory):
         os.makedirs(directory, 0o755)
 
-    for year in years:
-        filename = create_hdf_year(ev, year)
-        print("="*80)
-        print(">>>> file created: ", filename)
-        with h5py.File(filename, 'r+') as f:
-            ts = f['date'][:]
-            idx_start = time2index(ev, ts[0], time_array_all)
-            idx_end = time2index(ev, df, time_array_all) + 1
-            idx_start_ds = time2index(ev, ts[0], ts)
-            idx_end_ds = time2index(ev, df, ts) + 1
-            if year < years[-1]:
-                idx_end = time2index(ev, ts[-1], time_array_all) + 1
-                idx_end_ds = time2index(ev, ts[-1], ts) + 1
+    filename = create_hdf(ev, year)
+    print("="*80)
+    print(">>>> file created: ", filename)
+    with h5py.File(filename, 'r+') as f:
+        ts = f['date'][:]
+        idx_start = time2index(ev, ts[0], time_array_all)
+        idx_end = time2index(ev, df, time_array_all) + 1
+        idx_start_ds = time2index(ev, ts[0], ts)
+        idx_end_ds = time2index(ev, df, ts) + 1
+        if year < years[-1]:
+            idx_end = time2index(ev, ts[-1], time_array_all) + 1
+            idx_end_ds = time2index(ev, ts[-1], ts) + 1
 
-            for proj_id in projects_in:
-                create_proj_datasets(ev, year, proj_id, p_dict)
-                grp_name = p_dict[proj_id][0]
-                for metric in METRICS:
-                    data_array = f[grp_name][metric]
-                    data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
+        for proj_id in projects_in:
+            create_proj_datasets(ev, year, proj_id, p_dict)
+            grp_name = p_dict[proj_id][0]
+            for metric in METRICS:
+                data_array = f[grp_name][metric]
+                data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
-            f.attrs['LastRun'] = ts[idx_end_ds-1]
-            f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds-1]))
+        f.attrs['LastRun'] = ts[idx_end_ds-1]
+        f.attrs['LastRunUTC'] = str(to_isodate(ts[idx_end_ds-1]))

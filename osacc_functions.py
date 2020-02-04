@@ -94,6 +94,27 @@ def exists_hdf(ev, year):
     return os.path.exists(get_hdf_filename(ev, year))
 
 
+def create_hdf(ev, year):
+    """Initial creation of hdf5 file containing the time_series dataset
+    The file is for 10 years
+    :param ev: configuration options
+    :param year: Year
+    :return (string) file_name
+    """
+    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+10, 1, 1, 0, 0, 0))
+    if year == ev['year_ini']:
+        di = ev['secepoc_ini']
+
+    ts = time_series(ev, di, df)
+    file_name = ev['out_dir'] + os.sep + 'osacc.hdf'
+    with h5py.File(file_name, 'w') as f:
+        f.create_dataset('date', data=ts, compression="gzip")
+        f.attrs['LastRun'] = di
+        f.attrs['LastRunUTC'] = str(to_isodate(di))
+
+    return file_name
+
 def create_hdf_year(ev, year):
     """Initial creation of hdf5 files containing the time_series dataset
     One file is created per year
