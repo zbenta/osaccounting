@@ -38,9 +38,8 @@ if __name__ == '__main__':
     year = ev['year_ini']
     if not os.path.exists(filename):
         state = "init"  # state is "init" if first time accounting
-        directory = os.path.dirname(ev['out_dir'])
-        if not os.path.exists(directory):
-            os.makedirs(directory, 0o755)
+        if not os.path.exists(ev['out_dir']):
+            os.makedirs(ev['out_dir'], 0o755)
         filename = oaf.create_hdf(ev, year)
 
     with h5py.File(filename, 'r+') as f:
