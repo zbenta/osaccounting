@@ -47,7 +47,8 @@ if __name__ == '__main__':
         proj_hdf = list(f.keys())
 
     df = oaf.now_acc()
-    print(80*"-")
+    print(80*"=")
+    print(80*">")
     print("Running update Openstack accounting: ", oaf.to_isodate(df))
     proj_hdf.remove("date")
     time_array_all = oaf.time_series(ev, di, df)
@@ -63,9 +64,9 @@ if __name__ == '__main__':
         idx_start_ds = oaf.time2index(ev, di, ts)
         idx_end_ds = oaf.time2index(ev, df, ts) + 1
         print(80*"-")
-        print("Size time_array_all: ", len(time_array_all))
-        print("Size ts: ", len(ts))
-        print("idx_start:", idx_start, "idx_end:", idx_start, "idx_start_ds:", idx_start_ds, "idx_end_ds:", idx_end_ds)
+        print("Size time_array_all:", len(time_array_all))
+        print("Size ts:", len(ts), "di:", di, "df:", df)
+        print("idx_start:", idx_start, "idx_end:", idx_end, "idx_start_ds:", idx_start_ds, "idx_end_ds:", idx_end_ds)
         print(80*"-")
         for proj_id in projects_in:
             grp_name = p_dict[proj_id][0]
