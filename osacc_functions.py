@@ -76,23 +76,12 @@ def get_years(ev):
     return list(range(ev['year_ini'], tf.year + 1))
 
 
-def get_hdf_filename(ev, year):
+def get_hdf_filename(ev):
     """Get the HDF5 filename
     :param ev: configuration options
-    :param year: Year
     :return (string) filename
     """
-    return ev['out_dir'] + os.sep + str(year) + '.hdf'
-
-
-def exists_hdf(ev, year):
-    """Checks if hdf5 file exists
-    :param ev: configuration options
-    :param year: Year
-    :return (boolean) true is file exists or false if it doesn't
-    """
-    return os.path.exists(get_hdf_filename(ev, year))
-
+    return ev['out_dir'] + os.sep + 'osacc.hdf'
 
 def create_hdf(ev, year):
     """Initial creation of hdf5 file containing the time_series dataset
@@ -115,28 +104,6 @@ def create_hdf(ev, year):
 
     return file_name
 
-def create_hdf_year(ev, year):
-    """Initial creation of hdf5 files containing the time_series dataset
-    One file is created per year
-    :param ev: configuration options
-    :param year: Year
-    :return (string) file_name
-    """
-    di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
-    if year == ev['year_ini']:
-        di = ev['secepoc_ini']
-
-    ts = time_series(ev, di, df)
-    file_name = get_hdf_filename(ev, year)
-    with h5py.File(file_name, 'w') as f:
-        f.create_dataset('date', data=ts, compression="gzip")
-        f.attrs['LastRun'] = di
-        f.attrs['LastRunUTC'] = str(to_isodate(di))
-
-    return file_name
-
-
 def create_proj_datasets(ev, year, proj_id, p_dict):
     """Initial creation of metrics hdf5 dataset containing 1 group per project and datasets
     for each metric.
@@ -152,12 +119,12 @@ def create_proj_datasets(ev, year, proj_id, p_dict):
     :return (string) file_name
     """
     di = to_secepoc(datetime.datetime(year, 1, 1, 0, 0, 0))
-    df = to_secepoc(datetime.datetime(year+1, 1, 1, 0, 0, 0))
+    df = to_secepoc(datetime.datetime(year+10, 1, 1, 0, 0, 0))
     if year == ev['year_ini']:
         di = ev['secepoc_ini']
 
     ts = time_series(ev, di, df)
-    file_name = get_hdf_filename(ev, year)
+    file_name = get_hdf_filename(ev)
     grp_name = p_dict[proj_id][0]
     with h5py.File(file_name, 'r+') as f:
         grp = f.create_group(grp_name)
