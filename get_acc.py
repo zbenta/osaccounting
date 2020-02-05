@@ -62,6 +62,11 @@ if __name__ == '__main__':
         idx_end = oaf.time2index(ev, df, time_array_all) + 1
         idx_start_ds = oaf.time2index(ev, di, ts)
         idx_end_ds = oaf.time2index(ev, df, ts) + 1
+        print(80*"-")
+        print("Size time_array_all: ", len(time_array_all))
+        print("Size ts: ", len(ts))
+        print("idx_start:", idx_start, "idx_end:", idx_start, "idx_start_ds:", idx_start_ds, "idx_end_ds:", idx_end_ds)
+        print(80*"-")
         for proj_id in projects_in:
             grp_name = p_dict[proj_id][0]
             if grp_name not in proj_hdf:
