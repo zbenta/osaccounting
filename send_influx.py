@@ -40,12 +40,25 @@ def get_last(ev):
     ti = datetime.datetime.utcnow()
     return ti
 
+def create_dict(proj):
+    """Create dict of metrics
+    :param proj: project name
+    :return (dict) dict of metric and timestamp
+    """
+    infl_proj = {"measurement": proj, 'metric': dict()}
+    for mtr in oaf.METRICS:
+        infl_proj['metric'][mtr] = ""
+        infl_proj['time'] = 0
+
+    return infl_proj
+
 if __name__ == '__main__':
 
     ev = oaf.get_conf()
     # client = get_influxclient(ev)
     # ti = get_last(ev)
     filename = oaf.get_hdf_filename(ev)
+    influx_list = list()
     print(80 * '=')
     print('Filename:', filename)
 
@@ -57,21 +70,16 @@ if __name__ == '__main__':
         idx_start = 50000
         idx_end = 50050
         len_ds = len(ts)
-        influx_list = list()
         for group in f:
             if group == "date":
                 continue
-
             print("Group:", group)
-            infl_proj = {"measurement": group, 'metric': dict()}
             for mtr in oaf.METRICS:
                 print("Metric:", mtr)
                 data = f[group][mtr]
                 for i in range(idx_start, idx_end+1):
-                    infl_proj['metric'][mtr] = data[i]
-                    infl_proj['time'] = int(ts[i])
-
-            influx_list.append(infl_proj)
+                    infl_proj = mtr + ',' + 'proj_name=' + group + ' ' + 'value=' + str(data[i]) + ' ' + str(ts[i])
+                    influx_list.append(infl_proj)
 
     print(80 * '=')
     print(influx_list)
