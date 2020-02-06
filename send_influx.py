@@ -25,35 +25,86 @@ def get_influxclient(ev):
     dbname = ev['dbname']
     bssl = ev['ssl']
     bverify_ssl = ev['verify_ssl']
-    return InfluxDBClient(dbhost, dbport, dbuser, dbpass, dbname, ssl=bssl, verify_ssl=bverify_ssl)
+    client = InfluxDBClient(dbhost, dbport, dbuser, dbpass, dbname, ssl=bssl, verify_ssl=bverify_ssl)
+    check_conn = client.ping()
+    if check_conn:
+        print(check_conn)
+    return client
+
+def get_last(ev):
+    """Get last metric timestamp from DB
+    :param ev: configuration options
+    :return (datetime) last timestamp in seconds to epoc
+    """
+    #TODO: to be implemented
+    ti = datetime.datetime.utcnow()
+    return ti
 
 if __name__ == '__main__':
 
     ev = oaf.get_conf()
-    client = get_influxclient(ev)
-    print(client.get_list_database())
-
-    print(80 * "=")
+    # client = get_influxclient(ev)
+    # ti = get_last(ev)
     filename = oaf.get_hdf_filename(ev)
-    print("Filename:", filename)
+    print(80 * '=')
+    print('Filename:', filename)
+
     with h5py.File(filename, 'r') as f:
-        ti = f.attrs['LastRun']
+        tf = f.attrs['LastRun']
         ts = f['date'][:]
+        # idx_start = oaf.time2index(ev, ti, ts)
+        # idx_end = oaf.time2index(ev, tf, ts)
+        idx_start = 50000
+        idx_end = 50050
         len_ds = len(ts)
+        influx_list = list()
         for group in f:
             if group == "date":
                 continue
+
             print("Group:", group)
-            for metric in oaf.METRICS:
-                graph_list = list()
-                print("Metric:", metric)
-                data = f[group][metric]
-                metric_str = ev['graph_ns'] + "." + str(group) + "." + str(metric)
-                for i in range(len_ds):
-                    graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
-                    value = int(data[i])
-                    timestamp = int(ts[i])
-                    metric = str(metric_str)
-                    graph_ds = (metric, (timestamp, value))
-                    graph_list.append(graph_ds)
+            infl_proj = {"measurement": group, 'metric': dict()}
+            for mtr in oaf.METRICS:
+                print("Metric:", mtr)
+                data = f[group][mtr]
+                for i in range(idx_start, idx_end+1):
+                    infl_proj['metric'][mtr] = data[i]
+                    infl_proj['time'] = int(ts[i])
+
+            influx_list.append(infl_proj)
+
+    print(80 * '=')
+    print(influx_list)
+
+
+# "{measurement},location={location},fruit={fruit},id={id} x={x},y={y},z={z}i {timestamp}"
+#             .format(measurement=measurement_name,
+#                     location=random.choice(location_tags),
+#                     fruit=random.choice(fruit_tags),
+#                     id=random.choice(id_tags),
+#                     x=round(random.random(),4),
+#                     y=round(random.random(),4),
+#                     z=random.randint(0,50),
+#                     timestamp=data_start_time)
+
+    # with h5py.File(filename, 'r') as f:
+    #     ti = f.attrs['LastRun']
+    #     ts = f['date'][:]
+    #     len_ds = len(ts)
+    #     for group in f:
+    #         if group == "date":
+    #             continue
+    #         print("Group:", group)
+    #         for metric in oaf.METRICS:
+    #             graph_list = list()
+    #             print("Metric:", metric)
+    #             data = f[group][metric]
+    #             metric_str = ev['graph_ns'] + "." + str(group) + "." + str(metric)
+    #             for i in range(len_ds):
+    #                 graph_string = metric_str + " " + str(data[i]) + " " + str(int(ts[i])) + "\n"
+    #                 value = int(data[i])
+    #                 timestamp = int(ts[i])
+    #                 metric = str(metric_str)
+    #                 graph_ds = (metric, (timestamp, value))
+    #                 graph_list.append(graph_ds)
 
