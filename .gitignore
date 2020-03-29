@@ -111,6 +111,9 @@ ENV/
 # Pycharm
 .idea
 
+# VS Code
+.vscode
+
 # Eclipse
 .project
 .pydevproject
