@@ -55,7 +55,7 @@ def create_dict(proj):
 if __name__ == '__main__':
 
     ev = oaf.get_conf()
-    # client = get_influxclient(ev)
+    client = get_influxclient(ev)
     # ti = get_last(ev)
     filename = oaf.get_hdf_filename(ev)
     influx_list = list()
@@ -67,22 +67,26 @@ if __name__ == '__main__':
         ts = f['date'][:]
         # idx_start = oaf.time2index(ev, ti, ts)
         # idx_end = oaf.time2index(ev, tf, ts)
-        idx_start = 50000
-        idx_end = 50050
+        idx_start = 621000
+        idx_end = 621010
         len_ds = len(ts)
         for group in f:
             if group == "date":
                 continue
+            print(80 * '=')
             print("Group:", group)
-            for mtr in oaf.METRICS:
-                print("Metric:", mtr)
-                data = f[group][mtr]
-                for i in range(idx_start, idx_end+1):
-                    infl_proj = mtr + ',' + 'proj_name=' + group + ' ' + 'value=' + str(data[i]) + ' ' + str(ts[i])
-                    influx_list.append(infl_proj)
+            for i in range(idx_start, idx_end+1):
+                make_mtr = "cloud_acc,project=" + group + " "
+                for mtr in oaf.METRICS:
+                    print("Metric:", mtr)
+                    data = f[group][mtr]
+                    make_mtr = make_mtr + mtr + "=" + str(data[i]) + ","
 
-    print(80 * '=')
-    print(influx_list)
+                infl_proj = make_mtr.rstrip(",")
+                infl_proj = infl_proj + " " + str(ts[i])
+                print(infl_proj)
+
+    # print(influx_list)
 
 
 # "{measurement},location={location},fruit={fruit},id={id} x={x},y={y},z={z}i {timestamp}"
