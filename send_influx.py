@@ -78,13 +78,14 @@ if __name__ == '__main__':
             ti = get_last(ev, client, group)
             idx_start = oaf.time2index(ev, ti, ts)
             idx_end = oaf.time2index(ev, tf, ts)
-            print(80 * '=')
-            print("Group:", group)
-            print("LastRun - tf:", oaf.to_isodate(tf))
-            print("idx start:", idx_start)
-            print("idx end:", idx_end)
-            print("Start Time:", oaf.to_isodate(ts[idx_start]))
-            print("End Time:", oaf.to_isodate(ts[idx_end]))
+            if group == "lip":
+                print(80 * '=')
+                print("Group:", group)
+                print("LastRun - tf:", oaf.to_isodate(tf))
+                print("idx start:", idx_start)
+                print("idx end:", idx_end)
+                print("Start Time:", oaf.to_isodate(ts[idx_start]))
+                print("End Time:", oaf.to_isodate(ts[idx_end]))
             for i in range(idx_start, idx_end+1):
                 a = (i-idx_start) % batch_size
                 if not a:
@@ -100,7 +101,8 @@ if __name__ == '__main__':
                 data_met.append(infl_proj)
                 b = (i+1-idx_start) % batch_size
                 if not b or (i == idx_end):
-                    print(i, data_met[0])
+                    if group == "lip":
+                        print(i, data_met[0])
                     client.write_points(data_met, batch_size=batch_size,
                                         protocol='line')
 
