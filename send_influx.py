@@ -35,12 +35,17 @@ def get_influxclient(ev):
     client.switch_database(dbname)
     return client
 
-def get_last(ev, client):
+def get_last(ev, client, group):
     """Get last metric timestamp from DB
+    :param ev: Configuration options list
     :param client: InfluxDB client
+    :param group: project
     :return (datetime) last timestamp in seconds to epoc
     """
-    last_ts = client.query('select last(vcpus) from cloud_acc')
+    qry_str = 'SELECT last(vcpus) FROM cloud_acc WHERE project=$proj'
+    bind_params = {'proj': group}
+    print(qry_str)
+    last_ts = client.query(qry_str, bind_params=bind_params)
     ti = ev['secepoc_ini']
     if last_ts:
         time_stamp = last_ts.get_points()
@@ -57,7 +62,6 @@ if __name__ == '__main__':
 
     ev = oaf.get_conf()
     client = get_influxclient(ev)
-    ti = get_last(ev, client)
     filename = oaf.get_hdf_filename(ev)
     print(80 * '=')
     print('Filename:', filename)
@@ -67,19 +71,20 @@ if __name__ == '__main__':
     with h5py.File(filename, 'r') as f:
         tf = f.attrs['LastRun']
         ts = f['date'][:]
-        idx_start = oaf.time2index(ev, ti, ts)
-        idx_end = oaf.time2index(ev, tf, ts)
         len_ds = len(ts)
-        print(80 * '=')
-        print("LastRun - tf:", oaf.to_isodate(tf))
-        print("idx start:", idx_start)
-        print("idx end:", idx_end)
-        print("Start Time:", oaf.to_isodate(ts[idx_start]))
-        print("End Time:", oaf.to_isodate(ts[idx_end]))
         for group in f:
             if group == "date":
                 continue
+            ti = get_last(ev, client, group)
+            idx_start = oaf.time2index(ev, ti, ts)
+            idx_end = oaf.time2index(ev, tf, ts)
+            print(80 * '=')
             print("Group:", group)
+            print("LastRun - tf:", oaf.to_isodate(tf))
+            print("idx start:", idx_start)
+            print("idx end:", idx_end)
+            print("Start Time:", oaf.to_isodate(ts[idx_start]))
+            print("End Time:", oaf.to_isodate(ts[idx_end]))
             for i in range(idx_start, idx_end+1):
                 a = (i-idx_start) % batch_size
                 if not a:
