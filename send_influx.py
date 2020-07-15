@@ -44,7 +44,7 @@ def get_last(ev, client, group):
     """
     qry_str = 'SELECT last(vcpus) FROM cloud_acc WHERE project=$proj'
     bind_params = {'proj': group}
-    print(qry_str)
+    # print(qry_str)
     last_ts = client.query(qry_str, bind_params=bind_params)
     ti = ev['secepoc_ini']
     if last_ts:
