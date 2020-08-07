@@ -21,7 +21,8 @@ import json
 import math
 
 # List of metrics
-METRICS = ['vcpus', 'mem_mb', 'disk_gb', 'volume_gb', 'ninstances', 'nvolumes', 'npublic_ips']
+METRICS = ['vcpus', 'mem_mb', 'volume_gb',
+           'ninstances', 'nvolumes', 'npublic_ips']
 
 
 def get_conf():
@@ -199,7 +200,7 @@ def db_conn(database):
                                    db=database)
 
 
-def get_list_db(ti, database, state):
+def get_list_db(ti, database, dbtable, state):
     """Get the list of rows of table from database
     Query keystone, nova or cinder to get projects or instances or volumes
     For projects (do not take into account admin and service projects)
@@ -208,6 +209,7 @@ def get_list_db(ti, database, state):
     DB = nova     -> Table = instances and instance_info_caches
     :param ti: Initial Date Time in seconds to epoc
     :param database: Database name
+    :param dbtable: Database table name
     :param state: one of the two values - `init` accounting (default), `upd` update
     :return (json dict): List of rows of a table in the database
     """
@@ -222,13 +224,15 @@ def get_list_db(ti, database, state):
         cnd_state = " AND deleted_at >= '%s'" % dtlocal_i
         cnd_state_nova = " AND instances.deleted_at > '%s'" % dtlocal_i
 
-    dbtable = "project"
     table_str = "id,name,description,enabled"
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
     if database == "cinder":
-        dbtable = "volumes"
-        table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
-        condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
+        if dbtable == "volumes":
+            table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+            condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
+        if dbtable == "snapshots":
+            table_str = "created_at,deleted_at,deleted,id,user_id,project_id,volume_size,status"
+            condition = "status = 'available' OR (status = 'deleted'" + cnd_state + ")"
 
     table_coll = table_str.split(",")
     query = ' '.join((
@@ -238,11 +242,11 @@ def get_list_db(ti, database, state):
     ))
     if database == "nova":
         table_coll = ['uuid', 'created_at', 'deleted_at', 'id', 'project_id',
-                      'vm_state', 'memory_mb', 'vcpus', 'root_gb', 'network_info']
-        dbtable = "instances"
+                      'vm_state', 'memory_mb', 'vcpus', 'network_info']
         table_str = "instances.uuid,instances.created_at,instances.deleted_at," \
-                    "instances.id,instances.project_id,instances.vm_state,instances.memory_mb," \
-                    "instances.vcpus,instances.root_gb,instance_info_caches.network_info"
+                    "instances.id,instances.project_id,instances.vm_state," \
+                    "instances.memory_mb," \
+                    "instances.vcpus,instance_info_caches.network_info"
         ijoin = "instance_info_caches ON uuid=instance_info_caches.instance_uuid"
         condition = "(instances.vm_state = 'active' OR instances.vm_state = 'stopped') OR " \
                     "(instances.vm_state = 'deleted'" + cnd_state_nova + ")"
@@ -252,6 +256,33 @@ def get_list_db(ti, database, state):
             "INNER JOIN " + ijoin,
             "WHERE " + condition
         ))
+
+    return get_table_rows(database, query, table_coll)
+
+
+def get_quotas(database):
+    """Get quotas of metrics from database per project
+    :param database: database name
+    :return:
+    """
+    dbtable = "quotas"
+    table_str = "resource,project_id,hard_limit"
+    if database == "cinder":
+        condition = "(resource = 'gigabytes' OR resource = 'volumes')"
+
+    if database == "nova_api":
+        condition = "resource = 'cores' OR resource = 'ram' OR resource = 'instances'"
+
+    if database == "neutron":
+        table_str = "resource,project_id,'limit'"
+        condition = "resource = 'floatingip'"
+
+    table_coll = table_str.split(",")
+    query = ' '.join((
+        "SELECT " + table_str,
+        "FROM " + dbtable,
+        "WHERE " + condition
+    ))
 
     return get_table_rows(database, query, table_coll)
 
@@ -287,7 +318,7 @@ def get_projects(di, state):
     :param state: Either ``init`` or ``upd`` of accounting
     :return: dictionary with keystone projects
     """
-    projects = get_list_db(di, "keystone", state)
+    projects = get_list_db(di, "keystone", "project", state)
     p_dict = dict()
     for proj in projects:
         p_dict[proj['id']] = [proj['name'], proj['description']]
@@ -354,7 +385,7 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param projects_in: list of projects to process
     :param state: one of the two values - `init` accounting (default), `upd` update
     """
-    instances = get_list_db(di, "nova", state)
+    instances = get_list_db(di, "nova", "instances", state)
     print(80*"=")
     print("Instances selected from DB n = ", len(instances))
     for inst in instances:
@@ -368,7 +399,6 @@ def process_inst(ev, di, df, time_array, a, p_dict, projects_in, state):
         idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
         a[pname]['vcpus'][idx_start:idx_end] = a[pname]['vcpus'][idx_start:idx_end] + inst['vcpus']
         a[pname]['mem_mb'][idx_start:idx_end] = a[pname]['mem_mb'][idx_start:idx_end] + inst['memory_mb']
-        a[pname]['disk_gb'][idx_start:idx_end] = a[pname]['disk_gb'][idx_start:idx_end] + inst['root_gb']
         a[pname]['ninstances'][idx_start:idx_end] = a[pname]['ninstances'][idx_start:idx_end] + 1
         net_info = json.loads(inst['network_info'])
         if net_info:
@@ -391,17 +421,19 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
     :param projects_in: list of projects to process
     :param state: one of the two values - `init` accounting (default), `upd` update
     """
-    volumes = get_list_db(di, "cinder", state)
-    print(80*"=")
-    print("Volumes selected from DB n = ", len(volumes))
-    for vol in volumes:
-        proj_id = vol['project_id']
-        if proj_id not in p_dict:
-            continue
+    storages = ["volumes", "snapshots"]
+    for stor in storages:
+        volumes = get_list_db(di, "cinder", stor, state)
+        print(80*"=")
+        print("Volumes selected from DB n = ", len(volumes))
+        for vol in volumes:
+            proj_id = vol['project_id']
+            if proj_id not in p_dict:
+                continue
 
-        crt = vol["created_at"]
-        dlt = vol["deleted_at"]
-        pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
-        idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
-        a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
-        a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
+            crt = vol["created_at"]
+            dlt = vol["deleted_at"]
+            pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
+            idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
+            a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
+            a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
