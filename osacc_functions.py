@@ -224,22 +224,31 @@ def get_list_db(ti, database, dbtable, state):
         cnd_state = " AND deleted_at >= '%s'" % dtlocal_i
         cnd_state_nova = " AND instances.deleted_at > '%s'" % dtlocal_i
 
+    # Case for projects in keystone
     table_str = "id,name,description,enabled"
+    table_coll = table_str.split(",")
     condition = "domain_id='default' AND name!='admin' AND name!='service'"
+
+    # Case for volumes and snapshots in cinder
     if database == "cinder":
         if dbtable == "volumes":
-            table_str = "created_at,deleted_at,deleted,id,user_id,project_id,size,status"
+            table_str = "created_at,deleted_at,deleted,id,project_id,size,status"
             condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
+            table_coll = ['created_at', 'deleted_at', 'deleted' 'id', 'project_id',
+                          'size', 'status']
         if dbtable == "snapshots":
-            table_str = "created_at,deleted_at,deleted,id,user_id,project_id,volume_size,status"
+            table_str = "created_at,deleted_at,deleted,id,project_id,volume_size,status"
             condition = "status = 'available' OR (status = 'deleted'" + cnd_state + ")"
+            table_coll = ['created_at', 'deleted_at', 'deleted' 'id', 'project_id',
+                          'size', 'status']
 
-    table_coll = table_str.split(",")
     query = ' '.join((
         "SELECT " + table_str,
         "FROM " + dbtable,
         "WHERE " + condition
     ))
+
+    # Case for instances and fip in nova
     if database == "nova":
         table_coll = ['uuid', 'created_at', 'deleted_at', 'id', 'project_id',
                       'vm_state', 'memory_mb', 'vcpus', 'network_info']
@@ -262,6 +271,8 @@ def get_list_db(ti, database, dbtable, state):
 
 def get_quotas(database):
     """Get quotas of metrics from database per project
+    returns a list of dict() of the form
+    [{'quota_name': 'ram', 'project_id': '123', 'quota_value': '1024'},]
     :param database: database name
     :return:
     """
@@ -277,7 +288,7 @@ def get_quotas(database):
         table_str = "resource,project_id,'limit'"
         condition = "resource = 'floatingip'"
 
-    table_coll = table_str.split(",")
+    table_coll = ['quota_name', 'project_id', 'quota_value']
     query = ' '.join((
         "SELECT " + table_str,
         "FROM " + dbtable,
@@ -437,3 +448,40 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
             idx_start, idx_end = get_indexes(ev, crt, dlt, di, df, time_array, state)
             a[pname]['volume_gb'][idx_start:idx_end] = a[pname]['volume_gb'][idx_start:idx_end] + vol['size']
             a[pname]['nvolumes'][idx_start:idx_end] = a[pname]['nvolumes'][idx_start:idx_end] + 1
+
+
+def process_quotas(proj_dict):
+    """Process quotas per project, returns a list of all quotas
+    from get_projects.
+    METRIC[i]   <-> quota_name[i]
+    vcpus       <-> cores
+    mem_mb      <-> ram
+    volume_gb   <-> gigabytes
+    ninstances  <-> instances
+    nvolumes    <-> volumes
+    npublic_ips <-> floatingip
+    :param proj_dict: dict with all projects from 
+    """
+    dbs = ["nova_api", "cinder", "neutron"]
+    all_quotas = list()
+    for db in dbs:
+        quotas = get_quotas(db)
+        for quota in quotas:
+            proj_name = proj_dict[quota['project_id']][0]
+            quota['grp_name'] = proj_name
+            if quota['quota_name'] == "cores":
+                quota['quota_name'] = "q_vcpus"
+            if quota['quota_name'] == "ram":
+                quota['quota_name'] = "q_mem_mb"
+            if quota['quota_name'] == "gigabytes":
+                quota['quota_name'] = "q_volume_gb"
+            if quota['quota_name'] == "instances":
+                quota['quota_name'] = "q_ninstances"
+            if quota['quota_name'] == "volumes":
+                quota['quota_name'] = "q_nvolumes"
+            if quota['quota_name'] == "floatingip":
+                quota['quota_name'] = "q_npublic_ips"
+
+            all_quotas.append(quota)
+
+    return all_quotas

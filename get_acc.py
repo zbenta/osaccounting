@@ -77,5 +77,11 @@ if __name__ == '__main__':
                 data_array = f[grp_name][metric]
                 data_array[idx_start_ds:idx_end_ds] = array_metrics[grp_name][metric][idx_start:idx_end]
 
+        all_quotas = oaf.process_quotas(p_dict)
+        for quota in all_quotas:
+            proj_name = quota['grp_name']
+            quota_name = quota['quota_name']
+            f.attrs[proj_name][quota_name] = quota['quota_value']
+
         f.attrs['LastRun'] = ts[idx_end_ds - 1]
         f.attrs['LastRunUTC'] = str(oaf.to_isodate(ts[idx_end_ds - 1]))
