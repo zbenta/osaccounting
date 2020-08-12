@@ -48,7 +48,6 @@ if __name__ == '__main__':
 
     df = oaf.now_acc()
     print(80*"=")
-    print(80*">")
     print("Running update Openstack accounting: ", oaf.to_isodate(df))
     proj_hdf.remove("date")
     time_array_all = oaf.time_series(ev, di, df)
@@ -67,7 +66,6 @@ if __name__ == '__main__':
         print("Size time_array_all:", len(time_array_all))
         print("Size ts:", len(ts), "di:", di, "df:", df)
         print("idx_start:", idx_start, "idx_end:", idx_end, "idx_start_ds:", idx_start_ds, "idx_end_ds:", idx_end_ds)
-        print(80*"-")
         for proj_id in projects_in:
             grp_name = p_dict[proj_id][0]
             if grp_name not in proj_hdf:
@@ -79,9 +77,11 @@ if __name__ == '__main__':
 
         all_quotas = oaf.process_quotas(p_dict)
         for quota in all_quotas:
-            proj_name = quota['grp_name']
+            if quota['project_id'] not in projects_in:
+                continue
+            dgroup = f[quota['grp_name']]
             quota_name = quota['quota_name']
-            f.attrs[proj_name][quota_name] = quota['quota_value']
+            dgroup.attrs[quota_name] = quota['quota_value']
 
         f.attrs['LastRun'] = ts[idx_end_ds - 1]
         f.attrs['LastRunUTC'] = str(oaf.to_isodate(ts[idx_end_ds - 1]))

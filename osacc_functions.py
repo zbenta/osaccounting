@@ -467,21 +467,22 @@ def process_quotas(proj_dict):
     for db in dbs:
         quotas = get_quotas(db)
         for quota in quotas:
-            proj_name = proj_dict[quota['project_id']][0]
-            quota['grp_name'] = proj_name
-            if quota['quota_name'] == "cores":
-                quota['quota_name'] = "q_vcpus"
-            if quota['quota_name'] == "ram":
-                quota['quota_name'] = "q_mem_mb"
-            if quota['quota_name'] == "gigabytes":
-                quota['quota_name'] = "q_volume_gb"
-            if quota['quota_name'] == "instances":
-                quota['quota_name'] = "q_ninstances"
-            if quota['quota_name'] == "volumes":
-                quota['quota_name'] = "q_nvolumes"
-            if quota['quota_name'] == "floatingip":
-                quota['quota_name'] = "q_npublic_ips"
+            if quota['project_id'] in proj_dict.keys():
+                proj_name = proj_dict[quota['project_id']][0]
+                quota['grp_name'] = proj_name
+                if quota['quota_name'] == "cores":
+                    quota['quota_name'] = "q_vcpus"
+                if quota['quota_name'] == "ram":
+                    quota['quota_name'] = "q_mem_mb"
+                if quota['quota_name'] == "gigabytes":
+                    quota['quota_name'] = "q_volume_gb"
+                if quota['quota_name'] == "instances":
+                    quota['quota_name'] = "q_ninstances"
+                if quota['quota_name'] == "volumes":
+                    quota['quota_name'] = "q_nvolumes"
+                if quota['quota_name'] == "floatingip":
+                    quota['quota_name'] = "q_npublic_ips"
 
-            all_quotas.append(quota)
+                all_quotas.append(quota)
 
     return all_quotas
