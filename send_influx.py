@@ -29,8 +29,6 @@ def get_influxclient(ev):
     client = InfluxDBClient(dbhost, dbport, dbuser, dbpass,
                             ssl=bssl, verify_ssl=bverify_ssl)
     check_conn = client.ping()
-    if check_conn:
-        print(check_conn)
     client.create_database(dbname)
     client.switch_database(dbname)
     return client
@@ -44,7 +42,6 @@ def get_last(ev, client, group):
     """
     qry_str = 'SELECT last(vcpus) FROM cloud_acc WHERE project=$proj'
     bind_params = {'proj': group}
-    # print(qry_str)
     last_ts = client.query(qry_str, bind_params=bind_params)
     ti = ev['secepoc_ini']
     if last_ts:
@@ -53,8 +50,6 @@ def get_last(ev, client, group):
             print(t["time"])
             a = dateutil.parser.parse(t["time"])
             ti = oaf.to_secepoc(a)
-
-    print(ti)
     return ti
 
 
@@ -65,7 +60,6 @@ if __name__ == '__main__':
     filename = oaf.get_hdf_filename(ev)
     print(80 * '=')
     print('Filename:', filename)
-
     batch_size = 5000
     to_ns = 1000*1000*1000
     with h5py.File(filename, 'r') as f:
@@ -78,14 +72,6 @@ if __name__ == '__main__':
             ti = get_last(ev, client, group)
             idx_start = oaf.time2index(ev, ti, ts)
             idx_end = oaf.time2index(ev, tf, ts)
-            if group == "lip":
-                print(80 * '=')
-                print("Group:", group)
-                print("LastRun - tf:", oaf.to_isodate(tf))
-                print("idx start:", idx_start)
-                print("idx end:", idx_end)
-                print("Start Time:", oaf.to_isodate(ts[idx_start]))
-                print("End Time:", oaf.to_isodate(ts[idx_end]))
             for i in range(idx_start, idx_end+1):
                 a = (i-idx_start) % batch_size
                 if not a:
