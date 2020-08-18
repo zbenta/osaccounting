@@ -62,6 +62,12 @@ if __name__ == '__main__':
         idx_end = oaf.time2index(ev, df, time_array_all) + 1
         idx_start_ds = oaf.time2index(ev, di, ts)
         idx_end_ds = oaf.time2index(ev, df, ts) + 1
+
+        # idx_start = 0
+        # idx_end = 10
+        # idx_start_ds = 0
+        # idx_end_ds = 10
+
         print(80*"-")
         print("Size time_array_all:", len(time_array_all))
         print("Size ts:", len(ts), "di:", di, "df:", df)
@@ -78,6 +84,7 @@ if __name__ == '__main__':
         all_quotas = oaf.process_quotas(p_dict)
         for quota in all_quotas:
             if quota['project_id'] not in projects_in:
+                print("Quota, ProjectID not found in p_dict", quota['project_id'], quota['grp_name'])
                 continue
             dgroup = f[quota['grp_name']]
             quota_name = quota['quota_name']

@@ -436,7 +436,7 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
     for stor in storages:
         volumes = get_list_db(di, "cinder", stor, state)
         print(80*"=")
-        print("Volumes selected from DB n = ", len(volumes))
+        print(stor, "selected from DB n = ", len(volumes))
         for vol in volumes:
             proj_id = vol['project_id']
             if proj_id not in p_dict:
@@ -464,9 +464,18 @@ def process_quotas(proj_dict):
     """
     dbs = ["nova_api", "cinder", "neutron"]
     all_quotas = list()
+    print(80*'-')
+    for a in proj_dict:
+        print("ProjectID:", a)
+
     for db in dbs:
         quotas = get_quotas(db)
+        print(80*'-')
+        print(db, "PROJECTDICT", proj_dict.keys())
+        print(db, "QUOTAS", quotas)
+        print(80*'-')
         for quota in quotas:
+            print("quota['project_id']=", quota['project_id'])
             if quota['project_id'] in proj_dict.keys():
                 proj_name = proj_dict[quota['project_id']][0]
                 quota['grp_name'] = proj_name
