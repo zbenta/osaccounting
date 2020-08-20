@@ -62,17 +62,14 @@ if __name__ == '__main__':
         idx_end = oaf.time2index(ev, df, time_array_all) + 1
         idx_start_ds = oaf.time2index(ev, di, ts)
         idx_end_ds = oaf.time2index(ev, df, ts) + 1
-
-        # idx_start = 0
-        # idx_end = 10
-        # idx_start_ds = 0
-        # idx_end_ds = 10
-
         print(80*"-")
         print("Size time_array_all:", len(time_array_all))
         print("Size ts:", len(ts), "di:", di, "df:", df)
         print("idx_start:", idx_start, "idx_end:", idx_end, "idx_start_ds:", idx_start_ds, "idx_end_ds:", idx_end_ds)
+        # nvol contains sum of quota of nvolumes and number of snapshots
+        nvols = dict()
         for proj_id in projects_in:
+            nvols[proj_id] = 0
             grp_name = p_dict[proj_id][0]
             if grp_name not in proj_hdf:
                 oaf.create_proj_datasets(ev, year, proj_id, p_dict)
@@ -88,7 +85,15 @@ if __name__ == '__main__':
                 continue
             dgroup = f[quota['grp_name']]
             quota_name = quota['quota_name']
-            dgroup.attrs[quota_name] = quota['quota_value']
+            if quota_name == "q_nvolumes" or quota_name == "q_snapshots":
+                nvols[quota['project_id']] = nvols[quota['project_id']] + quota['quota_value']
+            else:
+                dgroup.attrs[quota_name] = quota['quota_value']
+
+        for proj_id in projects_in:
+            grp_name = p_dict[proj_id][0]
+            dgroup = f[grp_name]
+            dgroup.attrs["q_nvolumes"] = nvols[proj_id]
 
         f.attrs['LastRun'] = ts[idx_end_ds - 1]
         f.attrs['LastRunUTC'] = str(oaf.to_isodate(ts[idx_end_ds - 1]))

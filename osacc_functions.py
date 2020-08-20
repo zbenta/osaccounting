@@ -277,18 +277,18 @@ def get_quotas(database):
     :return:
     """
     dbtable = "quotas"
-    table_str = "resource,project_id,hard_limit"
+    table_str = "id,project_id,resource,hard_limit"
     if database == "cinder":
-        condition = "(resource = 'gigabytes' OR resource = 'volumes')"
+        condition = "(resource = 'gigabytes' OR resource = 'volumes' OR resource = 'snapshots')"
 
     if database == "nova_api":
         condition = "resource = 'cores' OR resource = 'ram' OR resource = 'instances'"
 
     if database == "neutron":
-        table_str = "resource,project_id,'limit'"
+        table_str = "*"
         condition = "resource = 'floatingip'"
 
-    table_coll = ['quota_name', 'project_id', 'quota_value']
+    table_coll = ['id', 'project_id', 'quota_name', 'quota_value']
     query = ' '.join((
         "SELECT " + table_str,
         "FROM " + dbtable,
@@ -458,24 +458,15 @@ def process_quotas(proj_dict):
     mem_mb      <-> ram
     volume_gb   <-> gigabytes
     ninstances  <-> instances
-    nvolumes    <-> volumes
+    nvolumes    <-> volumes + snapshots
     npublic_ips <-> floatingip
     :param proj_dict: dict with all projects from 
     """
     dbs = ["nova_api", "cinder", "neutron"]
     all_quotas = list()
-    print(80*'-')
-    for a in proj_dict:
-        print("ProjectID:", a)
-
     for db in dbs:
         quotas = get_quotas(db)
-        print(80*'-')
-        print(db, "PROJECTDICT", proj_dict.keys())
-        print(db, "QUOTAS", quotas)
-        print(80*'-')
         for quota in quotas:
-            print("quota['project_id']=", quota['project_id'])
             if quota['project_id'] in proj_dict.keys():
                 proj_name = proj_dict[quota['project_id']][0]
                 quota['grp_name'] = proj_name
@@ -489,6 +480,8 @@ def process_quotas(proj_dict):
                     quota['quota_name'] = "q_ninstances"
                 if quota['quota_name'] == "volumes":
                     quota['quota_name'] = "q_nvolumes"
+                if quota['quota_name'] == "snapshots":
+                    quota['quota_name'] = "q_snapshots"
                 if quota['quota_name'] == "floatingip":
                     quota['quota_name'] = "q_npublic_ips"
 
