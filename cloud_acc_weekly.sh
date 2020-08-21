@@ -26,7 +26,7 @@ echo "Account,CPU Hours,Disk GB-Hours,RAM MB-Hours,Servers" > ${FILE_USAGE}
 
 for proj in `cat ${PROJ}`
 do
-    echo "---------------"
-    eval "$(openstack usage show --project $proj --format shell --start ${ACC_START} --end ${ACC_END})"
-    echo "$proj,$cpu_hours,$disk_gb_hours,$ram_mb_hours,$servers" >> ${FILE_USAGE}
+  echo "---------------"
+  eval "$(openstack usage show --project $proj --format shell --start ${ACC_START} --end ${ACC_END})"
+  echo "$proj,$cpu_hours,$disk_gb_hours,$ram_mb_hours,$servers" >> ${FILE_USAGE}
 done
