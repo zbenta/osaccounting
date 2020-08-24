@@ -81,7 +81,6 @@ if __name__ == '__main__':
         all_quotas = oaf.process_quotas(p_dict)
         for quota in all_quotas:
             if quota['project_id'] not in projects_in:
-                print("Quota, ProjectID not found in p_dict", quota['project_id'], quota['grp_name'])
                 continue
             dgroup = f[quota['grp_name']]
             quota_name = quota['quota_name']

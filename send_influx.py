@@ -68,13 +68,11 @@ if __name__ == '__main__':
         for group in f:
             if group == "date":
                 continue
+
             ti = get_last(ev, client, group)
             idx_start = oaf.time2index(ev, ti, ts)
             idx_end = oaf.time2index(ev, tf, ts)
-            # idx_start = 50000
-            # idx_end = 50010
             dgroup = f[group]
-
             for i in range(idx_start, idx_end+1):
                 a = (i-idx_start) % batch_size
                 if not a:
@@ -84,9 +82,6 @@ if __name__ == '__main__':
                 for mtr in oaf.METRICS:
                     data = dgroup[mtr]
                     q_name = "q_" + mtr
-                    # print(80*'-')
-                    # for at in dgroup.attrs:
-                    #     print(i, at, dgroup.attrs[at])
                     q_value = dgroup.attrs[q_name]
                     make_mtr = make_mtr + mtr + "=" + str(data[i]) + ","
                     make_mtr = make_mtr + q_name + "=" + str(q_value) + ","
@@ -96,10 +91,6 @@ if __name__ == '__main__':
                 data_met.append(infl_proj)
                 b = (i+1-idx_start) % batch_size
                 if not b or (i == idx_end):
-                    if group == "lip":
-                        print(i, data_met[0])
-
-                    # print(i, data_met[0])
                     client.write_points(data_met, batch_size=batch_size,
                                         protocol='line')
 

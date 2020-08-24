@@ -231,16 +231,14 @@ def get_list_db(ti, database, dbtable, state):
 
     # Case for volumes and snapshots in cinder
     if database == "cinder":
+        table_coll = ['created_at', 'deleted_at', 'id', 'project_id',
+                      'size', 'status']
         if dbtable == "volumes":
-            table_str = "created_at,deleted_at,deleted,id,project_id,size,status"
+            table_str = "created_at,deleted_at,id,project_id,size,status"
             condition = "(status = 'available' OR status = 'in-use') OR (status = 'deleted'" + cnd_state + ")"
-            table_coll = ['created_at', 'deleted_at', 'deleted' 'id', 'project_id',
-                          'size', 'status']
         if dbtable == "snapshots":
-            table_str = "created_at,deleted_at,deleted,id,project_id,volume_size,status"
+            table_str = "created_at,deleted_at,id,project_id,volume_size,status"
             condition = "status = 'available' OR (status = 'deleted'" + cnd_state + ")"
-            table_coll = ['created_at', 'deleted_at', 'deleted' 'id', 'project_id',
-                          'size', 'status']
 
     query = ' '.join((
         "SELECT " + table_str,
@@ -441,7 +439,6 @@ def process_vol(ev, di, df, time_array, a, p_dict, projects_in, state):
             proj_id = vol['project_id']
             if proj_id not in p_dict:
                 continue
-
             crt = vol["created_at"]
             dlt = vol["deleted_at"]
             pname = prep_metrics(time_array, p_dict, proj_id, projects_in, a)
