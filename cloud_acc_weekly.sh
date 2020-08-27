@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-OSCRED=admin.sh
+OSCRED=/etc/admin.sh
 PROJ=/var/log/osacc/proj.txt
 
 DATE_END=`date +%Y%m%d -d "last Sun"`
 DATE_START=`date +%m%d -d "last Sun -7 days"`
 BASE_FILE="/var/log/osacc/CLOUD_STRATUS_"
 FILE_USAGE="${BASE_FILE}${DATE_END}${DATE_START}_usage.csv"
+FILE_USERS="${BASE_FILE}${DATE_END}${DATE_START}_users.csv"
 
 ACC_END=`date +%Y-%m-%d -d "last Sun"`
 ACC_START=`date +%Y-%m-%d -d "last Sun -7 days"`
@@ -19,11 +20,15 @@ echo "Usage file: ${FILE_USAGE}"
 mkdir -p /var/log/osacc
 source ${OSCRED}
 
+#######################################
+# Create the file usage accounting
+
 echo "Get all projects"
 openstack project list --format value -c Name > ${PROJ}
 
 echo "Account,CPU Hours,Disk GB-Hours,RAM MB-Hours,Servers" > ${FILE_USAGE}
 
+echo "Processing projects usages"
 for proj in `cat ${PROJ}`
 do
   if [ ${proj} == 'admin' ] || [ ${proj} == 'service' ]
@@ -32,5 +37,16 @@ do
   else
     eval "$(openstack usage show --project $proj --format shell --start ${ACC_START} --end ${ACC_END})"
     echo "$proj,$cpu_hours,$disk_gb_hours,$ram_mb_hours,$servers" >> ${FILE_USAGE}
+    echo "$proj processed"
   fi
 done
+
+################################################################
+# Create the file of projects, the file is maintained
+# in https://git01.ncg.ingrid.pt/lip-computing/openstack-deploy
+# requires jq: yum -y install jq
+
+echo "Get project info"
+curl --header "PRIVATE-TOKEN: ${GIT_TOKEN}" \
+  "https://git01.ncg.ingrid.pt/api/v4/projects/50/repository/files/files%2Fcloud-stratus-projects%2Ecsv?ref=master" | \
+  jq .content | sed 's/.\(.*\)/\1/' | sed 's/\(.*\)./\1/'|base64 -d - > ${FILE_USERS}
