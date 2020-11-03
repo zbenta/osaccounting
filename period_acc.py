@@ -21,15 +21,25 @@ if __name__ == '__main__':
     filename = oaf.get_hdf_filename(ev)
     print(80 * '=')
     print('Filename:', filename)
-    to_ns = 1000*1000*1000
-    ini_date = ev['secepoc_ini']
+    my_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
     today = datetime.date.today()
     first = today.replace(day=1)
     last_month = first - datetime.timedelta(days=1)
     with h5py.File(filename, 'r') as f:
-        tf = f.attrs['LastRun']
-        ts = f['date'][:]
-        len_ds = len(ts)
-        for group in f:
-            if group == "date":
-                continue
+        while(my_ini <= last_month):
+            print(80*'+')
+            my_end = my_ini.month + 1
+            ti = oaf.to_secepoc(my_ini)
+            tf = oaf.to_secepoc(my_end)
+            ts = f['date'][:]
+            idx_start = oaf.time2index(ev, ti, ts)
+            idx_end = oaf.time2index(ev, tf, ts)
+            print(my_ini, my_end)
+            print(ti, ts)
+            print(idx_start, idx_end)
+            my_ini = my_end
+
+            # for group in f:
+            #     if group == "date":
+            #         continue
+            #     dgroup = f[group]
