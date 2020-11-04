@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 hdrline = 'project'
                 for mtr in oaf.METRICS:
                     hdrline = hdrline + ',' + mtr + '*hour'
-                fout.writeline(hdrline)
+                fout.write(hdrline + '\n')
                 for group in f:
                     if group == "date":
                         continue
@@ -60,4 +60,4 @@ if __name__ == '__main__':
                             data = dgroup[mtr]
                             summtr = summtr + (data[i]/hourdt)
                         csvline = csvline + ',' + str(summtr)
-                    fout.writeline(csvline)
+                    fout.write(csvline + '\n')
