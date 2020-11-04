@@ -22,7 +22,9 @@ if __name__ == '__main__':
     filename = oaf.get_hdf_filename(ev)
     print(80 * '=')
     print('Filename:', filename)
-    my_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
+    hourdt = 3600 / ev['delta_time']
+    #my_ini = datetime.datetime(ev['year_ini'], ev['month_ini'], 1, 0, 0, 0)
+    my_ini = datetime.datetime(2020, 7, 1, 0, 0, 0)
     last_month = datetime.datetime.now()
     last_month = last_month + relativedelta(months=-1)
     last_month = last_month + relativedelta(day=31)
@@ -40,11 +42,19 @@ if __name__ == '__main__':
             print(idx_start, idx_end)
             my_ini = my_end
 
+            hdrline = 'project'
+            for mtr in oaf.METRICS:
+                hdrline = hdrline + ',' + mtr + '*hour'
+            print(hdrline)
             for group in f:
                 if group == "date":
                     continue
+                csvline = group
                 dgroup = f[group]
-                for i in range(idx_start, idx_end):
-                    for mtr in oaf.METRICS:
+                for mtr in oaf.METRICS:
+                    summtr = 0
+                    for i in range(idx_start, idx_end):
                         data = dgroup[mtr]
-                        make_mtr = make_mtr + mtr + "=" + str(data[i]) + ","
+                        summtr = summtr + (data[i]/hourdt)
+                    csvline = csvline + ',' + str(summtr)
+                print(csvline)
