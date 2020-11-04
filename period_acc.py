@@ -30,6 +30,8 @@ if __name__ == '__main__':
     last_month = last_month + relativedelta(day=31)
     with h5py.File(filename, 'r') as f:
         while(my_ini <= last_month):
+            fname = ev['out_dir'] + '/' + 'cloud-monthly-' + str(my_ini.year) + '-'
+            fname = fname + '{:02d}'.format(my_ini.month) + '.csv'
             print(80*'+')
             my_end = my_ini + relativedelta(months=+1)
             ti = oaf.to_secepoc(my_ini)
@@ -42,19 +44,20 @@ if __name__ == '__main__':
             print(idx_start, idx_end)
             my_ini = my_end
 
-            hdrline = 'project'
-            for mtr in oaf.METRICS:
-                hdrline = hdrline + ',' + mtr + '*hour'
-            print(hdrline)
-            for group in f:
-                if group == "date":
-                    continue
-                csvline = group
-                dgroup = f[group]
+            with open(fname, 'w') as fout:
+                hdrline = 'project'
                 for mtr in oaf.METRICS:
-                    summtr = 0
-                    for i in range(idx_start, idx_end):
-                        data = dgroup[mtr]
-                        summtr = summtr + (data[i]/hourdt)
-                    csvline = csvline + ',' + str(summtr)
-                print(csvline)
+                    hdrline = hdrline + ',' + mtr + '*hour'
+                fout.writeline(hdrline)
+                for group in f:
+                    if group == "date":
+                        continue
+                    csvline = group
+                    dgroup = f[group]
+                    for mtr in oaf.METRICS:
+                        summtr = 0
+                        for i in range(idx_start, idx_end):
+                            data = dgroup[mtr]
+                            summtr = summtr + (data[i]/hourdt)
+                        csvline = csvline + ',' + str(summtr)
+                    fout.writeline(csvline)
