@@ -213,7 +213,7 @@ def get_users(proj_id, proj_name):
     # Users created in keystone
     t_info = ["id", "extra", "created_at"]
     tstr_info = "id,extra,created_at"
-    query = "SELECT %s FROM user WHERE default_project_id=\'%s\'" % (tstr_info, proj_id)
+    query = "SELECT %s FROM user WHERE default_project_id=\'%s\' AND enabled=1" % (tstr_info, proj_id)
     user_info = get_table_rows('keystone', query, t_info)
     for user in user_info:
         info = create_user()
