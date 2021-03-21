@@ -117,3 +117,6 @@ ENV/
 
 # VSCode
 .vscode
+
+# Others
+osinfo.md

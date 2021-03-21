@@ -83,6 +83,8 @@ if __name__ == '__main__':
         md = md + rowproj
         md = md + hdruser
         for user in project['users']:
+            if user['email'] is None:
+                continue
             rowuser = '| ' + str(user['created']) + ' | ' + user['email'] + ' | '
             rowuser = rowuser + user['description'] + ' |\n'
             md = md + rowuser

@@ -227,7 +227,8 @@ def get_list_db(ti, database, dbtable, state):
     # Case for projects in keystone
     table_str = "id,name,description,enabled"
     table_coll = table_str.split(",")
-    condition = "domain_id='default' AND name!='admin' AND name!='service' AND enabled='1'"
+    cond = "domain_id='default' AND name!='admin' AND name!='service' AND enabled='1'"
+    condition = cond + " ORDER BY name"
 
     # Case for volumes and snapshots in cinder
     if database == "cinder":
