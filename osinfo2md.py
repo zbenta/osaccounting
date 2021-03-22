@@ -74,6 +74,7 @@ if __name__ == '__main__':
     hdrserver = hdrserver + '| - | - | - | - | - |\n'
     hdrvol = '| **Created** | **Size (GB)** | **Type** | **Status** | **Cinder ID** |\n'
     hdrvol = hdrvol + '| - | - | - | - | - |\n'
+    users_str = 'project,name,email\n'
     for project in data:
         md = md + '## Project: ' + project['project_name'] + '\n\n'
         md = md + hdrproj
@@ -88,6 +89,7 @@ if __name__ == '__main__':
             rowuser = '| ' + str(user['created']) + ' | ' + user['email'] + ' | '
             rowuser = rowuser + user['description'] + ' |\n'
             md = md + rowuser
+            users_str = users_str + project['project_name'] + ',' + user['description']+ ',' + user['email'] + '\n'
 
         md = md + '\n'
         md = md + hdrserver
@@ -117,5 +119,8 @@ if __name__ == '__main__':
 
     with open('osinfo.md', 'w') as fd:
         fd.write(md)
+
+    with open('usersall.csv', 'w') as fd:
+        fd.write(users_str)
 
     sys.exit(0)
