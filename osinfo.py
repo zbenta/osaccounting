@@ -38,6 +38,7 @@ osinfo_json =
                 "description": "string",
                 "created_at": "timestamp",
                 "key_name": "string",
+                "host": "string",
                 "fixed_ips": [],
                 "floating_ips": []
             },
@@ -94,6 +95,7 @@ def create_server():
             "description": None,
             "created_at": None,
             "key_name": None,
+            "host": None,
             "fixed_ips": list(),
             "floating_ips": list()
         }
@@ -117,8 +119,8 @@ def get_servers(proj_id):
     """
     # envirn = get_conf()
     vm_list = list()
-    t_inst_info = ["uuid", "hostname", "created_at", "description", "key_name"]
-    tstr_inst_info = "uuid,hostname,created_at,display_description,key_name"
+    t_inst_info = ["uuid", "hostname", "created_at", "description", "key_name", "host"]
+    tstr_inst_info = "uuid,hostname,created_at,display_description,key_name,host"
     query = "SELECT %s FROM instances WHERE (vm_state=\'active\' AND project_id=\'%s\')" % (tstr_inst_info, proj_id)
     inst_info = get_table_rows('nova', query, t_inst_info)
     for inst in inst_info:
@@ -131,6 +133,7 @@ def get_servers(proj_id):
         server_info['hostname'] = inst['hostname']
         server_info['created_at'] = to_secepoc(inst['created_at'])
         server_info['key_name'] = inst['key_name']
+        server_info['host'] = inst['host']
         server_info['description'] = inst['description']
         if net_info:
             for n in range(len(net_info[0]['network']['subnets'])):
