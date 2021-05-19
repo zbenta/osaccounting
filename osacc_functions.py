@@ -53,7 +53,8 @@ def get_conf():
     # elasticsearch section options are Optional
     if parser.has_option('elasticsearch', 'ESHOST'):
         ev['eshost'] = parser.get('elasticsearch', 'ESHOST')
-        ev['esport'] = parser.getint('elasticsearch', 'ESPORT')
+        ev['esindex'] = parser.get('elasticsearch', 'ESINDEX')
+        ev['esapikey'] = parser.get('elasticsearch', 'ESAPIKEY')
 
     # influxdb section options are Optional
     if parser.has_option('influxdb', 'DBHOST'):
